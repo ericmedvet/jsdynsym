@@ -24,7 +24,7 @@
     <version>${revision}</version>
 
     <name>jsdynsym</name>
-    <description>Abstraction and (few) implementations of simple dynamical systems in Java.</description>
+    <description>Abstractions and (few) implementations of simple dynamical systems in Java.</description>
     <url>https://github.com/ericmedvet/jsdynsym</url>
 
     <licenses>
