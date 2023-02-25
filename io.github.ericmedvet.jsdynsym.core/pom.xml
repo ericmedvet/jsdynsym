@@ -27,7 +27,7 @@
 
     <name>jsdynsym-core</name>
     <description>Core components of jsdynsym, a set of abstractions and (few) implementations of simple dynamical systems in Java.</description>
-    <artifactId>jnb.jsdynsym</artifactId>
+    <artifactId>jsdynsym.core</artifactId>
     <packaging>jar</packaging>
 
 </project>
