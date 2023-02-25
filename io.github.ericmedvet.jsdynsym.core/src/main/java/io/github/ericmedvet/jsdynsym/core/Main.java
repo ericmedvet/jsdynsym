@@ -5,6 +5,7 @@ package io.github.ericmedvet.jsdynsym.core;
  */
 public class Main {
   public static void main(String[] args) {
-    System.out.println("Hello world!");
+    TimeInvariantStatelessSystem<Double, Double> f = x -> x * x;
+    System.out.println(f.apply(3d));
   }
 }
