@@ -5,13 +5,13 @@ import io.github.ericmedvet.jsdynsym.core.DynamicalSystem;
 /**
  * @author "Eric Medvet" on 2023/02/25 for jsdynsym
  */
-public class Rated<I, O, S> extends AbstractComposed<DynamicalSystem<I, O, S>> implements DynamicalSystem<I, O,
-    Rated.State<S>> {
+public class InStepped<I, O, S> extends AbstractComposed<DynamicalSystem<I, O, S>> implements DynamicalSystem<I, O,
+    InStepped.State<S>> {
   private final double interval;
   private double lastT;
-  private O lastOutput;
+  private I lastInput;
 
-  public Rated(DynamicalSystem<I, O, S> inner, double interval) {
+  public InStepped(DynamicalSystem<I, O, S> inner, double interval) {
     super(inner);
     this.interval = interval;
     lastT = Double.NEGATIVE_INFINITY;
@@ -32,9 +32,14 @@ public class Rated<I, O, S> extends AbstractComposed<DynamicalSystem<I, O, S>> i
   @Override
   public O step(double t, I input) {
     if (t - lastT > interval) {
-      lastOutput = inner().step(t, input);
+      lastInput = input;
       lastT = t;
     }
-    return lastOutput;
+    return inner().step(t, lastInput);
+  }
+
+  @Override
+  public String toString() {
+    return "iStepped(%s @ t=%.3f)".formatted(inner(), interval);
   }
 }
