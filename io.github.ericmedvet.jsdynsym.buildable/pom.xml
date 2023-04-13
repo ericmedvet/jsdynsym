@@ -30,4 +30,17 @@
     <artifactId>jsdynsym.buildable</artifactId>
     <packaging>jar</packaging>
 
+    <dependencies>
+        <dependency>
+            <groupId>io.github.ericmedvet</groupId>
+            <artifactId>jnb.core</artifactId>
+            <version>${jnb.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.ericmedvet</groupId>
+            <artifactId>jsdynsym.core</artifactId>
+            <version>${revision}</version>
+        </dependency>
+    </dependencies>
+
 </project>
