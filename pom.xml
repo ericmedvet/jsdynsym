@@ -51,6 +51,7 @@
 
     <modules>
         <module>io.github.ericmedvet.jsdynsym.core</module>
+        <module>io.github.ericmedvet.jsdynsym.buildable</module>
     </modules>
     <packaging>pom</packaging>
     <properties>
