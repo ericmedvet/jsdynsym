@@ -1,6 +1,7 @@
 package io.github.ericmedvet.jsdynsym.core.vectorial.ann;
 
 import io.github.ericmedvet.jsdynsym.core.DoubleRange;
+import io.github.ericmedvet.jsdynsym.core.NumericalParametrized;
 import io.github.ericmedvet.jsdynsym.core.Parametrized;
 import io.github.ericmedvet.jsdynsym.core.vectorial.VectorialTimeInvariantStatelessSystem;
 
@@ -10,7 +11,7 @@ import java.util.function.DoubleUnaryOperator;
 /**
  * @author "Eric Medvet" on 2023/02/25 for jsdynsym
  */
-public class MultiLayerPerceptron implements VectorialTimeInvariantStatelessSystem, Parametrized<double[]> {
+public class MultiLayerPerceptron implements VectorialTimeInvariantStatelessSystem, NumericalParametrized {
 
   protected final ActivationFunction activationFunction;
   protected final double[][][] weights;
@@ -158,7 +159,7 @@ public class MultiLayerPerceptron implements VectorialTimeInvariantStatelessSyst
   }
 
   @Override
-  public int nOfOuputs() {
+  public int nOfOutputs() {
     return neurons[neurons.length - 1];
   }
 

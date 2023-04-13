@@ -7,5 +7,5 @@ import io.github.ericmedvet.jsdynsym.core.DynamicalSystem;
  */
 public interface VectorialDynamicalSystem<S> extends DynamicalSystem<double[], double[], S> {
   int nOfInputs();
-  int nOfOuputs();
+  int nOfOutputs();
 }
