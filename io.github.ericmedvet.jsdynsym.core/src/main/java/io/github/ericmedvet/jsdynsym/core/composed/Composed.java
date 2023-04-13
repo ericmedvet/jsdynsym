@@ -5,9 +5,9 @@ package io.github.ericmedvet.jsdynsym.core.composed;
  */
 public interface Composed<C> {
   C inner();
-  default C mostInner() {
+  default Object mostInner() {
     if (inner() instanceof Composed<?> composed) {
-      return (C)composed.mostInner(); //TODO suboptimal
+      return composed.mostInner();
     }
     return inner();
   }
