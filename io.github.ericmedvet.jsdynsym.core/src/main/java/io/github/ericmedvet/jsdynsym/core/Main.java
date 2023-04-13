@@ -13,7 +13,8 @@ public class Main {
     OutStepped<Double, Double, ?> rF = new OutStepped<>(f, 1d);
     OutStepped<Double, Double, ?> rrF = new OutStepped<>(rF, 1.5d);
     for (double t = 0; t < 4d; t = t + 0.25) {
-      System.out.printf("t=%5.2f f(t,sin(t))=%5.2f rF(t,sin(t))=%5.2f rrF(t,sin(t))=%5.2f\n",
+      System.out.printf(
+          "t=%5.2f f(t,sin(t))=%5.2f rF(t,sin(t))=%5.2f rrF(t,sin(t))=%5.2f\n",
           t,
           f.step(t, Math.sin(t)),
           rF.step(t, Math.sin(t)),
@@ -23,5 +24,9 @@ public class Main {
 
     System.out.println(rF.mostInner());
     System.out.println(rrF.mostInner());
+
+    @SuppressWarnings("unchecked") TimeInvariantStatelessSystem<Double, Double> innerTISS = rrF.mostInner(
+        TimeInvariantStatelessSystem.class).get();
+    System.out.println(innerTISS);
   }
 }
