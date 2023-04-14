@@ -1,9 +1,8 @@
-package io.github.ericmedvet.jsdynsym.core.vectorial.ann;
+package io.github.ericmedvet.jsdynsym.core.numerical.ann;
 
 import io.github.ericmedvet.jsdynsym.core.DoubleRange;
 import io.github.ericmedvet.jsdynsym.core.NumericalParametrized;
-import io.github.ericmedvet.jsdynsym.core.Parametrized;
-import io.github.ericmedvet.jsdynsym.core.vectorial.VectorialTimeInvariantStatelessSystem;
+import io.github.ericmedvet.jsdynsym.core.numerical.NumericalTimeInvariantStatelessSystem;
 
 import java.util.Arrays;
 import java.util.function.DoubleUnaryOperator;
@@ -11,7 +10,7 @@ import java.util.function.DoubleUnaryOperator;
 /**
  * @author "Eric Medvet" on 2023/02/25 for jsdynsym
  */
-public class MultiLayerPerceptron implements VectorialTimeInvariantStatelessSystem, NumericalParametrized {
+public class MultiLayerPerceptron implements NumericalTimeInvariantStatelessSystem, NumericalParametrized {
 
   protected final ActivationFunction activationFunction;
   protected final double[][][] weights;

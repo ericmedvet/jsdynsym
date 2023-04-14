@@ -1,18 +1,18 @@
-package io.github.ericmedvet.jsdynsym.core.vectorial;
+package io.github.ericmedvet.jsdynsym.core.numerical;
 
 import io.github.ericmedvet.jsdynsym.core.composed.AbstractComposed;
 
 import java.util.Arrays;
 import java.util.random.RandomGenerator;
 
-public class Noised<S> extends AbstractComposed<VectorialDynamicalSystem<S>> implements VectorialDynamicalSystem<S> {
+public class Noised<S> extends AbstractComposed<NumericalDynamicalSystem<S>> implements NumericalDynamicalSystem<S> {
 
   private final double inputSigma;
   private final double outputSigma;
   private final RandomGenerator randomGenerator;
 
   public Noised(
-      VectorialDynamicalSystem<S> inner,
+      NumericalDynamicalSystem<S> inner,
       double inputSigma,
       double outputSigma,
       RandomGenerator randomGenerator

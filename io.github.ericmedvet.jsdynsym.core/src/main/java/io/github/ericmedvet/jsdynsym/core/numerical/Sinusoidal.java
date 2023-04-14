@@ -1,4 +1,4 @@
-package io.github.ericmedvet.jsdynsym.core.vectorial;
+package io.github.ericmedvet.jsdynsym.core.numerical;
 
 import io.github.ericmedvet.jsdynsym.core.DoubleRange;
 import io.github.ericmedvet.jsdynsym.core.NumericalParametrized;
@@ -6,7 +6,7 @@ import io.github.ericmedvet.jsdynsym.core.NumericalParametrized;
 import java.util.Arrays;
 import java.util.stream.IntStream;
 
-public class Sinusoidal implements VectorialStatelessSystem, NumericalParametrized {
+public class Sinusoidal implements NumericalStatelessSystem, NumericalParametrized {
   private final static DoubleRange PARAM_RANGE = DoubleRange.SYMMETRIC_UNIT;
 
   private final int nOfInputs;

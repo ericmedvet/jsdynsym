@@ -1,13 +1,13 @@
-package io.github.ericmedvet.jsdynsym.core.vectorial.ann;
+package io.github.ericmedvet.jsdynsym.core.numerical.ann;
 
 import io.github.ericmedvet.jsdynsym.core.DoubleRange;
 import io.github.ericmedvet.jsdynsym.core.NumericalParametrized;
-import io.github.ericmedvet.jsdynsym.core.vectorial.VectorialDynamicalSystem;
+import io.github.ericmedvet.jsdynsym.core.numerical.NumericalDynamicalSystem;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class DelayedRecurrentNetwork implements VectorialDynamicalSystem<DelayedRecurrentNetwork.State>, NumericalParametrized {
+public class DelayedRecurrentNetwork implements NumericalDynamicalSystem<DelayedRecurrentNetwork.State>, NumericalParametrized {
   public record State(double[] outValues) {}
 
   private record Connection(double weight, double delay, double duration) {}

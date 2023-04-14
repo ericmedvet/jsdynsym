@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.github.ericmedvet.jsdynsym.core.vectorial;
+package io.github.ericmedvet.jsdynsym.core.numerical;
 
 import io.github.ericmedvet.jsdynsym.core.composed.AbstractComposed;
 
@@ -26,7 +26,7 @@ import java.util.TreeMap;
 /**
  * @author "Eric Medvet" on 2022/10/07 for 2dmrsim
  */
-public class AggregatedInput<S> extends AbstractComposed<VectorialDynamicalSystem<S>> implements VectorialDynamicalSystem<AggregatedInput.State<S>> {
+public class AggregatedInput<S> extends AbstractComposed<NumericalDynamicalSystem<S>> implements NumericalDynamicalSystem<AggregatedInput.State<S>> {
 
   public record State<S>(SortedMap<Double, double[]> inputHistory, S innerState) {}
 
@@ -34,7 +34,7 @@ public class AggregatedInput<S> extends AbstractComposed<VectorialDynamicalSyste
   private final EnumSet<Type> types;
   private final SortedMap<Double, double[]> history;
 
-  public AggregatedInput(VectorialDynamicalSystem<S> innerVDS, double windowT, Collection<Type> types) {
+  public AggregatedInput(NumericalDynamicalSystem<S> innerVDS, double windowT, Collection<Type> types) {
     super(innerVDS);
     if (innerVDS.nOfInputs() % types.size() != 0) {
       throw new IllegalArgumentException(
