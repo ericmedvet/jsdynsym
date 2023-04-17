@@ -6,12 +6,14 @@ import io.github.ericmedvet.jsdynsym.core.StatelessSystem;
 import io.github.ericmedvet.jsdynsym.core.composed.InStepped;
 import io.github.ericmedvet.jsdynsym.core.composed.OutStepped;
 import io.github.ericmedvet.jsdynsym.core.composed.Stepped;
+import io.github.ericmedvet.jsdynsym.core.numerical.EnhancedInput;
 import io.github.ericmedvet.jsdynsym.core.numerical.Noised;
 import io.github.ericmedvet.jsdynsym.core.numerical.NumericalDynamicalSystem;
 import io.github.ericmedvet.jsdynsym.core.numerical.Sinusoidal;
 import io.github.ericmedvet.jsdynsym.core.numerical.ann.DelayedRecurrentNetwork;
 import io.github.ericmedvet.jsdynsym.core.numerical.ann.MultiLayerPerceptron;
 
+import java.util.List;
 import java.util.function.BiFunction;
 import java.util.random.RandomGenerator;
 
@@ -38,6 +40,19 @@ public class NumericalDynamicalSystems {
         timeRange,
         threshold,
         timeResolution
+    );
+  }
+
+  @SuppressWarnings("unused")
+  public static <S> Builder<EnhancedInput<S>, S> enhanced(
+      @Param("windowT") double windowT,
+      @Param("inner") Builder<? extends NumericalDynamicalSystem<S>, S> inner,
+      @Param(value = "types", dSs = {"current", "trend", "avg"}) List<EnhancedInput.Type> types
+  ) {
+    return (nOfInputs, nOfOutputs) -> new EnhancedInput<>(
+        inner.apply(nOfInputs * types.size(), nOfOutputs),
+        windowT,
+        types
     );
   }
 

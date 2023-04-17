@@ -9,8 +9,10 @@ import java.util.List;
 public class PreparedNamedBuilder {
 
   private final static NamedBuilder<Object> NB = NamedBuilder.empty()
-      .and(NamedBuilder.fromUtilityClass(Misc.class))
-      .and(List.of("numerical", "num"), NamedBuilder.fromUtilityClass(NumericalDynamicalSystems.class));
+      .and(List.of("dynamicalSystem", "dynSys", "ds"), NamedBuilder.empty()
+          .and(NamedBuilder.fromUtilityClass(Misc.class))
+          .and(List.of("numerical", "num"), NamedBuilder.fromUtilityClass(NumericalDynamicalSystems.class))
+      );
 
   private PreparedNamedBuilder() {
   }

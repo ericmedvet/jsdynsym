@@ -90,4 +90,19 @@ public interface NumericalDynamicalSystem<S> extends DynamicalSystem<double[], d
       }
     };
   }
+
+  default void checkDimension(int nOfInputs, int nOfOutputs) {
+    if (nOfInputs() != nOfInputs) {
+      throw new IllegalArgumentException("Wrong number of inputs: %d found, %d expected".formatted(
+          nOfInputs(),
+          nOfInputs
+      ));
+    }
+    if (nOfOutputs() != nOfOutputs) {
+      throw new IllegalArgumentException("Wrong number of outputs: %d found, %d expected".formatted(
+          nOfOutputs(),
+          nOfOutputs
+      ));
+    }
+  }
 }
