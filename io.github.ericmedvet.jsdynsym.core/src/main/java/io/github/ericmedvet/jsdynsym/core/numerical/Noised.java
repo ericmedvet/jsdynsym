@@ -55,4 +55,12 @@ public class Noised<S> extends AbstractComposed<NumericalDynamicalSystem<S>> imp
   public int nOfOutputs() {
     return inner().nOfOutputs();
   }
+
+  @Override
+  public String toString() {
+    return "noised[in=%.3f;out=%.3f](%s)".formatted(
+        inputSigma, outputSigma,
+        inner()
+    );
+  }
 }

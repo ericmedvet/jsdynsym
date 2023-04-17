@@ -6,6 +6,7 @@ import io.github.ericmedvet.jsdynsym.core.numerical.NumericalTimeInvariantStatel
 
 import java.util.Arrays;
 import java.util.function.DoubleUnaryOperator;
+import java.util.stream.Collectors;
 
 /**
  * @author "Eric Medvet" on 2023/02/25 for jsdynsym
@@ -184,5 +185,13 @@ public class MultiLayerPerceptron implements NumericalTimeInvariantStatelessSyst
       }
     }
     return activationValues[neurons.length - 1];
+  }
+
+  @Override
+  public String toString() {
+    return "MLP-%s-%s".formatted(
+        activationFunction.toString().toLowerCase(),
+        Arrays.stream(neurons).mapToObj(Integer::toString).collect(Collectors.joining(">"))
+    );
   }
 }

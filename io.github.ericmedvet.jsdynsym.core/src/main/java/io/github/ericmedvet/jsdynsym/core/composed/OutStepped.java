@@ -6,7 +6,7 @@ import io.github.ericmedvet.jsdynsym.core.DynamicalSystem;
  * @author "Eric Medvet" on 2023/02/25 for jsdynsym
  */
 public class OutStepped<I, O, S> extends AbstractComposed<DynamicalSystem<I, O, S>> implements DynamicalSystem<I, O,
-    OutStepped.State<S>> {
+    Stepped.State<S>> {
   private final double interval;
   private double lastT;
   private O lastOutput;
@@ -17,11 +17,9 @@ public class OutStepped<I, O, S> extends AbstractComposed<DynamicalSystem<I, O, 
     lastT = Double.NEGATIVE_INFINITY;
   }
 
-  public record State<S>(double lastT, S state) {}
-
   @Override
-  public State<S> getState() {
-    return new State<>(lastT, inner().getState());
+  public Stepped.State<S> getState() {
+    return new Stepped.State<>(lastT, inner().getState());
   }
 
   @Override
@@ -31,8 +29,9 @@ public class OutStepped<I, O, S> extends AbstractComposed<DynamicalSystem<I, O, 
 
   @Override
   public O step(double t, I input) {
+    O output = inner().step(t, input);
     if (t - lastT > interval) {
-      lastOutput = inner().step(t, input);
+      lastOutput = output;
       lastT = t;
     }
     return lastOutput;
@@ -40,6 +39,7 @@ public class OutStepped<I, O, S> extends AbstractComposed<DynamicalSystem<I, O, 
 
   @Override
   public String toString() {
-    return "oStepped(%s @ t=%.3f)".formatted(inner(), interval);
+    return "oStepped[t=%.3f](%s)".formatted(interval, inner());
   }
+
 }

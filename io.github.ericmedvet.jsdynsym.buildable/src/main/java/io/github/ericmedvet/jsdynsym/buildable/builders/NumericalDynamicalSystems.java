@@ -5,6 +5,7 @@ import io.github.ericmedvet.jsdynsym.core.DoubleRange;
 import io.github.ericmedvet.jsdynsym.core.StatelessSystem;
 import io.github.ericmedvet.jsdynsym.core.composed.InStepped;
 import io.github.ericmedvet.jsdynsym.core.composed.OutStepped;
+import io.github.ericmedvet.jsdynsym.core.composed.Stepped;
 import io.github.ericmedvet.jsdynsym.core.numerical.Noised;
 import io.github.ericmedvet.jsdynsym.core.numerical.NumericalDynamicalSystem;
 import io.github.ericmedvet.jsdynsym.core.numerical.Sinusoidal;
@@ -16,9 +17,40 @@ import java.util.random.RandomGenerator;
 
 public class NumericalDynamicalSystems {
 
+  private NumericalDynamicalSystems() {
+  }
+
   public interface Builder<F extends NumericalDynamicalSystem<S>, S> extends BiFunction<Integer, Integer, F> {}
 
-  private NumericalDynamicalSystems() {
+  @SuppressWarnings("unused")
+  public static Builder<DelayedRecurrentNetwork, DelayedRecurrentNetwork.State> drn(
+      @Param(value = "timeRange", dNPM = "ds.range(min=0;max=1)") DoubleRange timeRange,
+      @Param(value = "innerNeuronsRatio", dD = 1d) double innerNeuronsRatio,
+      @Param(value = "activationFunction", dS = "tanh") MultiLayerPerceptron.ActivationFunction activationFunction,
+      @Param(value = "threshold", dD = 0.1d) double threshold,
+      @Param(value = "timeResolution", dD = 0.16666d) double timeResolution
+  ) {
+    return (nOfInputs, nOfOutputs) -> new DelayedRecurrentNetwork(
+        activationFunction,
+        nOfInputs,
+        nOfOutputs,
+        (int) Math.round(innerNeuronsRatio * (nOfInputs + nOfOutputs)),
+        timeRange,
+        threshold,
+        timeResolution
+    );
+  }
+
+  @SuppressWarnings("unused")
+  public static <S> Builder<NumericalDynamicalSystem<Stepped.State<S>>, Stepped.State<S>> inStepped(
+      @Param(value = "interval", dD = 1) double interval,
+      @Param("inner") Builder<? extends NumericalDynamicalSystem<S>, S> inner
+  ) {
+    return (nOfInputs, nOfOutputs) -> NumericalDynamicalSystem.from(
+        new InStepped<>(inner.apply(nOfInputs, nOfOutputs), interval),
+        nOfInputs,
+        nOfOutputs
+    );
   }
 
   @SuppressWarnings("unused")
@@ -51,21 +83,29 @@ public class NumericalDynamicalSystems {
   }
 
   @SuppressWarnings("unused")
-  public static Builder<DelayedRecurrentNetwork, DelayedRecurrentNetwork.State> drn(
-      @Param(value = "timeRange", dNPM = "ds.range(min=0;max=1)") DoubleRange timeRange,
-      @Param(value = "innerNeuronsRatio", dD = 1d) double innerNeuronsRatio,
-      @Param(value = "activationFunction", dS = "tanh") MultiLayerPerceptron.ActivationFunction activationFunction,
-      @Param(value = "threshold", dD = 0.1d) double threshold,
-      @Param(value = "timeResolution", dD = 0.16666d) double timeResolution
+  public static <S> Builder<Noised<S>, S> noised(
+      @Param(value = "inputSigma", dD = 0) double inputSigma,
+      @Param(value = "outputSigma", dD = 0) double outputSigma,
+      @Param(value = "randomGenerator", dNPM = "ds.defaultRG()") RandomGenerator randomGenerator,
+      @Param("inner") Builder<? extends NumericalDynamicalSystem<S>, S> inner
   ) {
-    return (nOfInputs, nOfOutputs) -> new DelayedRecurrentNetwork(
-        activationFunction,
+    return (nOfInputs, nOfOutputs) -> new Noised<>(
+        inner.apply(nOfInputs, nOfOutputs),
+        inputSigma,
+        outputSigma,
+        randomGenerator
+    );
+  }
+
+  @SuppressWarnings("unused")
+  public static <S> Builder<NumericalDynamicalSystem<Stepped.State<S>>, Stepped.State<S>> outStepped(
+      @Param(value = "interval", dD = 1) double interval,
+      @Param("inner") Builder<? extends NumericalDynamicalSystem<S>, S> inner
+  ) {
+    return (nOfInputs, nOfOutputs) -> NumericalDynamicalSystem.from(
+        new OutStepped<>(inner.apply(nOfInputs, nOfOutputs), interval),
         nOfInputs,
-        nOfOutputs,
-        (int) Math.round(innerNeuronsRatio * (nOfInputs + nOfOutputs)),
-        timeRange,
-        threshold,
-        timeResolution
+        nOfOutputs
     );
   }
 
@@ -87,39 +127,12 @@ public class NumericalDynamicalSystems {
   }
 
   @SuppressWarnings("unused")
-  public static <S> Builder<Noised<S>, S> noised(
-      @Param(value = "inputSigma", dD = 0) double inputSigma,
-      @Param(value = "outputSigma", dD = 0) double outputSigma,
-      @Param(value = "randomGenerator", dNPM = "ds.defaultRG()") RandomGenerator randomGenerator,
-      @Param("inner") Builder<? extends NumericalDynamicalSystem<S>, S> inner
-  ) {
-    return (nOfInputs, nOfOutputs) -> new Noised<>(
-        inner.apply(nOfInputs, nOfOutputs),
-        inputSigma,
-        outputSigma,
-        randomGenerator
-    );
-  }
-
-  @SuppressWarnings("unused")
-  public static <S> Builder<NumericalDynamicalSystem<InStepped.State<S>>, InStepped.State<S>> inStepped(
+  public static <S> Builder<NumericalDynamicalSystem<Stepped.State<S>>, Stepped.State<S>> stepped(
       @Param(value = "interval", dD = 1) double interval,
       @Param("inner") Builder<? extends NumericalDynamicalSystem<S>, S> inner
   ) {
     return (nOfInputs, nOfOutputs) -> NumericalDynamicalSystem.from(
-        new InStepped<>(inner.apply(nOfInputs, nOfOutputs), interval),
-        nOfInputs,
-        nOfOutputs
-    );
-  }
-
-  @SuppressWarnings("unused")
-  public static <S> Builder<NumericalDynamicalSystem<OutStepped.State<S>>, OutStepped.State<S>> outStepped(
-      @Param(value = "interval", dD = 1) double interval,
-      @Param("inner") Builder<? extends NumericalDynamicalSystem<S>, S> inner
-  ) {
-    return (nOfInputs, nOfOutputs) -> NumericalDynamicalSystem.from(
-        new OutStepped<>(inner.apply(nOfInputs, nOfOutputs), interval),
+        new Stepped<>(inner.apply(nOfInputs, nOfOutputs), interval),
         nOfInputs,
         nOfOutputs
     );

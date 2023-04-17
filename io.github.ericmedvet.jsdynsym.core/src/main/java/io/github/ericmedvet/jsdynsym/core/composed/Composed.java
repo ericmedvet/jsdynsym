@@ -8,21 +8,47 @@ import java.util.Optional;
 public interface Composed<C> {
   C inner();
 
-  default Object mostInner() {
+  default Object deepest() {
     if (inner() instanceof Composed<?> composed) {
-      return composed.mostInner();
+      return composed.deepest();
     }
     return inner();
   }
 
-  default <K> Optional<K> mostInner(Class<K> kClass) {
+  default <K> Optional<K> deepest(Class<K> kClass) {
+    if (inner() instanceof Composed<?> composed) {
+      Optional<K> inside = composed.deepest(kClass);
+      if (inside.isPresent()) {
+        return inside;
+      }
+    }
+    if (kClass.isAssignableFrom(inner().getClass())) {
+      //noinspection unchecked
+      return Optional.of((K) inner());
+    }
+    if (kClass.isAssignableFrom(getClass())) {
+      //noinspection unchecked
+      return Optional.of((K) this);
+    }
+    return Optional.empty();
+  }
+
+  default <K> Optional<K> shallowest(Class<K> kClass) {
+    if (kClass.isAssignableFrom(getClass())) {
+      //noinspection unchecked
+      return Optional.of((K) this);
+    }
     if (kClass.isAssignableFrom(inner().getClass())) {
       //noinspection unchecked
       return Optional.of((K) inner());
     }
     if (inner() instanceof Composed<?> composed) {
-      return composed.mostInner(kClass);
+      Optional<K> inside = composed.shallowest(kClass);
+      if (inside.isPresent()) {
+        return inside;
+      }
     }
     return Optional.empty();
   }
+
 }

@@ -22,10 +22,10 @@ public class Main {
       );
     }
 
-    System.out.println(rF.mostInner());
-    System.out.println(rrF.mostInner());
+    System.out.println(rF.deepest());
+    System.out.println(rrF.deepest());
 
-    @SuppressWarnings("unchecked") TimeInvariantStatelessSystem<Double, Double> innerTISS = rrF.mostInner(
+    @SuppressWarnings("unchecked") TimeInvariantStatelessSystem<Double, Double> innerTISS = rrF.shallowest(
         TimeInvariantStatelessSystem.class).get();
     System.out.println(innerTISS);
   }

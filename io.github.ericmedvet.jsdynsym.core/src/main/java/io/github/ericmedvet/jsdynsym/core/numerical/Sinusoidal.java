@@ -39,35 +39,10 @@ public class Sinusoidal implements NumericalStatelessSystem, NumericalParametriz
     biases = new double[nOfOutputs];
   }
 
-  public enum Type {PHASE, FREQUENCY, AMPLITUDE, BIAS}
-
   private static double[] nCopies(double value, int n) {
     double[] values = new double[n];
     Arrays.fill(values, value);
     return values;
-  }
-
-  @Override
-  public double[] step(double t, double[] input) {
-    return IntStream.range(0, nOfOutputs)
-        .mapToDouble(i -> {
-          double a = amplitudeRange.denormalize(PARAM_RANGE.normalize(amplitudes[i]));
-          double p = phaseRange.denormalize(PARAM_RANGE.normalize(phases[i]));
-          double f = frequencyRange.denormalize(PARAM_RANGE.normalize(frequencies[i]));
-          double b = biasRange.denormalize(PARAM_RANGE.normalize(biases[i]));
-          return a * Math.sin(2d * Math.PI * f * t + p) + b;
-        })
-        .toArray();
-  }
-
-  @Override
-  public int nOfInputs() {
-    return nOfInputs;
-  }
-
-  @Override
-  public int nOfOutputs() {
-    return nOfOutputs;
   }
 
   @Override
@@ -116,6 +91,16 @@ public class Sinusoidal implements NumericalStatelessSystem, NumericalParametriz
     if (biasRange.extent() > 0) {
       System.arraycopy(params, i, biases, 0, nOfOutputs);
     }
+  }
+
+  @Override
+  public int nOfInputs() {
+    return nOfInputs;
+  }
+
+  @Override
+  public int nOfOutputs() {
+    return nOfOutputs;
   }
 
   private int nOfTypes() {
@@ -181,6 +166,24 @@ public class Sinusoidal implements NumericalStatelessSystem, NumericalParametriz
       ));
     }
     System.arraycopy(phases, 0, this.phases, 0, nOfOutputs);
+  }
+
+  @Override
+  public double[] step(double t, double[] input) {
+    return IntStream.range(0, nOfOutputs)
+        .mapToDouble(i -> {
+          double a = amplitudeRange.denormalize(PARAM_RANGE.normalize(amplitudes[i]));
+          double p = phaseRange.denormalize(PARAM_RANGE.normalize(phases[i]));
+          double f = frequencyRange.denormalize(PARAM_RANGE.normalize(frequencies[i]));
+          double b = biasRange.denormalize(PARAM_RANGE.normalize(biases[i]));
+          return a * Math.sin(2d * Math.PI * f * t + p) + b;
+        })
+        .toArray();
+  }
+
+  @Override
+  public String toString() {
+    return "sin-%d>%d".formatted(nOfInputs, nOfOutputs);
   }
 
 }

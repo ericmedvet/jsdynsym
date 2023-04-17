@@ -7,13 +7,8 @@ import io.github.ericmedvet.jsdynsym.core.numerical.NumericalDynamicalSystem;
 import java.util.HashMap;
 import java.util.Map;
 
-public class DelayedRecurrentNetwork implements NumericalDynamicalSystem<DelayedRecurrentNetwork.State>, NumericalParametrized {
-  public record State(double[] outValues) {}
-
-  private record Connection(double weight, double delay, double duration) {}
-
-  private record Coord(int fromId, int toId) {}
-
+public class DelayedRecurrentNetwork implements NumericalDynamicalSystem<DelayedRecurrentNetwork.State>,
+    NumericalParametrized {
   private final MultiLayerPerceptron.ActivationFunction activationFunction;
   private final int nOfInputs;
   private final int nOfOutputs;
@@ -23,7 +18,6 @@ public class DelayedRecurrentNetwork implements NumericalDynamicalSystem<Delayed
   private final double timeResolution;
   private final Map<Coord, Connection> connections;
   private final double[] biases;
-
   private final double[] outValues;
   private final double[][] inValues;
 
@@ -49,6 +43,58 @@ public class DelayedRecurrentNetwork implements NumericalDynamicalSystem<Delayed
     outValues = new double[nOfNeurons];
     inValues = new double[nOfNeurons][];
     reset();
+  }
+
+  private record Connection(double weight, double delay, double duration) {
+  }
+
+  private record Coord(int fromId, int toId) {
+  }
+
+  public record State(double[] outValues) {
+  }
+
+  @Override
+  public double[] getParams() {
+    int nOfNeurons = nOfInputs + nOfOutputs + nOfInnerNeurons;
+    double[] params = new double[3 * nOfNeurons * nOfNeurons + nOfNeurons];
+    int c = 0;
+    for (int i = 0; i < nOfNeurons; i = i + 1) {
+      params[c] = biases[i];
+      c = c + 1;
+    }
+    for (int fromI = 0; fromI < nOfNeurons; fromI = fromI + 1) {
+      for (int toI = 0; toI < nOfNeurons; toI = toI + 1) {
+        Connection connection = connections.get(new Coord(fromI, toI));
+        params[c] = connection.weight();
+        params[c + 1] = connection.delay();
+        params[c + 2] = connection.duration();
+        c = c + 3;
+      }
+    }
+    return params;
+  }
+
+  @Override
+  public void setParams(double[] params) {
+    int nOfNeurons = nOfInputs + nOfOutputs + nOfInnerNeurons;
+    if (params.length != 3 * nOfNeurons * nOfNeurons + nOfNeurons) {
+      throw new IllegalArgumentException("Wrong number of parameters: %d found, %d expected".formatted(
+          params.length,
+          3 * nOfNeurons * nOfNeurons + nOfNeurons
+      ));
+    }
+    int c = 0;
+    for (int i = 0; i < nOfNeurons; i = i + 1) {
+      biases[i] = params[c];
+      c = c + 1;
+    }
+    for (int fromI = 0; fromI < nOfNeurons; fromI = fromI + 1) {
+      for (int toI = 0; toI < nOfNeurons; toI = toI + 1) {
+        connections.put(new Coord(fromI, toI), new Connection(params[c], params[c + 1], params[c + 2]));
+        c = c + 3;
+      }
+    }
   }
 
   @Override
@@ -112,53 +158,6 @@ public class DelayedRecurrentNetwork implements NumericalDynamicalSystem<Delayed
     return outputs;
   }
 
-  private int timeIndex(double t) {
-    return (int) Math.floor((t % timeRange.max()) / timeResolution);
-  }
-
-  @Override
-  public double[] getParams() {
-    int nOfNeurons = nOfInputs + nOfOutputs + nOfInnerNeurons;
-    double[] params = new double[3 * nOfNeurons * nOfNeurons + nOfNeurons];
-    int c = 0;
-    for (int i = 0; i < nOfNeurons; i = i + 1) {
-      params[c] = biases[i];
-      c = c + 1;
-    }
-    for (int fromI = 0; fromI < nOfNeurons; fromI = fromI + 1) {
-      for (int toI = 0; toI < nOfNeurons; toI = toI + 1) {
-        Connection connection = connections.get(new Coord(fromI, toI));
-        params[c] = connection.weight();
-        params[c + 1] = connection.delay();
-        params[c + 2] = connection.duration();
-        c = c + 3;
-      }
-    }
-    return params;
-  }
-
-  @Override
-  public void setParams(double[] params) {
-    int nOfNeurons = nOfInputs + nOfOutputs + nOfInnerNeurons;
-    if (params.length != 3 * nOfNeurons * nOfNeurons + nOfNeurons) {
-      throw new IllegalArgumentException("Wrong number of parameters: %d found, %d expected".formatted(
-          params.length,
-          3 * nOfNeurons * nOfNeurons + nOfNeurons
-      ));
-    }
-    int c = 0;
-    for (int i = 0; i < nOfNeurons; i = i + 1) {
-      biases[i] = params[c];
-      c = c + 1;
-    }
-    for (int fromI = 0; fromI < nOfNeurons; fromI = fromI + 1) {
-      for (int toI = 0; toI < nOfNeurons; toI = toI + 1) {
-        connections.put(new Coord(fromI, toI), new Connection(params[c], params[c + 1], params[c + 2]));
-        c = c + 3;
-      }
-    }
-  }
-
   @Override
   public int nOfInputs() {
     return nOfInputs;
@@ -167,5 +166,17 @@ public class DelayedRecurrentNetwork implements NumericalDynamicalSystem<Delayed
   @Override
   public int nOfOutputs() {
     return nOfOutputs;
+  }
+
+  private int timeIndex(double t) {
+    return (int) Math.floor((t % timeRange.max()) / timeResolution);
+  }
+
+  @Override
+  public String toString() {
+    return "DRN-%s-%d>(%d)>%d".formatted(
+        activationFunction.toString().toLowerCase(),
+        nOfInputs, nOfInnerNeurons, nOfOutputs
+    );
   }
 }
