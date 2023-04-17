@@ -8,6 +8,28 @@ import java.util.Optional;
 public interface Composed<C> {
   C inner();
 
+  static <K> Optional<K> deepest(Object o, Class<K> kClass) {
+    if (o instanceof Composed<?> c) {
+      return c.deepest(kClass);
+    }
+    if (kClass.isAssignableFrom(o.getClass())) {
+      //noinspection unchecked
+      return Optional.of((K)o);
+    }
+    return Optional.empty();
+  }
+
+  static <K> Optional<K> shallowest(Object o, Class<K> kClass) {
+    if (kClass.isAssignableFrom(o.getClass())) {
+      //noinspection unchecked
+      return Optional.of((K)o);
+    }
+    if (o instanceof Composed<?> c) {
+      return c.shallowest(kClass);
+    }
+    return Optional.empty();
+  }
+
   default Object deepest() {
     if (inner() instanceof Composed<?> composed) {
       return composed.deepest();
