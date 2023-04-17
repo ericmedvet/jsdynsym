@@ -58,7 +58,7 @@ public class NumericalDynamicalSystems {
 
   @SuppressWarnings("unused")
   public static <S> Builder<NumericalDynamicalSystem<Stepped.State<S>>, Stepped.State<S>> inStepped(
-      @Param(value = "interval", dD = 1) double interval,
+      @Param(value = "stepT", dD = 1) double interval,
       @Param("inner") Builder<? extends NumericalDynamicalSystem<S>, S> inner
   ) {
     return (nOfInputs, nOfOutputs) -> NumericalDynamicalSystem.from(
@@ -114,7 +114,7 @@ public class NumericalDynamicalSystems {
 
   @SuppressWarnings("unused")
   public static <S> Builder<NumericalDynamicalSystem<Stepped.State<S>>, Stepped.State<S>> outStepped(
-      @Param(value = "interval", dD = 1) double interval,
+      @Param(value = "stepT", dD = 1) double interval,
       @Param("inner") Builder<? extends NumericalDynamicalSystem<S>, S> inner
   ) {
     return (nOfInputs, nOfOutputs) -> NumericalDynamicalSystem.from(
@@ -143,7 +143,7 @@ public class NumericalDynamicalSystems {
 
   @SuppressWarnings("unused")
   public static <S> Builder<NumericalDynamicalSystem<Stepped.State<S>>, Stepped.State<S>> stepped(
-      @Param(value = "interval", dD = 1) double interval,
+      @Param(value = "stepT", dD = 1) double interval,
       @Param("inner") Builder<? extends NumericalDynamicalSystem<S>, S> inner
   ) {
     return (nOfInputs, nOfOutputs) -> NumericalDynamicalSystem.from(
