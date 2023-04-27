@@ -18,6 +18,7 @@ package io.github.ericmedvet.jsdynsym.core.rl;
 
 import java.util.*;
 import java.util.random.RandomGenerator;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class ProtoQLearning implements EnumeratedDiscreteTimeInvariantReinforcementLearningAgent<ProtoQLearning.State> {
@@ -34,12 +35,22 @@ public class ProtoQLearning implements EnumeratedDiscreteTimeInvariantReinforcem
     this.nOfOutputs = nOfOutputs;
     this.explorationRate = explorationRate;
     this.randomGenerator = randomGenerator;
-    state = new State(new HashMap<>());
+    state = new State(nOfInputs, nOfOutputs, new HashMap<>());
   }
 
   public record ObservationActionPair(int observation, int action) {}
 
-  public record State(Map<ObservationActionPair, Double> table) {}
+  public record State(int nOfInputs, int nOfOutputs, Map<ObservationActionPair, Double> table) {
+    @Override
+    public String toString() {
+      return IntStream.range(0, nOfOutputs)
+          .mapToObj(o -> IntStream.range(0, nOfInputs)
+              .mapToObj(i -> "%5.1f".formatted(table().getOrDefault(new ObservationActionPair(i, o), Double.NaN)))
+              .collect(Collectors.joining(" "))
+          )
+          .collect(Collectors.joining("\n"));
+    }
+  }
 
   @Override
   public State getState() {
@@ -83,7 +94,7 @@ public class ProtoQLearning implements EnumeratedDiscreteTimeInvariantReinforcem
         output = randomGenerator.nextInt(nOfOutputs);
       } else {
         double value = oEntry.get().getValue();
-        if (value > 0) {
+        if (value > 0 || oEntries.size() == nOfOutputs) {
           //the best action has a value greater than the default one (0)
           output = oEntry.get().getKey().action();
         } else {
