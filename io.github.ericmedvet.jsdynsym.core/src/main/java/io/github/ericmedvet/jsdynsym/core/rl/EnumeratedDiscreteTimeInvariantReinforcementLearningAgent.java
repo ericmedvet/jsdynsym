@@ -27,4 +27,13 @@ public interface EnumeratedDiscreteTimeInvariantReinforcementLearningAgent<S> ex
     return step(t, rewardedInput.reward(), rewardedInput.input());
   }
 
+  @Override
+  default Integer step(double t, double reward, Integer input) {
+    return step(reward, input);
+  }
+
+  @Override
+  default Integer step(RewardedInput<Integer> input) {
+    return step(input.reward(), input.input());
+  }
 }

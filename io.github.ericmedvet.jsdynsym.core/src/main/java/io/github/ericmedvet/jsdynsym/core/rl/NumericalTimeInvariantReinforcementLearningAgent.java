@@ -18,11 +18,23 @@ package io.github.ericmedvet.jsdynsym.core.rl;
 
 import io.github.ericmedvet.jsdynsym.core.TimeInvariantDynamicalSystem;
 
-public interface NumericalTimeInvariantReinforcementLearningAgent<S> extends NumericalReinforcementLearningAgent<S>, TimeInvariantDynamicalSystem<ReinforcementLearningAgent.RewardedInput<double[]>, double[], S> {
+public interface NumericalTimeInvariantReinforcementLearningAgent<S> extends NumericalReinforcementLearningAgent<S>,
+    TimeInvariantDynamicalSystem<ReinforcementLearningAgent.RewardedInput<double[]>, double[], S> {
 
   double[] step(double reward, double[] input);
+
   @Override
   default double[] step(double t, RewardedInput<double[]> rewardedInput) {
     return step(rewardedInput.reward(), rewardedInput.input());
+  }
+
+  @Override
+  default double[] step(RewardedInput<double[]> input) {
+    return step(input.reward(), input.input());
+  }
+
+  @Override
+  default double[] step(double t, double reward, double[] input) {
+    return step(reward, input);
   }
 }
