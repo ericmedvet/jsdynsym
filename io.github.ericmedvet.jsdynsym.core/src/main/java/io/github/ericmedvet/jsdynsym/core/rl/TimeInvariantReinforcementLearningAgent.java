@@ -18,22 +18,22 @@ package io.github.ericmedvet.jsdynsym.core.rl;
 
 import io.github.ericmedvet.jsdynsym.core.TimeInvariantDynamicalSystem;
 
-public interface EnumeratedDiscreteTimeInvariantReinforcementLearningAgent<S> extends EnumeratedDiscreteReinforcementLearningAgent<S>, TimeInvariantDynamicalSystem<ReinforcementLearningAgent.RewardedInput<Integer>, Integer, S> {
+public interface TimeInvariantReinforcementLearningAgent<I,O,S> extends ReinforcementLearningAgent<I,O,S>, TimeInvariantDynamicalSystem<ReinforcementLearningAgent.RewardedInput<I>, O, S> {
 
-  Integer step(double reward, Integer input);
+  O step(I input, double reward);
 
   @Override
-  default Integer step(double t, RewardedInput<Integer> rewardedInput) {
-    return step(t, rewardedInput.reward(), rewardedInput.input());
+  default O step(RewardedInput<I> rewardedInput) {
+    return step(rewardedInput.input(), rewardedInput.reward());
   }
 
   @Override
-  default Integer step(double t, double reward, Integer input) {
-    return step(reward, input);
+  default O step(double t, I input, double reward) {
+    return step(input, reward);
   }
 
   @Override
-  default Integer step(RewardedInput<Integer> input) {
-    return step(input.reward(), input.input());
+  default O step(double t, RewardedInput<I> rewardedInput) {
+    return step(rewardedInput);
   }
 }

@@ -16,9 +16,11 @@
 
 package io.github.ericmedvet.jsdynsym.problem;
 
-import io.github.ericmedvet.jsdynsym.core.rl.EnumeratedDiscreteTimeInvariantReinforcementLearningAgent;
+import io.github.ericmedvet.jsdynsym.core.composed.AbstractComposed;
+import io.github.ericmedvet.jsdynsym.core.rl.EnumeratedTimeInvariantReinforcementLearningAgent;
+import io.github.ericmedvet.jsdynsym.core.rl.NumericalTimeInvariantReinforcementLearningAgent;
 import io.github.ericmedvet.jsdynsym.core.rl.ProtoQLearning;
-import io.github.ericmedvet.jsdynsym.core.rl.ReinforcementLearningAgent;
+import io.github.ericmedvet.jsdynsym.core.rl.TimeInvariantReinforcementLearningAgent;
 
 import java.util.Random;
 import java.util.random.RandomGenerator;
@@ -30,13 +32,14 @@ public class GuessTheNumber implements Runnable {
   private final int target;
   private final int maxTrials;
   private final RandomGenerator randomGenerator;
-  private final ReinforcementLearningAgent<Integer, Action, ?> player;
+  private final TimeInvariantReinforcementLearningAgent<Integer, Action, ?> player;
+
   public GuessTheNumber(
       int target,
       int maxNumber,
       int maxTrials,
       RandomGenerator randomGenerator,
-      ReinforcementLearningAgent<Integer, Action, ?> player
+      TimeInvariantReinforcementLearningAgent<Integer, Action, ?> player
   ) {
     this.target = target;
     this.maxNumber = maxNumber;
@@ -47,10 +50,10 @@ public class GuessTheNumber implements Runnable {
 
   public enum Action {DEC, SAME, INC}
 
-  public static class Adapter<S> implements ReinforcementLearningAgent<Integer, Action, S> {
-    private final EnumeratedDiscreteTimeInvariantReinforcementLearningAgent<S> inner;
+  public static class EnumeratedAdapter<S> extends AbstractComposed<EnumeratedTimeInvariantReinforcementLearningAgent<S>> implements TimeInvariantReinforcementLearningAgent<Integer, Action, S> {
 
-    public Adapter(int maxNumber, EnumeratedDiscreteTimeInvariantReinforcementLearningAgent<S> inner) {
+    public EnumeratedAdapter(int maxNumber, EnumeratedTimeInvariantReinforcementLearningAgent<S> inner) {
+      super(inner);
       if (inner.nOfInputs() != maxNumber) {
         throw new IllegalArgumentException(
             "The inner agent expects an observation space with %d elements, instead of %d".formatted(
@@ -64,23 +67,70 @@ public class GuessTheNumber implements Runnable {
                 inner.nOfOutputs()
             ));
       }
-      this.inner = inner;
     }
 
     @Override
     public S getState() {
-      return inner.getState();
+      return inner().getState();
     }
 
     @Override
     public void reset() {
-      inner.reset();
+      inner().reset();
     }
 
     @Override
-    public Action step(double t, double reward, Integer input) {
-      Integer iAction = inner.step(reward, input);
+    public Action step(Integer input, double reward) {
+      Integer iAction = inner().step(input, reward);
       return switch (iAction) {
+        case 0 -> Action.DEC;
+        case 1 -> Action.SAME;
+        case 2 -> Action.INC;
+        default -> throw new IllegalArgumentException("Unmappable action");
+      };
+    }
+  }
+
+  public static class NumericAdapter<S> extends AbstractComposed<NumericalTimeInvariantReinforcementLearningAgent<S>> implements TimeInvariantReinforcementLearningAgent<Integer, Action, S> {
+    private final int maxNumber;
+
+    public NumericAdapter(int maxNumber, NumericalTimeInvariantReinforcementLearningAgent<S> inner) {
+      super(inner);
+      if (inner.nOfInputs() != 1) {
+        throw new IllegalArgumentException(
+            "The inner agent expects an observation space with %d elements, instead of 1".formatted(
+                inner.nOfInputs()
+            ));
+      }
+      if (inner.nOfOutputs() != 3) {
+        throw new IllegalArgumentException(
+            "The inner agent expects an action space with %d elements, instead of 3".formatted(
+                inner.nOfOutputs()
+            ));
+      }
+      this.maxNumber = maxNumber;
+    }
+
+    @Override
+    public S getState() {
+      return inner().getState();
+    }
+
+    @Override
+    public void reset() {
+      inner().reset();
+    }
+
+    @Override
+    public Action step(Integer input, double reward) {
+      double[] outputs = inner().step(new double[]{(double) input / (double) maxNumber}, reward);
+      int maxIndex = 0;
+      for (int i = 1; i < outputs.length; i++) {
+        if (outputs[i] > outputs[maxIndex]) {
+          maxIndex = i;
+        }
+      }
+      return switch (maxIndex) {
         case 0 -> Action.DEC;
         case 1 -> Action.SAME;
         case 2 -> Action.INC;
@@ -95,10 +145,10 @@ public class GuessTheNumber implements Runnable {
     RandomGenerator rg = new Random();
     //EnumeratedDiscreteTimeInvariantReinforcementLearningAgent<?> agent = new RandomEnumeratedDiscreteAgent(max, 3,
     // rg);
-    EnumeratedDiscreteTimeInvariantReinforcementLearningAgent<?> agent = new ProtoQLearning(max, 3, 0.1, rg);
+    EnumeratedTimeInvariantReinforcementLearningAgent<?> agent = new ProtoQLearning(max, 3, 0.1, rg);
     System.out.println(agent.getState());
     IntStream.range(0, 1000).forEach(i -> {
-      GuessTheNumber game = new GuessTheNumber(max / 2, max, maxTrials, rg, new Adapter<>(max, agent));
+      GuessTheNumber game = new GuessTheNumber(max / 2, max, maxTrials, rg, new EnumeratedAdapter<>(max, agent));
       game.run();
     });
     System.out.println(agent.getState());
@@ -113,7 +163,7 @@ public class GuessTheNumber implements Runnable {
     double cumulativeReward = 0d;
     while (trials < maxTrials) {
       trials = trials + 1;
-      Action action = player.step(trials, previousReward, currentNumber);
+      Action action = player.step(currentNumber, previousReward);
       if (currentNumber == target) {
         break;
       }

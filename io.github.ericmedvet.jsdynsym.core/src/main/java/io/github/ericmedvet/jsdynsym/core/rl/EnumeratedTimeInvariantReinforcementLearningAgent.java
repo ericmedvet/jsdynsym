@@ -16,10 +16,6 @@
 
 package io.github.ericmedvet.jsdynsym.core.rl;
 
-public interface EnumeratedDiscreteReinforcementLearningAgent<S> extends ReinforcementLearningAgent<Integer, Integer, S> {
-
-  int nOfInputs();
-
-  int nOfOutputs();
+public interface EnumeratedTimeInvariantReinforcementLearningAgent<S> extends EnumeratedReinforcementLearningAgent<S>, TimeInvariantReinforcementLearningAgent<Integer, Integer, S> {
 
 }

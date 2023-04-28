@@ -16,24 +16,25 @@
 
 package io.github.ericmedvet.jsdynsym.problem;
 
-import io.github.ericmedvet.jsdynsym.core.rl.EnumeratedDiscreteTimeInvariantReinforcementLearningAgent;
+import io.github.ericmedvet.jsdynsym.core.StatelessSystem;
+import io.github.ericmedvet.jsdynsym.core.rl.EnumeratedTimeInvariantReinforcementLearningAgent;
 
 import java.util.random.RandomGenerator;
 
-public class RandomEnumeratedDiscreteAgent implements EnumeratedDiscreteTimeInvariantReinforcementLearningAgent<Void> {
+public class RandomEnumeratedAgent implements EnumeratedTimeInvariantReinforcementLearningAgent<StatelessSystem.State> {
   private final int nOfInputs;
   private final int nOfOutputs;
   private final RandomGenerator randomGenerator;
 
-  public RandomEnumeratedDiscreteAgent(int nOfInputs, int nOfOutputs, RandomGenerator randomGenerator) {
+  public RandomEnumeratedAgent(int nOfInputs, int nOfOutputs, RandomGenerator randomGenerator) {
     this.nOfInputs = nOfInputs;
     this.nOfOutputs = nOfOutputs;
     this.randomGenerator = randomGenerator;
   }
 
   @Override
-  public Void getState() {
-    return null;
+  public StatelessSystem.State getState() {
+    return StatelessSystem.State.EMPTY;
   }
 
   @Override
@@ -51,7 +52,7 @@ public class RandomEnumeratedDiscreteAgent implements EnumeratedDiscreteTimeInva
   }
 
   @Override
-  public Integer step(double reward, Integer input) {
+  public Integer step(Integer input, double reward) {
     return randomGenerator.nextInt(nOfOutputs);
   }
 }

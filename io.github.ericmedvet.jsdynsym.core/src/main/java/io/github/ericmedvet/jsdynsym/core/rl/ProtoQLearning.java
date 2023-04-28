@@ -21,7 +21,7 @@ import java.util.random.RandomGenerator;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class ProtoQLearning implements EnumeratedDiscreteTimeInvariantReinforcementLearningAgent<ProtoQLearning.State> {
+public class ProtoQLearning implements EnumeratedTimeInvariantReinforcementLearningAgent<ProtoQLearning.State> {
 
   private final int nOfInputs;
   private final int nOfOutputs;
@@ -73,7 +73,7 @@ public class ProtoQLearning implements EnumeratedDiscreteTimeInvariantReinforcem
   }
 
   @Override
-  public Integer step(double reward, Integer input) {
+  public Integer step(Integer input, double reward) {
     //update the state based on previous O-A pair
     if (previousPair != null) {
       state.table().merge(previousPair, reward, Double::sum);
