@@ -21,6 +21,10 @@ public interface UnivariateRealFunction extends MultivariateRealFunction, ToDoub
     };
   }
 
+  static UnivariateRealFunction from(MultivariateRealFunction multivariateRealFunction) {
+    return from(xs -> multivariateRealFunction.compute(xs)[0], multivariateRealFunction.nOfInputs());
+  }
+
   @Override
   default double[] compute(double... input) {
     return new double[]{applyAsDouble(input)};
