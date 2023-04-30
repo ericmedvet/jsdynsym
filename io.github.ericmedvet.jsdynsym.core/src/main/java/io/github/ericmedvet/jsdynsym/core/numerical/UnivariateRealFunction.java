@@ -34,4 +34,8 @@ public interface UnivariateRealFunction extends MultivariateRealFunction, ToDoub
   default int nOfOutputs() {
     return 1;
   }
+
+  default UnivariateRealFunction scaledOutput(double slope, double intercept) {
+    return UnivariateRealFunction.from(xs -> slope * applyAsDouble(xs) + intercept, nOfInputs());
+  }
 }

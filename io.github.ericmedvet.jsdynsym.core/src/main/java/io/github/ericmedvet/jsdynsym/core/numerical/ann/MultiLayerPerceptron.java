@@ -2,7 +2,7 @@ package io.github.ericmedvet.jsdynsym.core.numerical.ann;
 
 import io.github.ericmedvet.jsdynsym.core.DoubleRange;
 import io.github.ericmedvet.jsdynsym.core.NumericalParametrized;
-import io.github.ericmedvet.jsdynsym.core.numerical.NumericalTimeInvariantStatelessSystem;
+import io.github.ericmedvet.jsdynsym.core.numerical.MultivariateRealFunction;
 
 import java.util.Arrays;
 import java.util.function.DoubleUnaryOperator;
@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 /**
  * @author "Eric Medvet" on 2023/02/25 for jsdynsym
  */
-public class MultiLayerPerceptron implements NumericalTimeInvariantStatelessSystem, NumericalParametrized {
+public class MultiLayerPerceptron implements MultivariateRealFunction, NumericalParametrized {
 
   protected final ActivationFunction activationFunction;
   protected final double[][][] weights;
@@ -139,6 +139,30 @@ public class MultiLayerPerceptron implements NumericalTimeInvariantStatelessSyst
   }
 
   @Override
+  public double[] compute(double[] input) {
+    if (input.length != neurons[0]) {
+      throw new IllegalArgumentException(String.format(
+          "Expected input length is %d: found %d",
+          neurons[0],
+          input.length
+      ));
+    }
+    double[][] activationValues = new double[neurons.length][];
+    activationValues[0] = Arrays.stream(input).map(activationFunction).toArray();
+    for (int i = 1; i < neurons.length; i++) {
+      activationValues[i] = new double[neurons[i]];
+      for (int j = 0; j < neurons[i]; j++) {
+        double sum = weights[i - 1][j][0]; //set the bias
+        for (int k = 1; k < neurons[i - 1] + 1; k++) {
+          sum = sum + activationValues[i - 1][k - 1] * weights[i - 1][j][k];
+        }
+        activationValues[i][j] = activationFunction.applyAsDouble(sum);
+      }
+    }
+    return activationValues[neurons.length - 1];
+  }
+
+  @Override
   public double[] getParams() {
     return flat(weights, neurons);
   }
@@ -161,30 +185,6 @@ public class MultiLayerPerceptron implements NumericalTimeInvariantStatelessSyst
   @Override
   public int nOfOutputs() {
     return neurons[neurons.length - 1];
-  }
-
-  @Override
-  public double[] step(double[] input) {
-    if (input.length != neurons[0]) {
-      throw new IllegalArgumentException(String.format(
-          "Expected input length is %d: found %d",
-          neurons[0],
-          input.length
-      ));
-    }
-    double[][] activationValues = new double[neurons.length][];
-    activationValues[0] = Arrays.stream(input).map(activationFunction).toArray();
-    for (int i = 1; i < neurons.length; i++) {
-      activationValues[i] = new double[neurons[i]];
-      for (int j = 0; j < neurons[i]; j++) {
-        double sum = weights[i - 1][j][0]; //set the bias
-        for (int k = 1; k < neurons[i - 1] + 1; k++) {
-          sum = sum + activationValues[i - 1][k - 1] * weights[i - 1][j][k];
-        }
-        activationValues[i][j] = activationFunction.applyAsDouble(sum);
-      }
-    }
-    return activationValues[neurons.length - 1];
   }
 
   @Override
