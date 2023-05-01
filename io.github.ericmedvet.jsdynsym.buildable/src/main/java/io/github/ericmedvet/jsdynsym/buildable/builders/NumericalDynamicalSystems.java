@@ -22,7 +22,8 @@ public class NumericalDynamicalSystems {
   private NumericalDynamicalSystems() {
   }
 
-  public interface Builder<F extends NumericalDynamicalSystem<S>, S> extends BiFunction<Integer, Integer, F> {}
+  public interface Builder<F extends NumericalDynamicalSystem<S>, S> extends BiFunction<List<String>, List<String>, F> {
+  }
 
   @SuppressWarnings("unused")
   public static Builder<DelayedRecurrentNetwork, DelayedRecurrentNetwork.State> drn(
@@ -32,11 +33,11 @@ public class NumericalDynamicalSystems {
       @Param(value = "threshold", dD = 0.1d) double threshold,
       @Param(value = "timeResolution", dD = 0.16666d) double timeResolution
   ) {
-    return (nOfInputs, nOfOutputs) -> new DelayedRecurrentNetwork(
+    return (xVarNames, yVarNames) -> new DelayedRecurrentNetwork(
         activationFunction,
-        nOfInputs,
-        nOfOutputs,
-        (int) Math.round(innerNeuronsRatio * (nOfInputs + nOfOutputs)),
+        xVarNames.size(),
+        yVarNames.size(),
+        (int) Math.round(innerNeuronsRatio * (xVarNames.size() + yVarNames.size())),
         timeRange,
         threshold,
         timeResolution
@@ -49,8 +50,17 @@ public class NumericalDynamicalSystems {
       @Param("inner") Builder<? extends NumericalDynamicalSystem<S>, S> inner,
       @Param(value = "types", dSs = {"current", "trend", "avg"}) List<EnhancedInput.Type> types
   ) {
-    return (nOfInputs, nOfOutputs) -> new EnhancedInput<>(
-        inner.apply(nOfInputs * types.size(), nOfOutputs),
+    return (xVarNames, yVarNames) -> new EnhancedInput<>(
+        inner.apply(
+            xVarNames.stream()
+                .map(n -> types.stream()
+                    .map(t -> n + "_" + t.toString().toLowerCase())
+                    .toList()
+                )
+                .flatMap(List::stream)
+                .toList(),
+            yVarNames
+        ),
         windowT,
         types
     );
@@ -61,10 +71,10 @@ public class NumericalDynamicalSystems {
       @Param(value = "stepT", dD = 1) double interval,
       @Param("inner") Builder<? extends NumericalDynamicalSystem<S>, S> inner
   ) {
-    return (nOfInputs, nOfOutputs) -> NumericalDynamicalSystem.from(
-        new InStepped<>(inner.apply(nOfInputs, nOfOutputs), interval),
-        nOfInputs,
-        nOfOutputs
+    return (xVarNames, yVarNames) -> NumericalDynamicalSystem.from(
+        new InStepped<>(inner.apply(xVarNames, yVarNames), interval),
+        xVarNames.size(),
+        yVarNames.size()
     );
   }
 
@@ -74,25 +84,25 @@ public class NumericalDynamicalSystems {
       @Param(value = "nOfInnerLayers", dI = 1) int nOfInnerLayers,
       @Param(value = "activationFunction", dS = "tanh") MultiLayerPerceptron.ActivationFunction activationFunction
   ) {
-    return (nOfInputs, nOfOutputs) -> {
+    return (xVarNames, yVarNames) -> {
       int[] innerNeurons = new int[nOfInnerLayers];
-      int centerSize = (int) Math.max(2, Math.round(nOfInputs * innerLayerRatio));
+      int centerSize = (int) Math.max(2, Math.round(xVarNames.size() * innerLayerRatio));
       if (nOfInnerLayers > 1) {
         for (int i = 0; i < nOfInnerLayers / 2; i++) {
-          innerNeurons[i] = nOfInputs + (centerSize - nOfInputs) / (nOfInnerLayers / 2 + 1) * (i + 1);
+          innerNeurons[i] = xVarNames.size() + (centerSize - xVarNames.size()) / (nOfInnerLayers / 2 + 1) * (i + 1);
         }
         for (int i = nOfInnerLayers / 2; i < nOfInnerLayers; i++) {
           innerNeurons[i] =
-              centerSize + (nOfOutputs - centerSize) / (nOfInnerLayers / 2 + 1) * (i - nOfInnerLayers / 2);
+              centerSize + (yVarNames.size() - centerSize) / (nOfInnerLayers / 2 + 1) * (i - nOfInnerLayers / 2);
         }
       } else if (nOfInnerLayers > 0) {
         innerNeurons[0] = centerSize;
       }
       return new MultiLayerPerceptron(
           activationFunction,
-          nOfInputs,
+          xVarNames.size(),
           innerNeurons,
-          nOfOutputs
+          yVarNames.size()
       );
     };
   }
@@ -104,8 +114,8 @@ public class NumericalDynamicalSystems {
       @Param(value = "randomGenerator", dNPM = "ds.defaultRG()") RandomGenerator randomGenerator,
       @Param("inner") Builder<? extends NumericalDynamicalSystem<S>, S> inner
   ) {
-    return (nOfInputs, nOfOutputs) -> new Noised<>(
-        inner.apply(nOfInputs, nOfOutputs),
+    return (xVarNames, yVarNames) -> new Noised<>(
+        inner.apply(xVarNames, yVarNames),
         inputSigma,
         outputSigma,
         randomGenerator
@@ -117,10 +127,10 @@ public class NumericalDynamicalSystems {
       @Param(value = "stepT", dD = 1) double interval,
       @Param("inner") Builder<? extends NumericalDynamicalSystem<S>, S> inner
   ) {
-    return (nOfInputs, nOfOutputs) -> NumericalDynamicalSystem.from(
-        new OutStepped<>(inner.apply(nOfInputs, nOfOutputs), interval),
-        nOfInputs,
-        nOfOutputs
+    return (xVarNames, yVarNames) -> NumericalDynamicalSystem.from(
+        new OutStepped<>(inner.apply(xVarNames, yVarNames), interval),
+        xVarNames.size(),
+        yVarNames.size()
     );
   }
 
@@ -131,9 +141,9 @@ public class NumericalDynamicalSystems {
       @Param(value = "a", dNPM = "ds.range(min=0;max=1)") DoubleRange amplitudeRange,
       @Param(value = "b", dNPM = "ds.range(min=-0.5;max=0.5)") DoubleRange biasRange
   ) {
-    return (nOfInputs, nOfOutputs) -> new Sinusoidal(
-        nOfInputs,
-        nOfOutputs,
+    return (xVarNames, yVarNames) -> new Sinusoidal(
+        xVarNames.size(),
+        yVarNames.size(),
         phaseRange,
         frequencyRange,
         amplitudeRange,
@@ -146,10 +156,10 @@ public class NumericalDynamicalSystems {
       @Param(value = "stepT", dD = 1) double interval,
       @Param("inner") Builder<? extends NumericalDynamicalSystem<S>, S> inner
   ) {
-    return (nOfInputs, nOfOutputs) -> NumericalDynamicalSystem.from(
-        new Stepped<>(inner.apply(nOfInputs, nOfOutputs), interval),
-        nOfInputs,
-        nOfOutputs
+    return (xVarNames, yVarNames) -> NumericalDynamicalSystem.from(
+        new Stepped<>(inner.apply(xVarNames, yVarNames), interval),
+        xVarNames.size(),
+        yVarNames.size()
     );
   }
 
