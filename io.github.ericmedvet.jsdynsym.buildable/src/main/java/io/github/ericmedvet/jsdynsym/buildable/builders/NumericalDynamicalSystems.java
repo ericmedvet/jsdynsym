@@ -16,7 +16,6 @@ import io.github.ericmedvet.jsdynsym.core.numerical.ann.MultiLayerPerceptron;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.random.RandomGenerator;
-import java.util.stream.IntStream;
 
 public class NumericalDynamicalSystems {
 
@@ -24,10 +23,6 @@ public class NumericalDynamicalSystems {
   }
 
   public interface Builder<F extends NumericalDynamicalSystem<S>, S> extends BiFunction<List<String>, List<String>, F> {
-    static List<String> varNames(String name, int number) {
-      int digits = (int) Math.ceil(Math.log10(number + 1));
-      return IntStream.range(1, number + 1).mapToObj((name + "%0" + digits + "d")::formatted).toList();
-    }
   }
 
   @SuppressWarnings("unused")
