@@ -1,3 +1,19 @@
+/*
+ * Copyright 2023 eric
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.github.ericmedvet.jsdynsym.grid;
 
 import java.io.Serializable;
@@ -14,8 +30,9 @@ import java.util.stream.StreamSupport;
  * @author "Eric Medvet" on 2023/01/03 for 2dmrsim
  */
 public interface Grid<T> extends Iterable<Grid.Entry<T>> {
-  char FULL_CELL_CHAR = '█';
-  char EMPTY_CELL_CHAR = '░';
+  char FULL_CELL_B_CHAR = '█';
+  char EMPTY_CELL_B_CHAR = '░';
+  char EMPTY_CELL_C_CHAR = '.';
 
   record Entry<V>(Key key, V value) implements Serializable {
     @Override
@@ -25,8 +42,12 @@ public interface Grid<T> extends Iterable<Grid.Entry<T>> {
   }
 
   record Key(int x, int y) implements Serializable {
-    public Key at(int dX, int dY) {
+    public Key translated(int dX, int dY) {
       return new Key(x + dX, y + dY);
+    }
+
+    public Key translated(Key deltaKey) {
+      return translated(deltaKey.x(), deltaKey.y());
     }
 
     @Override
@@ -100,7 +121,7 @@ public interface Grid<T> extends Iterable<Grid.Entry<T>> {
   }
 
   static <K> String toString(Grid<K> grid, Predicate<K> p, String separator) {
-    return toString(grid, (Entry<K> e) -> p.test(e.value()) ? FULL_CELL_CHAR : EMPTY_CELL_CHAR, separator);
+    return toString(grid, (Entry<K> e) -> p.test(e.value()) ? FULL_CELL_B_CHAR : EMPTY_CELL_B_CHAR, separator);
   }
 
   static <K> String toString(Grid<K> grid, Function<K, Character> function) {
@@ -111,7 +132,8 @@ public interface Grid<T> extends Iterable<Grid.Entry<T>> {
     StringBuilder sb = new StringBuilder();
     for (int y = 0; y < grid.h(); y++) {
       for (int x = 0; x < grid.w(); x++) {
-        sb.append(function.apply(new Entry<>(new Key(x, y), grid.get(x, y))));
+        Character c = function.apply(new Entry<>(new Key(x, y), grid.get(x, y)));
+        sb.append(c != null ? c : EMPTY_CELL_C_CHAR);
       }
       if (y < grid.h() - 1) {
         sb.append(separator);
