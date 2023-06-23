@@ -84,7 +84,7 @@ public interface Grid<T> extends Iterable<Grid.Entry<T>> {
       Function<Key, K> fillerFunction
   ) {
     Grid<K> grid = new ArrayGrid<>(w, h);
-    grid.keys().forEach(k -> {System.out.println(k);grid.set(k, fillerFunction.apply(k));});
+    grid.keys().forEach(k -> grid.set(k, fillerFunction.apply(k)));
     return grid;
   }
 
