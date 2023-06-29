@@ -206,4 +206,56 @@ public class GridUtils {
     return translated;
   }
 
+  public static Grid.Key center(Grid<?> grid) {
+    return new Grid.Key(
+        (int) grid.entries()
+            .stream()
+            .filter(e -> e.value() != null)
+            .mapToInt(e -> e.key().x())
+            .average()
+            .orElse(0d),
+        (int) grid.entries()
+            .stream()
+            .filter(e -> e.value() != null)
+            .mapToInt(e -> e.key().y())
+            .average()
+            .orElse(0d)
+    );
+  }
+
+  public static <T> int hammingDistance(Grid<T> g1, Grid<T> g2, boolean translate) {
+    if (translate) {
+      Grid.Key g1Center = center(g1);
+      Grid.Key g2Center = center(g2);
+      Grid.Key newCenter = new Grid.Key(
+          Math.max(g1Center.x(), g2Center.x()),
+          Math.max(g1Center.y(), g2Center.y())
+      );
+      g1 = GridUtils.translate(
+          g1,
+          new Grid.Key(newCenter.x() - g1Center.x(), newCenter.y() - g1Center.y())
+      );
+      g2 = GridUtils.translate(
+          g2,
+          new Grid.Key(newCenter.x() - g2Center.x(), newCenter.y() - g2Center.y())
+      );
+    }
+    Grid<T> finalG1 = g1;
+    return g2.entries().stream()
+        .filter(e -> finalG1.isValid(e.key()))
+        .mapToInt(e -> {
+          if (e.value() == null && finalG1.get(e.key()) == null) {
+            return 1;
+          }
+          if (e.value() == null) {
+            return 0;
+          }
+          if (e.value().equals(finalG1.get(e.key()))) {
+            return 1;
+          }
+          return 0;
+        })
+        .sum();
+  }
+
 }
