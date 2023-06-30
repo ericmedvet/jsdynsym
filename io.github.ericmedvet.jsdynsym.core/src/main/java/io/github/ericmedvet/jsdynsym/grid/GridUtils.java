@@ -240,22 +240,22 @@ public class GridUtils {
           new Grid.Key(newCenter.x() - g2Center.x(), newCenter.y() - g2Center.y())
       );
     }
-    Grid<T> finalG1 = g1;
-    return g2.entries().stream()
-        .filter(e -> finalG1.isValid(e.key()))
-        .mapToInt(e -> {
-          if (e.value() == null && finalG1.get(e.key()) == null) {
-            return 1;
-          }
-          if (e.value() == null) {
-            return 0;
-          }
-          if (e.value().equals(finalG1.get(e.key()))) {
-            return 1;
-          }
-          return 0;
-        })
-        .sum();
+    int sum = 0;
+    for (int x = 0; x < Math.max(g1.w(), g2.w()); x = x + 1) {
+      for (int y = 0; y < Math.max(g1.h(), g2.h()); y = y + 1) {
+        Grid.Key k = new Grid.Key(x, y);
+        sum = sum + (safeGet(g1, k).equals(safeGet(g2, k)) ? 0 : 1);
+      }
+    }
+    return sum;
+  }
+
+  private static <T> Optional<T> safeGet(Grid<T> grid, Grid.Key key) {
+    if (!grid.isValid(key)) {
+      return Optional.empty();
+    }
+    T t = grid.get(key);
+    return t == null ? Optional.empty() : Optional.of(t);
   }
 
 }
