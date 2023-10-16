@@ -146,7 +146,6 @@
                     <execution>
                         <id>licence-update</id>
                         <goals>
-                            <goal>remove-file-header</goal>
                             <goal>update-file-header</goal>
                         </goals>
                         <phase>process-sources</phase>
