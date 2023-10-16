@@ -45,6 +45,10 @@ public record DoubleRange(double min, double max) implements Serializable {
     return min <= d && d <= max;
   }
 
+  public boolean contains(DoubleRange other) {
+    return contains(other.min) && contains(other.max);
+  }
+
   public DoubleRange delta(double v) {
     return new DoubleRange(min + v, max + v);
   }
