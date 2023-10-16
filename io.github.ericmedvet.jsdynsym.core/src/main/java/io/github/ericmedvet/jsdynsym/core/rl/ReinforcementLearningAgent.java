@@ -1,3 +1,4 @@
+
 /*
  * Copyright 2023 eric
  *
@@ -17,10 +18,6 @@
 package io.github.ericmedvet.jsdynsym.core.rl;
 
 import io.github.ericmedvet.jsdynsym.core.DynamicalSystem;
-
-/**
- * @author "Eric Medvet" on 2023/02/25 for jsdynsym
- */
 public interface ReinforcementLearningAgent<I, O, S> extends DynamicalSystem<ReinforcementLearningAgent.RewardedInput<I>, O, S> {
   record RewardedInput<I>(I input, double reward) {}
 

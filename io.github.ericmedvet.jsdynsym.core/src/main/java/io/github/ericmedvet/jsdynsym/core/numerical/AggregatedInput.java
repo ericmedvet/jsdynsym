@@ -1,5 +1,6 @@
+
 /*
- * Copyright 2022 eric
+ * Copyright 2023 eric
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,10 +23,6 @@ import java.util.Collection;
 import java.util.EnumSet;
 import java.util.SortedMap;
 import java.util.TreeMap;
-
-/**
- * @author "Eric Medvet" on 2022/10/07 for 2dmrsim
- */
 public class AggregatedInput<S> extends AbstractComposed<NumericalDynamicalSystem<S>> implements NumericalDynamicalSystem<AggregatedInput.State<S>> {
 
   public record State<S>(SortedMap<Double, double[]> inputHistory, S innerState) {}

@@ -1,5 +1,6 @@
+
 /*
- * Copyright 2022 eric
+ * Copyright 2023 eric
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +18,6 @@
 package io.github.ericmedvet.jsdynsym.core;
 
 import java.io.Serializable;
-
-/**
- * @author "Eric Medvet" on 2022/07/08 for 2dmrsim
- */
 public record DoubleRange(double min, double max) implements Serializable {
 
   public static DoubleRange UNIT = new DoubleRange(0, 1);

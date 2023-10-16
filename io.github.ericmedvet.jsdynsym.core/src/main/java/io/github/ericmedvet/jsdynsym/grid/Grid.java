@@ -1,3 +1,4 @@
+
 /*
  * Copyright 2023 eric
  *
@@ -25,10 +26,6 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
-
-/**
- * @author "Eric Medvet" on 2023/01/03 for 2dmrsim
- */
 public interface Grid<T> extends Iterable<Grid.Entry<T>> {
   char FULL_CELL_B_CHAR = '█';
   char EMPTY_CELL_B_CHAR = '░';

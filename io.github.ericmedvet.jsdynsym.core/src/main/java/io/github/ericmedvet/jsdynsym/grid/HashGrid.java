@@ -1,3 +1,4 @@
+
 /*
  * Copyright 2023 eric
  *
@@ -20,10 +21,6 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-
-/**
- * @author "Eric Medvet" on 2023/01/03 for 2dmrsim
- */
 public class HashGrid<T> extends AbstractGrid<T> implements Serializable {
   private final Map<Grid.Key, T> map;
 
