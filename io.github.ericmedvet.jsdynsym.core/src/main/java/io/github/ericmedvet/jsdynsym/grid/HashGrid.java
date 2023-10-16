@@ -1,4 +1,3 @@
-
 /*
  * Copyright 2023 eric
  *
@@ -21,6 +20,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+
 public class HashGrid<T> extends AbstractGrid<T> implements Serializable {
   private final Map<Grid.Key, T> map;
 
@@ -50,12 +50,9 @@ public class HashGrid<T> extends AbstractGrid<T> implements Serializable {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o)
-      return true;
-    if (o == null || getClass() != o.getClass())
-      return false;
-    if (!super.equals(o))
-      return false;
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    if (!super.equals(o)) return false;
     HashGrid<?> hashGrid = (HashGrid<?>) o;
     return map.equals(hashGrid.map);
   }

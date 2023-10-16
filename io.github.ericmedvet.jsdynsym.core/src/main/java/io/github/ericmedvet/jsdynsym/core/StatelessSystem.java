@@ -1,4 +1,3 @@
-
 /*
  * Copyright 2023 eric
  *
@@ -16,6 +15,7 @@
  */
 
 package io.github.ericmedvet.jsdynsym.core;
+
 @FunctionalInterface
 public interface StatelessSystem<I, O> extends DynamicalSystem<I, O, StatelessSystem.State> {
 
@@ -29,6 +29,5 @@ public interface StatelessSystem<I, O> extends DynamicalSystem<I, O, StatelessSy
   }
 
   @Override
-  default void reset() {
-  }
+  default void reset() {}
 }

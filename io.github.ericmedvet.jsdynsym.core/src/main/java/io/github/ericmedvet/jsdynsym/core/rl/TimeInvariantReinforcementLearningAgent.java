@@ -1,4 +1,3 @@
-
 /*
  * Copyright 2023 eric
  *
@@ -19,7 +18,9 @@ package io.github.ericmedvet.jsdynsym.core.rl;
 
 import io.github.ericmedvet.jsdynsym.core.TimeInvariantDynamicalSystem;
 
-public interface TimeInvariantReinforcementLearningAgent<I,O,S> extends ReinforcementLearningAgent<I,O,S>, TimeInvariantDynamicalSystem<ReinforcementLearningAgent.RewardedInput<I>, O, S> {
+public interface TimeInvariantReinforcementLearningAgent<I, O, S>
+    extends ReinforcementLearningAgent<I, O, S>,
+        TimeInvariantDynamicalSystem<ReinforcementLearningAgent.RewardedInput<I>, O, S> {
 
   O step(I input, double reward);
 

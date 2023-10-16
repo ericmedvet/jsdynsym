@@ -17,6 +17,7 @@
 package io.github.ericmedvet.jsdynsym.core.composed;
 
 import java.util.Optional;
+
 public interface Composed<C> {
   C inner();
 
@@ -26,7 +27,7 @@ public interface Composed<C> {
     }
     if (kClass.isAssignableFrom(o.getClass())) {
       //noinspection unchecked
-      return Optional.of((K)o);
+      return Optional.of((K) o);
     }
     return Optional.empty();
   }
@@ -34,7 +35,7 @@ public interface Composed<C> {
   static <K> Optional<K> shallowest(Object o, Class<K> kClass) {
     if (kClass.isAssignableFrom(o.getClass())) {
       //noinspection unchecked
-      return Optional.of((K)o);
+      return Optional.of((K) o);
     }
     if (o instanceof Composed<?> c) {
       return c.shallowest(kClass);
@@ -84,5 +85,4 @@ public interface Composed<C> {
     }
     return Optional.empty();
   }
-
 }

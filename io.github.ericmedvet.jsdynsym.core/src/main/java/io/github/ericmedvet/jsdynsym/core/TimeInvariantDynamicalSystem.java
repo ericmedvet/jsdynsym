@@ -15,6 +15,7 @@
  */
 
 package io.github.ericmedvet.jsdynsym.core;
+
 public interface TimeInvariantDynamicalSystem<I, O, S> extends DynamicalSystem<I, O, S> {
   O step(I input);
 

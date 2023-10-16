@@ -15,6 +15,7 @@
  */
 
 package io.github.ericmedvet.jsdynsym.core;
+
 public interface DynamicalSystem<I, O, S> {
   S getState();
 

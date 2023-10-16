@@ -1,4 +1,3 @@
-
 /*
  * Copyright 2023 eric
  *
@@ -23,7 +22,9 @@ import java.util.Collection;
 import java.util.EnumSet;
 import java.util.SortedMap;
 import java.util.TreeMap;
-public class AggregatedInput<S> extends AbstractComposed<NumericalDynamicalSystem<S>> implements NumericalDynamicalSystem<AggregatedInput.State<S>> {
+
+public class AggregatedInput<S> extends AbstractComposed<NumericalDynamicalSystem<S>>
+    implements NumericalDynamicalSystem<AggregatedInput.State<S>> {
 
   public record State<S>(SortedMap<Double, double[]> inputHistory, S innerState) {}
 
@@ -31,22 +32,24 @@ public class AggregatedInput<S> extends AbstractComposed<NumericalDynamicalSyste
   private final EnumSet<Type> types;
   private final SortedMap<Double, double[]> history;
 
-  public AggregatedInput(NumericalDynamicalSystem<S> innerVDS, double windowT, Collection<Type> types) {
+  public AggregatedInput(
+      NumericalDynamicalSystem<S> innerVDS, double windowT, Collection<Type> types) {
     super(innerVDS);
     if (innerVDS.nOfInputs() % types.size() != 0) {
       throw new IllegalArgumentException(
-          "Cannot build VDS with %d aggregate types (%s), because inner VDS input size is wrong (%d)".formatted(
-              types.size(),
-              types,
-              innerVDS.nOfInputs()
-          ));
+          "Cannot build VDS with %d aggregate types (%s), because inner VDS input size is wrong (%d)"
+              .formatted(types.size(), types, innerVDS.nOfInputs()));
     }
     this.windowT = windowT;
     this.types = EnumSet.copyOf(types);
     this.history = new TreeMap<>();
   }
 
-  public enum Type {CURRENT, TREND, AVG}
+  public enum Type {
+    CURRENT,
+    TREND,
+    AVG
+  }
 
   @Override
   public State<S> getState() {
@@ -61,14 +64,14 @@ public class AggregatedInput<S> extends AbstractComposed<NumericalDynamicalSyste
 
   @Override
   public double[] step(double t, double[] input) {
-    //add new sample to memory
+    // add new sample to memory
     history.put(t, input);
-    //update memory
+    // update memory
     history.keySet().stream()
         .filter(mt -> mt < t - windowT)
         .toList()
         .forEach(history.keySet()::remove);
-    //build inner input
+    // build inner input
     double[] iInput = new double[inner().nOfInputs()];
     double[] firstInput = history.get(history.firstKey());
     double firstT = history.firstKey();
@@ -109,9 +112,6 @@ public class AggregatedInput<S> extends AbstractComposed<NumericalDynamicalSyste
 
   @Override
   public String toString() {
-    return "InputDiffTRF{" +
-        "windowT=" + windowT +
-        ", types=" + types +
-        '}';
+    return "InputDiffTRF{" + "windowT=" + windowT + ", types=" + types + '}';
   }
 }

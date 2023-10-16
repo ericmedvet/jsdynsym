@@ -23,6 +23,7 @@ import io.github.ericmedvet.jsdynsym.core.numerical.MultivariateRealFunction;
 import java.util.Arrays;
 import java.util.function.DoubleUnaryOperator;
 import java.util.stream.Collectors;
+
 public class MultiLayerPerceptron implements MultivariateRealFunction, NumericalParametrized {
 
   protected final ActivationFunction activationFunction;
@@ -30,19 +31,15 @@ public class MultiLayerPerceptron implements MultivariateRealFunction, Numerical
   protected final int[] neurons;
 
   public MultiLayerPerceptron(
-      ActivationFunction activationFunction,
-      double[][][] weights,
-      int[] neurons
-  ) {
+      ActivationFunction activationFunction, double[][][] weights, int[] neurons) {
     this.activationFunction = activationFunction;
     this.weights = weights;
     this.neurons = neurons;
     if (flat(weights, neurons).length != countWeights(neurons)) {
-      throw new IllegalArgumentException(String.format(
-          "Wrong number of weights: %d expected, %d found",
-          countWeights(neurons),
-          flat(weights, neurons).length
-      ));
+      throw new IllegalArgumentException(
+          String.format(
+              "Wrong number of weights: %d expected, %d found",
+              countWeights(neurons), flat(weights, neurons).length));
     }
   }
 
@@ -51,23 +48,21 @@ public class MultiLayerPerceptron implements MultivariateRealFunction, Numerical
       int nOfInput,
       int[] innerNeurons,
       int nOfOutput,
-      double[] weights
-  ) {
+      double[] weights) {
     this(
         activationFunction,
         unflat(weights, countNeurons(nOfInput, innerNeurons, nOfOutput)),
-        countNeurons(nOfInput, innerNeurons, nOfOutput)
-    );
+        countNeurons(nOfInput, innerNeurons, nOfOutput));
   }
 
-  public MultiLayerPerceptron(ActivationFunction activationFunction, int nOfInput, int[] innerNeurons, int nOfOutput) {
+  public MultiLayerPerceptron(
+      ActivationFunction activationFunction, int nOfInput, int[] innerNeurons, int nOfOutput) {
     this(
         activationFunction,
         nOfInput,
         innerNeurons,
         nOfOutput,
-        new double[countWeights(countNeurons(nOfInput, innerNeurons, nOfOutput))]
-    );
+        new double[countWeights(countNeurons(nOfInput, innerNeurons, nOfOutput))]);
   }
 
   public enum ActivationFunction implements DoubleUnaryOperator {
@@ -153,18 +148,15 @@ public class MultiLayerPerceptron implements MultivariateRealFunction, Numerical
   @Override
   public double[] compute(double[] input) {
     if (input.length != neurons[0]) {
-      throw new IllegalArgumentException(String.format(
-          "Expected input length is %d: found %d",
-          neurons[0],
-          input.length
-      ));
+      throw new IllegalArgumentException(
+          String.format("Expected input length is %d: found %d", neurons[0], input.length));
     }
     double[][] activationValues = new double[neurons.length][];
     activationValues[0] = Arrays.stream(input).map(activationFunction).toArray();
     for (int i = 1; i < neurons.length; i++) {
       activationValues[i] = new double[neurons[i]];
       for (int j = 0; j < neurons[i]; j++) {
-        double sum = weights[i - 1][j][0]; //set the bias
+        double sum = weights[i - 1][j][0]; // set the bias
         for (int k = 1; k < neurons[i - 1] + 1; k++) {
           sum = sum + activationValues[i - 1][k - 1] * weights[i - 1][j][k];
         }
@@ -201,9 +193,9 @@ public class MultiLayerPerceptron implements MultivariateRealFunction, Numerical
 
   @Override
   public String toString() {
-    return "MLP-%s-%s".formatted(
-        activationFunction.toString().toLowerCase(),
-        Arrays.stream(neurons).mapToObj(Integer::toString).collect(Collectors.joining(">"))
-    );
+    return "MLP-%s-%s"
+        .formatted(
+            activationFunction.toString().toLowerCase(),
+            Arrays.stream(neurons).mapToObj(Integer::toString).collect(Collectors.joining(">")));
   }
 }

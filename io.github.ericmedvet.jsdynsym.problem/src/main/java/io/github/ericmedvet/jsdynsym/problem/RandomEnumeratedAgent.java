@@ -1,4 +1,3 @@
-
 /*
  * Copyright 2023 eric
  *
@@ -22,7 +21,8 @@ import io.github.ericmedvet.jsdynsym.core.rl.EnumeratedTimeInvariantReinforcemen
 
 import java.util.random.RandomGenerator;
 
-public class RandomEnumeratedAgent implements EnumeratedTimeInvariantReinforcementLearningAgent<StatelessSystem.State> {
+public class RandomEnumeratedAgent
+    implements EnumeratedTimeInvariantReinforcementLearningAgent<StatelessSystem.State> {
   private final int nOfInputs;
   private final int nOfOutputs;
   private final RandomGenerator randomGenerator;
@@ -39,8 +39,7 @@ public class RandomEnumeratedAgent implements EnumeratedTimeInvariantReinforceme
   }
 
   @Override
-  public void reset() {
-  }
+  public void reset() {}
 
   @Override
   public int nOfInputs() {

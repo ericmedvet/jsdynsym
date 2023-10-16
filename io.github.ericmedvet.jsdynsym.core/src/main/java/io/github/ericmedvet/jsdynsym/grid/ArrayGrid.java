@@ -18,6 +18,7 @@ package io.github.ericmedvet.jsdynsym.grid;
 
 import java.io.Serializable;
 import java.util.Arrays;
+
 public class ArrayGrid<T> extends AbstractGrid<T> implements Serializable {
 
   private final Object[] ts;
@@ -49,15 +50,10 @@ public class ArrayGrid<T> extends AbstractGrid<T> implements Serializable {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o)
-      return true;
-    if (o == null || getClass() != o.getClass())
-      return false;
-    if (!super.equals(o))
-      return false;
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    if (!super.equals(o)) return false;
     ArrayGrid<?> arrayGrid = (ArrayGrid<?>) o;
     return Arrays.equals(ts, arrayGrid.ts);
   }
-
-
 }

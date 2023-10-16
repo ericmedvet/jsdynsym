@@ -1,3 +1,18 @@
+/*
+ * Copyright 2023 eric
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.github.ericmedvet.jsdynsym.core.numerical.ann;
 
 import io.github.ericmedvet.jsdynsym.core.DoubleRange;
@@ -7,8 +22,8 @@ import io.github.ericmedvet.jsdynsym.core.numerical.NumericalDynamicalSystem;
 import java.util.HashMap;
 import java.util.Map;
 
-public class DelayedRecurrentNetwork implements NumericalDynamicalSystem<DelayedRecurrentNetwork.State>,
-    NumericalParametrized {
+public class DelayedRecurrentNetwork
+    implements NumericalDynamicalSystem<DelayedRecurrentNetwork.State>, NumericalParametrized {
   private final MultiLayerPerceptron.ActivationFunction activationFunction;
   private final int nOfInputs;
   private final int nOfOutputs;
@@ -28,8 +43,7 @@ public class DelayedRecurrentNetwork implements NumericalDynamicalSystem<Delayed
       int nOfInnerNeurons,
       DoubleRange timeRange,
       double threshold,
-      double timeResolution
-  ) {
+      double timeResolution) {
     this.activationFunction = activationFunction;
     this.nOfInputs = nOfInputs;
     this.nOfOutputs = nOfOutputs;
@@ -45,14 +59,11 @@ public class DelayedRecurrentNetwork implements NumericalDynamicalSystem<Delayed
     reset();
   }
 
-  private record Connection(double weight, double delay, double duration) {
-  }
+  private record Connection(double weight, double delay, double duration) {}
 
-  private record Coord(int fromId, int toId) {
-  }
+  private record Coord(int fromId, int toId) {}
 
-  public record State(double[] outValues) {
-  }
+  public record State(double[] outValues) {}
 
   @Override
   public double[] getParams() {
@@ -79,10 +90,9 @@ public class DelayedRecurrentNetwork implements NumericalDynamicalSystem<Delayed
   public void setParams(double[] params) {
     int nOfNeurons = nOfInputs + nOfOutputs + nOfInnerNeurons;
     if (params.length != 3 * nOfNeurons * nOfNeurons + nOfNeurons) {
-      throw new IllegalArgumentException("Wrong number of parameters: %d found, %d expected".formatted(
-          params.length,
-          3 * nOfNeurons * nOfNeurons + nOfNeurons
-      ));
+      throw new IllegalArgumentException(
+          "Wrong number of parameters: %d found, %d expected"
+              .formatted(params.length, 3 * nOfNeurons * nOfNeurons + nOfNeurons));
     }
     int c = 0;
     for (int i = 0; i < nOfNeurons; i = i + 1) {
@@ -91,7 +101,8 @@ public class DelayedRecurrentNetwork implements NumericalDynamicalSystem<Delayed
     }
     for (int fromI = 0; fromI < nOfNeurons; fromI = fromI + 1) {
       for (int toI = 0; toI < nOfNeurons; toI = toI + 1) {
-        connections.put(new Coord(fromI, toI), new Connection(params[c], params[c + 1], params[c + 2]));
+        connections.put(
+            new Coord(fromI, toI), new Connection(params[c], params[c + 1], params[c + 2]));
         c = c + 3;
       }
     }
@@ -115,36 +126,40 @@ public class DelayedRecurrentNetwork implements NumericalDynamicalSystem<Delayed
 
   @Override
   public double[] step(double t, double[] input) {
-    //compute current time index
+    // compute current time index
     int currentTI = timeIndex(t);
-    //add inputs
+    // add inputs
     for (int i = 0; i < nOfInputs; i = i + 1) {
       if (Math.abs(input[i]) > threshold) {
         inValues[i][currentTI] = inValues[i][currentTI] + input[i];
       }
     }
-    //compute neuron values
+    // compute neuron values
     int nOfNeurons = nOfInputs + nOfOutputs + nOfInnerNeurons;
     for (int i = 0; i < nOfNeurons; i = i + 1) {
       outValues[i] = activationFunction.applyAsDouble(biases[i] + inValues[i][currentTI]);
     }
-    //generate new pulses
+    // generate new pulses
     for (int fromI = 0; fromI < nOfNeurons; fromI = fromI + 1) {
       for (int toI = 0; toI < nOfNeurons; toI = toI + 1) {
         Connection connection = connections.get(new Coord(fromI, toI));
         double pulseValue = outValues[fromI] * connection.weight();
         if (Math.abs(pulseValue) > threshold) {
-          double delay = timeRange.denormalize(DoubleRange.SYMMETRIC_UNIT.normalize(connection.delay()));
-          double duration = new DoubleRange(delay, timeRange.max())
-              .denormalize(DoubleRange.SYMMETRIC_UNIT.normalize(connection.duration()));
-          for (double futureT = t + delay; futureT <= t + delay + duration; futureT = futureT + timeResolution) {
+          double delay =
+              timeRange.denormalize(DoubleRange.SYMMETRIC_UNIT.normalize(connection.delay()));
+          double duration =
+              new DoubleRange(delay, timeRange.max())
+                  .denormalize(DoubleRange.SYMMETRIC_UNIT.normalize(connection.duration()));
+          for (double futureT = t + delay;
+              futureT <= t + delay + duration;
+              futureT = futureT + timeResolution) {
             int futureTI = timeIndex(futureT);
             inValues[toI][futureTI] = inValues[toI][futureTI] + pulseValue;
           }
         }
       }
     }
-    //clear previous index
+    // clear previous index
     int previousTI = currentTI - 1;
     if (previousTI < 0) {
       previousTI = timeIndex(timeRange.max());
@@ -152,7 +167,7 @@ public class DelayedRecurrentNetwork implements NumericalDynamicalSystem<Delayed
     for (int i = 0; i < nOfInputs; i = i + 1) {
       inValues[i][previousTI] = 0;
     }
-    //read outputs
+    // read outputs
     double[] outputs = new double[nOfOutputs];
     System.arraycopy(outValues, nOfInputs + nOfInnerNeurons, outputs, 0, outputs.length);
     return outputs;
@@ -174,9 +189,8 @@ public class DelayedRecurrentNetwork implements NumericalDynamicalSystem<Delayed
 
   @Override
   public String toString() {
-    return "DRN-%s-%d>(%d)>%d".formatted(
-        activationFunction.toString().toLowerCase(),
-        nOfInputs, nOfInnerNeurons, nOfOutputs
-    );
+    return "DRN-%s-%d>(%d)>%d"
+        .formatted(
+            activationFunction.toString().toLowerCase(), nOfInputs, nOfInnerNeurons, nOfOutputs);
   }
 }

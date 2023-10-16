@@ -17,8 +17,9 @@
 package io.github.ericmedvet.jsdynsym.core.composed;
 
 import io.github.ericmedvet.jsdynsym.core.DynamicalSystem;
-public class Stepped<I, O, S> extends AbstractComposed<DynamicalSystem<I, O, S>> implements DynamicalSystem<I, O,
-    Stepped.State<S>> {
+
+public class Stepped<I, O, S> extends AbstractComposed<DynamicalSystem<I, O, S>>
+    implements DynamicalSystem<I, O, Stepped.State<S>> {
   private final double interval;
   private double lastT;
   private O lastOutput;

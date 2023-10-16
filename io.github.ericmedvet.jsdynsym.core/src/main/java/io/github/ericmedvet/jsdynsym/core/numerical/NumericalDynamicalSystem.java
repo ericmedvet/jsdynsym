@@ -17,20 +17,19 @@
 package io.github.ericmedvet.jsdynsym.core.numerical;
 
 import io.github.ericmedvet.jsdynsym.core.DynamicalSystem;
+
 public interface NumericalDynamicalSystem<S> extends DynamicalSystem<double[], double[], S> {
 
-  interface Composed<S> extends NumericalDynamicalSystem<S>,
-      io.github.ericmedvet.jsdynsym.core.composed.Composed<NumericalDynamicalSystem<S>> {}
+  interface Composed<S>
+      extends NumericalDynamicalSystem<S>,
+          io.github.ericmedvet.jsdynsym.core.composed.Composed<NumericalDynamicalSystem<S>> {}
 
   int nOfInputs();
 
   int nOfOutputs();
 
   static <S1> NumericalDynamicalSystem<S1> from(
-      DynamicalSystem<double[], double[], S1> inner,
-      int nOfInputs,
-      int nOfOutputs
-  ) {
+      DynamicalSystem<double[], double[], S1> inner, int nOfInputs, int nOfOutputs) {
     if (inner instanceof io.github.ericmedvet.jsdynsym.core.composed.Composed<?> composed) {
       return new Composed<>() {
         @Override
@@ -105,16 +104,12 @@ public interface NumericalDynamicalSystem<S> extends DynamicalSystem<double[], d
 
   default void checkDimension(int nOfInputs, int nOfOutputs) {
     if (nOfInputs() != nOfInputs) {
-      throw new IllegalArgumentException("Wrong number of inputs: %d found, %d expected".formatted(
-          nOfInputs(),
-          nOfInputs
-      ));
+      throw new IllegalArgumentException(
+          "Wrong number of inputs: %d found, %d expected".formatted(nOfInputs(), nOfInputs));
     }
     if (nOfOutputs() != nOfOutputs) {
-      throw new IllegalArgumentException("Wrong number of outputs: %d found, %d expected".formatted(
-          nOfOutputs(),
-          nOfOutputs
-      ));
+      throw new IllegalArgumentException(
+          "Wrong number of outputs: %d found, %d expected".formatted(nOfOutputs(), nOfOutputs));
     }
   }
 }

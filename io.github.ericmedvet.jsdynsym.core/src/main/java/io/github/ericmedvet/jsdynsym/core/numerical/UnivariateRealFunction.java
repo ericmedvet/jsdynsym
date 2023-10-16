@@ -17,7 +17,9 @@
 package io.github.ericmedvet.jsdynsym.core.numerical;
 
 import java.util.function.ToDoubleFunction;
-public interface UnivariateRealFunction extends MultivariateRealFunction, ToDoubleFunction<double[]> {
+
+public interface UnivariateRealFunction
+    extends MultivariateRealFunction, ToDoubleFunction<double[]> {
 
   static UnivariateRealFunction from(ToDoubleFunction<double[]> f, int nOfInputs) {
     return new UnivariateRealFunction() {
@@ -34,12 +36,13 @@ public interface UnivariateRealFunction extends MultivariateRealFunction, ToDoub
   }
 
   static UnivariateRealFunction from(MultivariateRealFunction multivariateRealFunction) {
-    return from(xs -> multivariateRealFunction.compute(xs)[0], multivariateRealFunction.nOfInputs());
+    return from(
+        xs -> multivariateRealFunction.compute(xs)[0], multivariateRealFunction.nOfInputs());
   }
 
   @Override
   default double[] compute(double... input) {
-    return new double[]{applyAsDouble(input)};
+    return new double[] {applyAsDouble(input)};
   }
 
   @Override

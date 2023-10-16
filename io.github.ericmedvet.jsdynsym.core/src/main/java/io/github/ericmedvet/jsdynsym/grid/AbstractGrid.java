@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+
 public abstract class AbstractGrid<T> implements Grid<T> {
 
   private final int w;
@@ -40,12 +41,8 @@ public abstract class AbstractGrid<T> implements Grid<T> {
 
   protected void checkValidity(Key key) {
     if (!isValid(key)) {
-      throw new IllegalArgumentException("Invalid coords (%d,%d) on a %dx%d grid".formatted(
-          key.x(),
-          key.y(),
-          w(),
-          h()
-      ));
+      throw new IllegalArgumentException(
+          "Invalid coords (%d,%d) on a %dx%d grid".formatted(key.x(), key.y(), w(), h()));
     }
   }
 
@@ -71,10 +68,8 @@ public abstract class AbstractGrid<T> implements Grid<T> {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o)
-      return true;
-    if (o == null || getClass() != o.getClass())
-      return false;
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
     AbstractGrid<?> that = (AbstractGrid<?>) o;
     return w == that.w && h == that.h;
   }
@@ -83,5 +78,4 @@ public abstract class AbstractGrid<T> implements Grid<T> {
   public String toString() {
     return "%s(%dx%d)%s".formatted(getClass().getSimpleName(), w(), h(), entries());
   }
-
 }
