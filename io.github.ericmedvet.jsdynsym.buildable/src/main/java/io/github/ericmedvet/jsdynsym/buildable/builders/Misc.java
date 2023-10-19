@@ -20,6 +20,7 @@
 
 package io.github.ericmedvet.jsdynsym.buildable.builders;
 
+import io.github.ericmedvet.jnb.core.Discoverable;
 import io.github.ericmedvet.jnb.core.Param;
 import io.github.ericmedvet.jsdynsym.core.DoubleRange;
 import io.github.ericmedvet.jsdynsym.grid.Grid;
@@ -27,7 +28,9 @@ import java.util.List;
 import java.util.Random;
 import java.util.random.RandomGenerator;
 
+@Discoverable(prefixTemplate = "dynamicalSystem|dynSys|ds")
 public class Misc {
+  private Misc() {}
 
   @SuppressWarnings("unused")
   public static RandomGenerator defaultRG(@Param(value = "seed", dI = 0) int seed) {

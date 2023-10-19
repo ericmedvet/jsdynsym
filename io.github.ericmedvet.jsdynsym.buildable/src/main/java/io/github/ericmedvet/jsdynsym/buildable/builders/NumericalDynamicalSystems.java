@@ -20,6 +20,7 @@
 
 package io.github.ericmedvet.jsdynsym.buildable.builders;
 
+import io.github.ericmedvet.jnb.core.Discoverable;
 import io.github.ericmedvet.jnb.core.Param;
 import io.github.ericmedvet.jsdynsym.core.DoubleRange;
 import io.github.ericmedvet.jsdynsym.core.StatelessSystem;
@@ -36,6 +37,7 @@ import java.util.List;
 import java.util.function.BiFunction;
 import java.util.random.RandomGenerator;
 
+@Discoverable(prefixTemplate = "num")
 public class NumericalDynamicalSystems {
 
   private NumericalDynamicalSystems() {}
