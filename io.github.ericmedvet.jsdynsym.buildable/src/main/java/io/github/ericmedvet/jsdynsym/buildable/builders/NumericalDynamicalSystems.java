@@ -37,7 +37,7 @@ import java.util.List;
 import java.util.function.BiFunction;
 import java.util.random.RandomGenerator;
 
-@Discoverable(prefixTemplate = "num")
+@Discoverable(prefixTemplate = "dynamicalSystem|dynSys|ds.num")
 public class NumericalDynamicalSystems {
 
   private NumericalDynamicalSystems() {}
