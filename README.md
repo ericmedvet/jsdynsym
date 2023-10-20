@@ -10,6 +10,6 @@ Add this to your `pom.xml`:
 <dependency>
     <groupId>io.github.ericmedvet</groupId>
     <artifactId>jsdynsym.core</artifactId>
-    <version>0.10.5-SNAPSHOT</version>
+    <version>0.10.5</version>
 </dependency>
 ```

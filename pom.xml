@@ -58,7 +58,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jdk.version>17</jdk.version>
-        <revision>0.10.5-SNAPSHOT</revision>
+        <revision>0.10.5</revision>
         <jnb.version>1.2.0</jnb.version>
     </properties>
     <dependencies>
