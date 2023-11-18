@@ -33,25 +33,19 @@ public class MultiLayerPerceptron implements MultivariateRealFunction, Numerical
   protected final double[][][] weights;
   protected final int[] neurons;
 
-  public MultiLayerPerceptron(
-      ActivationFunction activationFunction, double[][][] weights, int[] neurons) {
+  public MultiLayerPerceptron(ActivationFunction activationFunction, double[][][] weights, int[] neurons) {
     this.activationFunction = activationFunction;
     this.weights = weights;
     this.neurons = neurons;
     if (flat(weights, neurons).length != countWeights(neurons)) {
-      throw new IllegalArgumentException(
-          String.format(
-              "Wrong number of weights: %d expected, %d found",
-              countWeights(neurons), flat(weights, neurons).length));
+      throw new IllegalArgumentException(String.format(
+          "Wrong number of weights: %d expected, %d found",
+          countWeights(neurons), flat(weights, neurons).length));
     }
   }
 
   public MultiLayerPerceptron(
-      ActivationFunction activationFunction,
-      int nOfInput,
-      int[] innerNeurons,
-      int nOfOutput,
-      double[] weights) {
+      ActivationFunction activationFunction, int nOfInput, int[] innerNeurons, int nOfOutput, double[] weights) {
     this(
         activationFunction,
         unflat(weights, countNeurons(nOfInput, innerNeurons, nOfOutput)),

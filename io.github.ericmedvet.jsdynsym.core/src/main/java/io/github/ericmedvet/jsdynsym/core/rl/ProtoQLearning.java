@@ -25,8 +25,7 @@ import java.util.random.RandomGenerator;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class ProtoQLearning
-    implements EnumeratedTimeInvariantReinforcementLearningAgent<ProtoQLearning.State> {
+public class ProtoQLearning implements EnumeratedTimeInvariantReinforcementLearningAgent<ProtoQLearning.State> {
 
   private final int nOfInputs;
   private final int nOfOutputs;
@@ -35,8 +34,7 @@ public class ProtoQLearning
   private final State state;
   private ObservationActionPair previousPair;
 
-  public ProtoQLearning(
-      int nOfInputs, int nOfOutputs, double explorationRate, RandomGenerator randomGenerator) {
+  public ProtoQLearning(int nOfInputs, int nOfOutputs, double explorationRate, RandomGenerator randomGenerator) {
     this.nOfInputs = nOfInputs;
     this.nOfOutputs = nOfOutputs;
     this.explorationRate = explorationRate;
@@ -50,17 +48,10 @@ public class ProtoQLearning
     @Override
     public String toString() {
       return IntStream.range(0, nOfOutputs)
-          .mapToObj(
-              o ->
-                  IntStream.range(0, nOfInputs)
-                      .mapToObj(
-                          i ->
-                              "%5.1f"
-                                  .formatted(
-                                      table()
-                                          .getOrDefault(
-                                              new ObservationActionPair(i, o), Double.NaN)))
-                      .collect(Collectors.joining(" ")))
+          .mapToObj(o -> IntStream.range(0, nOfInputs)
+              .mapToObj(i -> "%5.1f"
+                  .formatted(table().getOrDefault(new ObservationActionPair(i, o), Double.NaN)))
+              .collect(Collectors.joining(" ")))
           .collect(Collectors.joining("\n"));
     }
   }
@@ -98,8 +89,9 @@ public class ProtoQLearning
       output = randomGenerator.nextInt(nOfOutputs);
     } else {
       // choose action based on the table
-      List<Map.Entry<ObservationActionPair, Double>> oEntries =
-          state.table().entrySet().stream().filter(e -> e.getKey().observation() == input).toList();
+      List<Map.Entry<ObservationActionPair, Double>> oEntries = state.table().entrySet().stream()
+          .filter(e -> e.getKey().observation() == input)
+          .toList();
       Optional<Map.Entry<ObservationActionPair, Double>> oEntry =
           oEntries.stream().max(Map.Entry.comparingByValue());
       if (oEntry.isEmpty()) {
@@ -111,8 +103,10 @@ public class ProtoQLearning
           output = oEntry.get().getKey().action();
         } else {
           // choose a random action among the one never chosen
-          List<Integer> chosenActions = oEntries.stream().map(e -> e.getKey().action()).toList();
-          List<Integer> allActions = IntStream.range(0, nOfOutputs).boxed().toList();
+          List<Integer> chosenActions =
+              oEntries.stream().map(e -> e.getKey().action()).toList();
+          List<Integer> allActions =
+              IntStream.range(0, nOfOutputs).boxed().toList();
           List<Integer> availableActions = new ArrayList<>(allActions);
           availableActions.removeAll(chosenActions);
           output = availableActions.get(randomGenerator.nextInt(availableActions.size()));

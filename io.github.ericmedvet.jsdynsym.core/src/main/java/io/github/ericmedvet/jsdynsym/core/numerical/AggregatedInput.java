@@ -35,8 +35,7 @@ public class AggregatedInput<S> extends AbstractComposed<NumericalDynamicalSyste
   private final EnumSet<Type> types;
   private final SortedMap<Double, double[]> history;
 
-  public AggregatedInput(
-      NumericalDynamicalSystem<S> innerVDS, double windowT, Collection<Type> types) {
+  public AggregatedInput(NumericalDynamicalSystem<S> innerVDS, double windowT, Collection<Type> types) {
     super(innerVDS);
     if (innerVDS.nOfInputs() % types.size() != 0) {
       throw new IllegalArgumentException(
@@ -70,10 +69,7 @@ public class AggregatedInput<S> extends AbstractComposed<NumericalDynamicalSyste
     // add new sample to memory
     history.put(t, input);
     // update memory
-    history.keySet().stream()
-        .filter(mt -> mt < t - windowT)
-        .toList()
-        .forEach(history.keySet()::remove);
+    history.keySet().stream().filter(mt -> mt < t - windowT).toList().forEach(history.keySet()::remove);
     // build inner input
     double[] iInput = new double[inner().nOfInputs()];
     double[] firstInput = history.get(history.firstKey());

@@ -68,10 +68,7 @@ public class EnhancedInput<S> extends AbstractComposed<NumericalDynamicalSystem<
     // add new sample to memory
     memory.put(t, input);
     // update memory
-    memory.keySet().stream()
-        .filter(mt -> mt < t - windowT)
-        .toList()
-        .forEach(memory.keySet()::remove);
+    memory.keySet().stream().filter(mt -> mt < t - windowT).toList().forEach(memory.keySet()::remove);
     // build inner input
     double[] iInput = new double[inner().nOfInputs()];
     double[] firstInput = memory.get(memory.firstKey());
@@ -115,7 +112,6 @@ public class EnhancedInput<S> extends AbstractComposed<NumericalDynamicalSystem<
   public String toString() {
     return "enhanced[%s](%s)"
         .formatted(
-            types.stream().map(t -> t.toString().toLowerCase()).collect(Collectors.joining(",")),
-            inner());
+            types.stream().map(t -> t.toString().toLowerCase()).collect(Collectors.joining(",")), inner());
   }
 }

@@ -28,8 +28,7 @@ public interface MultivariateRealFunction extends NumericalTimeInvariantStateles
 
   double[] compute(double... input);
 
-  static MultivariateRealFunction from(
-      Function<double[], double[]> f, int nOfInputs, int nOfOutputs) {
+  static MultivariateRealFunction from(Function<double[], double[]> f, int nOfInputs, int nOfOutputs) {
     return new MultivariateRealFunction() {
       @Override
       public double[] compute(double... input) {

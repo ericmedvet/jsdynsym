@@ -24,8 +24,7 @@ import io.github.ericmedvet.jsdynsym.core.StatelessSystem;
 import io.github.ericmedvet.jsdynsym.core.rl.EnumeratedTimeInvariantReinforcementLearningAgent;
 import java.util.random.RandomGenerator;
 
-public class RandomEnumeratedAgent
-    implements EnumeratedTimeInvariantReinforcementLearningAgent<StatelessSystem.State> {
+public class RandomEnumeratedAgent implements EnumeratedTimeInvariantReinforcementLearningAgent<StatelessSystem.State> {
   private final int nOfInputs;
   private final int nOfOutputs;
   private final RandomGenerator randomGenerator;

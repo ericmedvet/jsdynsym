@@ -66,17 +66,19 @@ public interface Grid<T> extends Iterable<Grid.Entry<T>> {
   int w();
 
   static <T> Collector<Entry<T>, ?, Grid<T>> collector() {
-    return Collectors.collectingAndThen(
-        Collectors.toList(),
-        list -> {
-          int maxX =
-              list.stream().map(e -> e.key().x()).max(Comparator.comparingInt(v -> v)).orElse(0);
-          int maxY =
-              list.stream().map(e -> e.key().y()).max(Comparator.comparingInt(v -> v)).orElse(0);
-          Grid<T> grid = create(maxX + 1, maxY + 1);
-          list.forEach(e -> grid.set(e.key(), e.value()));
-          return grid;
-        });
+    return Collectors.collectingAndThen(Collectors.toList(), list -> {
+      int maxX = list.stream()
+          .map(e -> e.key().x())
+          .max(Comparator.comparingInt(v -> v))
+          .orElse(0);
+      int maxY = list.stream()
+          .map(e -> e.key().y())
+          .max(Comparator.comparingInt(v -> v))
+          .orElse(0);
+      Grid<T> grid = create(maxX + 1, maxY + 1);
+      list.forEach(e -> grid.set(e.key(), e.value()));
+      return grid;
+    });
   }
 
   static <K> Grid<K> create(int w, int h, K k) {
@@ -114,16 +116,14 @@ public interface Grid<T> extends Iterable<Grid.Entry<T>> {
   }
 
   static <K> String toString(Grid<K> grid, Predicate<K> p, String separator) {
-    return toString(
-        grid, (Entry<K> e) -> p.test(e.value()) ? FULL_CELL_B_CHAR : EMPTY_CELL_B_CHAR, separator);
+    return toString(grid, (Entry<K> e) -> p.test(e.value()) ? FULL_CELL_B_CHAR : EMPTY_CELL_B_CHAR, separator);
   }
 
   static <K> String toString(Grid<K> grid, Function<K, Character> function) {
     return toString(grid, (Entry<K> e) -> function.apply(e.value()), "\n");
   }
 
-  static <K> String toString(
-      Grid<K> grid, Function<Entry<K>, Character> function, String separator) {
+  static <K> String toString(Grid<K> grid, Function<Entry<K>, Character> function, String separator) {
     StringBuilder sb = new StringBuilder();
     for (int y = 0; y < grid.h(); y++) {
       for (int x = 0; x < grid.w(); x++) {

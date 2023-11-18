@@ -89,8 +89,7 @@ public class Sinusoidal implements NumericalStatelessSystem, NumericalParametriz
   public void setAmplitudes(double[] amplitudes) {
     if (amplitudes.length != nOfOutputs) {
       throw new IllegalArgumentException(
-          "Amplitudes size is wrong: %d expected, %d found"
-              .formatted(nOfOutputs, amplitudes.length));
+          "Amplitudes size is wrong: %d expected, %d found".formatted(nOfOutputs, amplitudes.length));
     }
     System.arraycopy(amplitudes, 0, this.amplitudes, 0, nOfOutputs);
   }
@@ -129,8 +128,7 @@ public class Sinusoidal implements NumericalStatelessSystem, NumericalParametriz
   public void setFrequencies(double[] frequencies) {
     if (frequencies.length != nOfOutputs) {
       throw new IllegalArgumentException(
-          "Frequencies size is wrong: %d expected, %d found"
-              .formatted(nOfOutputs, frequencies.length));
+          "Frequencies size is wrong: %d expected, %d found".formatted(nOfOutputs, frequencies.length));
     }
     System.arraycopy(frequencies, 0, this.frequencies, 0, nOfOutputs);
   }
@@ -147,8 +145,7 @@ public class Sinusoidal implements NumericalStatelessSystem, NumericalParametriz
   public void setParams(double[] params) {
     if (params.length != (nOfOutputs * nOfTypes())) {
       throw new IllegalArgumentException(
-          "Params size is wrong: %d expected, %d found"
-              .formatted(nOfOutputs * nOfTypes(), params.length));
+          "Params size is wrong: %d expected, %d found".formatted(nOfOutputs * nOfTypes(), params.length));
     }
     int i = 0;
     if (phaseRange.extent() > 0) {
@@ -183,14 +180,13 @@ public class Sinusoidal implements NumericalStatelessSystem, NumericalParametriz
   @Override
   public double[] step(double t, double[] input) {
     return IntStream.range(0, nOfOutputs)
-        .mapToDouble(
-            i -> {
-              double a = amplitudeRange.denormalize(PARAM_RANGE.normalize(amplitudes[i]));
-              double p = phaseRange.denormalize(PARAM_RANGE.normalize(phases[i]));
-              double f = frequencyRange.denormalize(PARAM_RANGE.normalize(frequencies[i]));
-              double b = biasRange.denormalize(PARAM_RANGE.normalize(biases[i]));
-              return a * Math.sin(2d * Math.PI * f * t + p) + b;
-            })
+        .mapToDouble(i -> {
+          double a = amplitudeRange.denormalize(PARAM_RANGE.normalize(amplitudes[i]));
+          double p = phaseRange.denormalize(PARAM_RANGE.normalize(phases[i]));
+          double f = frequencyRange.denormalize(PARAM_RANGE.normalize(frequencies[i]));
+          double b = biasRange.denormalize(PARAM_RANGE.normalize(biases[i]));
+          return a * Math.sin(2d * Math.PI * f * t + p) + b;
+        })
         .toArray();
   }
 

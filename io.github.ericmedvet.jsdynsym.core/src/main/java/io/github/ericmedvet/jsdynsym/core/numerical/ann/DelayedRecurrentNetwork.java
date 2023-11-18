@@ -94,9 +94,8 @@ public class DelayedRecurrentNetwork
   public void setParams(double[] params) {
     int nOfNeurons = nOfInputs + nOfOutputs + nOfInnerNeurons;
     if (params.length != 3 * nOfNeurons * nOfNeurons + nOfNeurons) {
-      throw new IllegalArgumentException(
-          "Wrong number of parameters: %d found, %d expected"
-              .formatted(params.length, 3 * nOfNeurons * nOfNeurons + nOfNeurons));
+      throw new IllegalArgumentException("Wrong number of parameters: %d found, %d expected"
+          .formatted(params.length, 3 * nOfNeurons * nOfNeurons + nOfNeurons));
     }
     int c = 0;
     for (int i = 0; i < nOfNeurons; i = i + 1) {
@@ -105,8 +104,7 @@ public class DelayedRecurrentNetwork
     }
     for (int fromI = 0; fromI < nOfNeurons; fromI = fromI + 1) {
       for (int toI = 0; toI < nOfNeurons; toI = toI + 1) {
-        connections.put(
-            new Coord(fromI, toI), new Connection(params[c], params[c + 1], params[c + 2]));
+        connections.put(new Coord(fromI, toI), new Connection(params[c], params[c + 1], params[c + 2]));
         c = c + 3;
       }
     }
@@ -149,11 +147,9 @@ public class DelayedRecurrentNetwork
         Connection connection = connections.get(new Coord(fromI, toI));
         double pulseValue = outValues[fromI] * connection.weight();
         if (Math.abs(pulseValue) > threshold) {
-          double delay =
-              timeRange.denormalize(DoubleRange.SYMMETRIC_UNIT.normalize(connection.delay()));
-          double duration =
-              new DoubleRange(delay, timeRange.max())
-                  .denormalize(DoubleRange.SYMMETRIC_UNIT.normalize(connection.duration()));
+          double delay = timeRange.denormalize(DoubleRange.SYMMETRIC_UNIT.normalize(connection.delay()));
+          double duration = new DoubleRange(delay, timeRange.max())
+              .denormalize(DoubleRange.SYMMETRIC_UNIT.normalize(connection.duration()));
           for (double futureT = t + delay;
               futureT <= t + delay + duration;
               futureT = futureT + timeResolution) {
@@ -194,7 +190,6 @@ public class DelayedRecurrentNetwork
   @Override
   public String toString() {
     return "DRN-%s-%d>(%d)>%d"
-        .formatted(
-            activationFunction.toString().toLowerCase(), nOfInputs, nOfInnerNeurons, nOfOutputs);
+        .formatted(activationFunction.toString().toLowerCase(), nOfInputs, nOfInnerNeurons, nOfOutputs);
   }
 }

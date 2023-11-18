@@ -49,8 +49,7 @@ public interface NumericalStatelessSystem
         double[] output = function.apply(t, input);
         if (output.length != nOfOutputs) {
           throw new IllegalArgumentException(
-              String.format(
-                  "Unsupported output size: %d instead of %d", output.length, nOfOutputs));
+              String.format("Unsupported output size: %d instead of %d", output.length, nOfOutputs));
         }
         return output;
       }

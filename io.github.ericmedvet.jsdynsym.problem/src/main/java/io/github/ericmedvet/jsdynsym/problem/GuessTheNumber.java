@@ -60,8 +60,7 @@ public class GuessTheNumber implements Runnable {
       extends AbstractComposed<EnumeratedTimeInvariantReinforcementLearningAgent<S>>
       implements TimeInvariantReinforcementLearningAgent<Integer, Action, S> {
 
-    public EnumeratedAdapter(
-        int maxNumber, EnumeratedTimeInvariantReinforcementLearningAgent<S> inner) {
+    public EnumeratedAdapter(int maxNumber, EnumeratedTimeInvariantReinforcementLearningAgent<S> inner) {
       super(inner);
       if (inner.nOfInputs() != maxNumber) {
         throw new IllegalArgumentException(
@@ -97,13 +96,11 @@ public class GuessTheNumber implements Runnable {
     }
   }
 
-  public static class NumericAdapter<S>
-      extends AbstractComposed<NumericalTimeInvariantReinforcementLearningAgent<S>>
+  public static class NumericAdapter<S> extends AbstractComposed<NumericalTimeInvariantReinforcementLearningAgent<S>>
       implements TimeInvariantReinforcementLearningAgent<Integer, Action, S> {
     private final int maxNumber;
 
-    public NumericAdapter(
-        int maxNumber, NumericalTimeInvariantReinforcementLearningAgent<S> inner) {
+    public NumericAdapter(int maxNumber, NumericalTimeInvariantReinforcementLearningAgent<S> inner) {
       super(inner);
       if (inner.nOfInputs() != 1) {
         throw new IllegalArgumentException(
@@ -153,17 +150,12 @@ public class GuessTheNumber implements Runnable {
     // EnumeratedDiscreteTimeInvariantReinforcementLearningAgent<?> agent = new
     // RandomEnumeratedDiscreteAgent(max, 3,
     // rg);
-    EnumeratedTimeInvariantReinforcementLearningAgent<?> agent =
-        new ProtoQLearning(max, 3, 0.1, rg);
+    EnumeratedTimeInvariantReinforcementLearningAgent<?> agent = new ProtoQLearning(max, 3, 0.1, rg);
     System.out.println(agent.getState());
-    IntStream.range(0, 1000)
-        .forEach(
-            i -> {
-              GuessTheNumber game =
-                  new GuessTheNumber(
-                      max / 2, max, maxTrials, rg, new EnumeratedAdapter<>(max, agent));
-              game.run();
-            });
+    IntStream.range(0, 1000).forEach(i -> {
+      GuessTheNumber game = new GuessTheNumber(max / 2, max, maxTrials, rg, new EnumeratedAdapter<>(max, agent));
+      game.run();
+    });
     System.out.println(agent.getState());
   }
 
@@ -181,20 +173,18 @@ public class GuessTheNumber implements Runnable {
         break;
       }
       // System.out.printf("Current number: %d\tAgent action: %s%n", currentNumber, action);
-      currentNumber =
-          currentNumber
-              + switch (action) {
-                case DEC -> -1;
-                case SAME -> 0;
-                case INC -> +1;
-              };
+      currentNumber = currentNumber
+          + switch (action) {
+            case DEC -> -1;
+            case SAME -> 0;
+            case INC -> +1;
+          };
       currentNumber = Math.max(0, Math.min(currentNumber, maxNumber - 1));
       cumulativeReward = cumulativeReward + previousReward;
       previousReward = 1 - Math.abs(currentNumber - target);
       // previousReward = currentNumber == target ? 1 : -0.1;
     }
-    System.out.printf(
-        "Game ended in %d trials with %d=%d and cumulative reward of %f%n"
-            .formatted(trials, currentNumber, target, cumulativeReward));
+    System.out.printf("Game ended in %d trials with %d=%d and cumulative reward of %f%n"
+        .formatted(trials, currentNumber, target, cumulativeReward));
   }
 }

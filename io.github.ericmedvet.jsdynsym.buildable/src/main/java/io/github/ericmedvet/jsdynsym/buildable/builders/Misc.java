@@ -38,12 +38,10 @@ public class Misc {
   }
 
   @SuppressWarnings("unused")
-  public static <T> Grid<T> grid(
-      @Param("w") int w, @Param("h") int h, @Param("items") List<T> items) {
+  public static <T> Grid<T> grid(@Param("w") int w, @Param("h") int h, @Param("items") List<T> items) {
     if (items.size() != w * h) {
       throw new IllegalArgumentException(
-          "Wrong number of items: %d x %d = %d expected, %d found"
-              .formatted(w, h, w * h, items.size()));
+          "Wrong number of items: %d x %d = %d expected, %d found".formatted(w, h, w * h, items.size()));
     }
     Grid<T> grid = Grid.create(w, h);
     int c = 0;

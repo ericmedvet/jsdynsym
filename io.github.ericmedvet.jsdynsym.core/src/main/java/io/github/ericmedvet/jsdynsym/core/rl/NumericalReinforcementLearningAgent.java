@@ -20,8 +20,7 @@
 
 package io.github.ericmedvet.jsdynsym.core.rl;
 
-public interface NumericalReinforcementLearningAgent<S>
-    extends ReinforcementLearningAgent<double[], double[], S> {
+public interface NumericalReinforcementLearningAgent<S> extends ReinforcementLearningAgent<double[], double[], S> {
 
   int nOfInputs();
 

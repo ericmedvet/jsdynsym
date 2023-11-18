@@ -24,18 +24,14 @@ import io.github.ericmedvet.jsdynsym.core.composed.AbstractComposed;
 import java.util.Arrays;
 import java.util.random.RandomGenerator;
 
-public class Noised<S> extends AbstractComposed<NumericalDynamicalSystem<S>>
-    implements NumericalDynamicalSystem<S> {
+public class Noised<S> extends AbstractComposed<NumericalDynamicalSystem<S>> implements NumericalDynamicalSystem<S> {
 
   private final double inputSigma;
   private final double outputSigma;
   private final RandomGenerator randomGenerator;
 
   public Noised(
-      NumericalDynamicalSystem<S> inner,
-      double inputSigma,
-      double outputSigma,
-      RandomGenerator randomGenerator) {
+      NumericalDynamicalSystem<S> inner, double inputSigma, double outputSigma, RandomGenerator randomGenerator) {
     super(inner);
     this.inputSigma = inputSigma;
     this.outputSigma = outputSigma;
@@ -56,15 +52,15 @@ public class Noised<S> extends AbstractComposed<NumericalDynamicalSystem<S>>
   public double[] step(double t, double[] input) {
     double[] noisedInput = input;
     if (inputSigma > 0) {
-      noisedInput =
-          Arrays.stream(input).map(v -> v + randomGenerator.nextGaussian(0, inputSigma)).toArray();
+      noisedInput = Arrays.stream(input)
+          .map(v -> v + randomGenerator.nextGaussian(0, inputSigma))
+          .toArray();
     }
     double[] noisedOutput = inner().step(t, noisedInput);
     if (outputSigma > 0) {
-      noisedOutput =
-          Arrays.stream(noisedOutput)
-              .map(v -> v + randomGenerator.nextGaussian(0, outputSigma))
-              .toArray();
+      noisedOutput = Arrays.stream(noisedOutput)
+          .map(v -> v + randomGenerator.nextGaussian(0, outputSigma))
+          .toArray();
     }
     return noisedOutput;
   }
