@@ -36,6 +36,14 @@ public record DoubleRange(double min, double max) implements Serializable {
     }
   }
 
+  public static DoubleRange largest(List<DoubleRange> ranges) {
+    return ranges.stream().reduce(DoubleRange::largest).orElseThrow();
+  }
+
+  public static DoubleRange smallest(List<DoubleRange> ranges) {
+    return ranges.stream().reduce(DoubleRange::smallest).orElseThrow();
+  }
+
   public double clip(double value) {
     return Math.min(Math.max(value, min), max);
   }
@@ -60,6 +68,10 @@ public record DoubleRange(double min, double max) implements Serializable {
     return max - min;
   }
 
+  public DoubleRange largest(DoubleRange other) {
+    return new DoubleRange(Math.min(min, other.min), Math.max(max, other.max));
+  }
+
   public double normalize(double value) {
     return (clip(value) - min) / (max - min);
   }
@@ -71,19 +83,7 @@ public record DoubleRange(double min, double max) implements Serializable {
     return !(min > other.max);
   }
 
-  public DoubleRange largest(DoubleRange other) {
-    return new DoubleRange(Math.min(min, other.min), Math.max(max, other.max));
-  }
-
   public DoubleRange smallest(DoubleRange other) {
     return new DoubleRange(Math.max(min, other.min), Math.min(max, other.max));
-  }
-
-  public static DoubleRange largest(List<DoubleRange> ranges) {
-    return ranges.stream().reduce(DoubleRange::largest).orElseThrow();
-  }
-
-  public static DoubleRange smallest(List<DoubleRange> ranges) {
-    return ranges.stream().reduce(DoubleRange::smallest).orElseThrow();
   }
 }
