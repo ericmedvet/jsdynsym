@@ -21,6 +21,7 @@
 package io.github.ericmedvet.jsdynsym.core;
 
 import java.io.Serializable;
+import java.util.List;
 
 public record DoubleRange(double min, double max) implements Serializable {
 
@@ -68,5 +69,21 @@ public record DoubleRange(double min, double max) implements Serializable {
       return false;
     }
     return !(min > other.max);
+  }
+
+  public DoubleRange largest(DoubleRange other) {
+    return new DoubleRange(Math.min(min, other.min), Math.max(max, other.max));
+  }
+
+  public DoubleRange smallest(DoubleRange other) {
+    return new DoubleRange(Math.max(min, other.min), Math.min(max, other.max));
+  }
+
+  static DoubleRange largest(List<DoubleRange> ranges) {
+    return ranges.stream().reduce(DoubleRange::largest).orElseThrow();
+  }
+
+  static DoubleRange smallest(List<DoubleRange> ranges) {
+    return ranges.stream().reduce(DoubleRange::smallest).orElseThrow();
   }
 }
