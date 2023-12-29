@@ -79,11 +79,11 @@ public record DoubleRange(double min, double max) implements Serializable {
     return new DoubleRange(Math.max(min, other.min), Math.min(max, other.max));
   }
 
-  static DoubleRange largest(List<DoubleRange> ranges) {
+  public static DoubleRange largest(List<DoubleRange> ranges) {
     return ranges.stream().reduce(DoubleRange::largest).orElseThrow();
   }
 
-  static DoubleRange smallest(List<DoubleRange> ranges) {
+  public static DoubleRange smallest(List<DoubleRange> ranges) {
     return ranges.stream().reduce(DoubleRange::smallest).orElseThrow();
   }
 }
