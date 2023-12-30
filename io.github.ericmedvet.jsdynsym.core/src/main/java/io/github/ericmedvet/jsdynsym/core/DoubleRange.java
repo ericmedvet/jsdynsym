@@ -22,6 +22,7 @@ package io.github.ericmedvet.jsdynsym.core;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.stream.DoubleStream;
 
 public record DoubleRange(double min, double max) implements Serializable {
 
@@ -85,5 +86,10 @@ public record DoubleRange(double min, double max) implements Serializable {
 
   public DoubleRange smallest(DoubleRange other) {
     return new DoubleRange(Math.max(min, other.min), Math.min(max, other.max));
+  }
+
+  public DoubleStream points(int n) {
+    double step = extent() / (double) n;
+    return DoubleStream.iterate(min, v -> v <= max, v -> v + step);
   }
 }
