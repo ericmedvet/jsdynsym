@@ -92,4 +92,15 @@ public record DoubleRange(double min, double max) implements Serializable {
     double step = extent() / (double) n;
     return DoubleStream.iterate(min, v -> v <= max, v -> v + step);
   }
+
+  public DoubleRange extend(double r) {
+    return new DoubleRange(center() - extent() / 2d * r, center() + extent() / 2d * r);
+  }
+
+  public double center() {
+    if (equals(UNBOUNDED)) {
+      return 0d;
+    }
+    return (min + max) / 2d;
+  }
 }
