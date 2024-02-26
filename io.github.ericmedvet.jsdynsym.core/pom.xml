@@ -27,4 +27,12 @@
   <name>jsdynsym-core</name>
   <description>Core components of jsdynsym, a set of abstractions and (few) implementations of simple dynamical systems in Java.</description>
 
+  <dependencies>
+    <dependency>
+      <groupId>io.github.ericmedvet</groupId>
+      <artifactId>jnb.datastructure</artifactId>
+      <version>${jnb.version}</version>
+    </dependency>
+  </dependencies>
+
 </project>
