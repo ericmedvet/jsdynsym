@@ -23,4 +23,6 @@ module io.github.ericmedvet.jsdynsym.core {
   exports io.github.ericmedvet.jsdynsym.core.numerical;
   exports io.github.ericmedvet.jsdynsym.core.numerical.ann;
   exports io.github.ericmedvet.jsdynsym.core.rl;
+
+  requires io.github.ericmedvet.jnb.datastructure;
 }

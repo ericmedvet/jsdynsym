@@ -20,6 +20,7 @@
 
 package io.github.ericmedvet.jsdynsym.core;
 
+import io.github.ericmedvet.jnb.datastructure.DoubleRange;
 import java.util.random.RandomGenerator;
 
 public interface NumericalParametrized extends Parametrized<double[]> {

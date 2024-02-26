@@ -20,7 +20,7 @@
 
 package io.github.ericmedvet.jsdynsym.core.numerical;
 
-import io.github.ericmedvet.jsdynsym.core.DoubleRange;
+import io.github.ericmedvet.jnb.datastructure.DoubleRange;
 import io.github.ericmedvet.jsdynsym.core.NumericalParametrized;
 import java.util.Arrays;
 import java.util.stream.IntStream;
