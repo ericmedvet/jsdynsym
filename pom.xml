@@ -42,6 +42,7 @@
   </developers>
 
   <modules>
+    <module>io.github.ericmedvet.jsdynsym.control</module>
     <module>io.github.ericmedvet.jsdynsym.core</module>
     <module>io.github.ericmedvet.jsdynsym.problem</module>
     <module>io.github.ericmedvet.jsdynsym.buildable</module>
