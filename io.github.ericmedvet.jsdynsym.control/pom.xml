@@ -33,6 +33,11 @@
       <artifactId>jsdynsym.core</artifactId>
       <version>${revision}</version>
     </dependency>
+    <dependency>
+      <groupId>io.github.ericmedvet</groupId>
+      <artifactId>jviz.core</artifactId>
+      <version>${jviz.version}</version>
+    </dependency>
   </dependencies>
 
 </project>

@@ -17,11 +17,21 @@
  * limitations under the License.
  * =========================LICENSE_END==================================
  */
-module io.github.ericmedvet.jsdynsym.control {
-  exports io.github.ericmedvet.jsdynsym.control;
+package io.github.ericmedvet.jsdynsym.control.geometry;
 
-  requires io.github.ericmedvet.jsdynsym.core;
-  requires io.github.ericmedvet.jnb.datastructure;
-  requires io.github.ericmedvet.jviz.core;
-  requires java.desktop;
+import java.util.Optional;
+
+public record Semiline(Point p, double a) {
+  public Optional<Point> interception(Segment s) {
+    Line l = Line.from(p, a);
+    Optional<Point> oIP = l.interception(s);
+    if (oIP.isEmpty()) {
+      return oIP;
+    }
+    Point iP = oIP.orElseThrow();
+    if (Math.abs(iP.diff(p).direction() - a) > Math.PI / 2d) {
+      return Optional.empty();
+    }
+    return oIP;
+  }
 }

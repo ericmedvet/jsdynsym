@@ -17,11 +17,16 @@
  * limitations under the License.
  * =========================LICENSE_END==================================
  */
-module io.github.ericmedvet.jsdynsym.control {
-  exports io.github.ericmedvet.jsdynsym.control;
 
-  requires io.github.ericmedvet.jsdynsym.core;
-  requires io.github.ericmedvet.jnb.datastructure;
-  requires io.github.ericmedvet.jviz.core;
-  requires java.desktop;
+package io.github.ericmedvet.jsdynsym.control.geometry;
+
+public record Segment(Point p1, Point p2) {
+
+  public double direction() {
+    return p2.diff(p1).direction();
+  }
+
+  public double length() {
+    return p1.distance(p2);
+  }
 }
