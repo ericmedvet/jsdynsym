@@ -27,6 +27,12 @@
   <name>jsdynsym-control</name>
   <description>Modeling of control tasks in jsdynsym, a set of abstractions and (few) implementations of simple dynamical systems in Java.</description>
 
-  <dependencies/>
+  <dependencies>
+    <dependency>
+      <groupId>io.github.ericmedvet</groupId>
+      <artifactId>jsdynsym.core</artifactId>
+      <version>${revision}</version>
+    </dependency>
+  </dependencies>
 
 </project>
