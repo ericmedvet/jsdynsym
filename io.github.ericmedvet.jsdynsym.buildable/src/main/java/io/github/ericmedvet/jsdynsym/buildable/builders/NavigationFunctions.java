@@ -36,13 +36,19 @@
 package io.github.ericmedvet.jsdynsym.buildable.builders;
 
 import io.github.ericmedvet.jnb.core.Discoverable;
+import io.github.ericmedvet.jnb.core.Param;
+import io.github.ericmedvet.jnb.datastructure.DoubleRange;
 import io.github.ericmedvet.jsdynsym.control.SingleAgentTask;
+import io.github.ericmedvet.jsdynsym.control.geometry.Point;
+import io.github.ericmedvet.jsdynsym.control.navigation.Arena;
 import io.github.ericmedvet.jsdynsym.control.navigation.NavigationEnvironment;
+import java.util.Comparator;
 import java.util.SortedMap;
 import java.util.function.Function;
 
 @Discoverable(prefixTemplate = "dynamicalSystem|dynSys|ds.environment|env|e.navigation|nav|n")
 public class NavigationFunctions {
+
   private NavigationFunctions() {}
 
   @SuppressWarnings("unused")
@@ -73,5 +79,51 @@ public class NavigationFunctions {
         .mapToDouble(s -> s.state().robotPosition().distance(s.state().targetPosition()))
         .average()
         .orElseThrow();
+  }
+
+  @SuppressWarnings("unused")
+  public static Function<
+          SortedMap<Double, SingleAgentTask.Step<double[], double[], NavigationEnvironment.State>>, Point>
+      finalRobotPosition(@Param(value = "normalized", dB = true) boolean normalized) {
+    return map -> {
+      Arena arena = map.values().iterator().next().state().configuration().arena();
+      Point p = map.get(map.lastKey()).state().robotPosition();
+      if (normalized) {
+        return new Point(
+            new DoubleRange(0, arena.xExtent()).normalize(p.x()),
+            new DoubleRange(0, arena.yExtent()).normalize(p.y()));
+      }
+      return p;
+    };
+  }
+
+  @SuppressWarnings("unused")
+  public static Function<
+          SortedMap<Double, SingleAgentTask.Step<double[], double[], NavigationEnvironment.State>>, Point>
+      closestRobotPosition(@Param(value = "normalized", dB = true) boolean normalized) {
+    return map -> {
+      Arena arena = map.values().iterator().next().state().configuration().arena();
+      Point p = map.values().stream()
+          .min(Comparator.comparingDouble(
+              s -> s.state().robotPosition().distance(s.state().targetPosition())))
+          .map(s -> s.state().robotPosition())
+          .orElseThrow();
+      if (normalized) {
+        return new Point(
+            new DoubleRange(0, arena.xExtent()).normalize(p.x()),
+            new DoubleRange(0, arena.yExtent()).normalize(p.y()));
+      }
+      return p;
+    };
+  }
+
+  @SuppressWarnings("unused")
+  public static Function<Point, Double> x() {
+    return Point::x;
+  }
+
+  @SuppressWarnings("unused")
+  public static Function<Point, Double> y() {
+    return Point::y;
   }
 }
