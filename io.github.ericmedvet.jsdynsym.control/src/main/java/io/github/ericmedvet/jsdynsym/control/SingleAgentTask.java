@@ -20,18 +20,16 @@
 package io.github.ericmedvet.jsdynsym.control;
 
 import io.github.ericmedvet.jnb.datastructure.DoubleRange;
+import io.github.ericmedvet.jsdynsym.control.SingleAgentTask.Step;
 import io.github.ericmedvet.jsdynsym.core.DynamicalSystem;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.function.Supplier;
 
-public interface SingleAgentTask<C extends DynamicalSystem<O, A, ?>, O, A, S> {
+public interface SingleAgentTask<C extends DynamicalSystem<O, A, ?>, O, A, S> extends Simulation<C, Step<O, A, S>> {
 
   record Step<O, A, S>(O observation, A action, S state) {}
-
-  SortedMap<Double, Step<O, A, S>> simulate(C agent);
 
   static <C extends DynamicalSystem<O, A, ?>, O, A, S> SingleAgentTask<C, O, A, S> fromEnvironment(
       Environment<O, A, S> environment, DoubleRange tRange, double dT) {
