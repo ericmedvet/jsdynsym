@@ -19,6 +19,7 @@
  */
 module io.github.ericmedvet.jsdynsym.buildable {
   requires io.github.ericmedvet.jsdynsym.core;
+  requires io.github.ericmedvet.jsdynsym.control;
   requires io.github.ericmedvet.jnb.core;
   requires io.github.ericmedvet.jnb.datastructure;
 

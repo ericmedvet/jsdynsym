@@ -38,6 +38,11 @@
       <artifactId>jsdynsym.core</artifactId>
       <version>${revision}</version>
     </dependency>
+    <dependency>
+      <groupId>io.github.ericmedvet</groupId>
+      <artifactId>jsdynsym.control</artifactId>
+      <version>${revision}</version>
+    </dependency>
   </dependencies>
 
 </project>

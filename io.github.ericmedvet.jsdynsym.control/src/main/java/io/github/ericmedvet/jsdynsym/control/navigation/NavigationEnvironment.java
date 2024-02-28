@@ -20,6 +20,7 @@
 package io.github.ericmedvet.jsdynsym.control.navigation;
 
 import io.github.ericmedvet.jnb.datastructure.DoubleRange;
+import io.github.ericmedvet.jsdynsym.control.Environment;
 import io.github.ericmedvet.jsdynsym.control.geometry.Point;
 import io.github.ericmedvet.jsdynsym.control.geometry.Segment;
 import io.github.ericmedvet.jsdynsym.control.geometry.Semiline;
@@ -29,12 +30,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.random.RandomGenerator;
 
-public class NavigationEnvironment implements NumericalDynamicalSystem<State> {
+public class NavigationEnvironment implements NumericalDynamicalSystem<State>, Environment<double[], double[], State> {
 
   public record Configuration(
       DoubleRange initialRobotXRange,
       DoubleRange initialRobotYRange,
-      DoubleRange initialRobotDirection,
+      DoubleRange initialRobotDirectionRange,
       DoubleRange targetXRange,
       DoubleRange targetYRange,
       double robotRadius,
@@ -62,6 +63,11 @@ public class NavigationEnvironment implements NumericalDynamicalSystem<State> {
   }
 
   @Override
+  public double[] defaultAgentAction() {
+    return new double[nOfInputs()];
+  }
+
+  @Override
   public State getState() {
     return state;
   }
@@ -76,7 +82,7 @@ public class NavigationEnvironment implements NumericalDynamicalSystem<State> {
         new Point(
             configuration.initialRobotXRange.denormalize(configuration.randomGenerator.nextDouble()),
             configuration.initialRobotYRange.denormalize(configuration.randomGenerator.nextDouble())),
-        configuration.initialRobotDirection.denormalize(configuration.randomGenerator.nextDouble()),
+        configuration.initialRobotDirectionRange.denormalize(configuration.randomGenerator.nextDouble()),
         0);
   }
 

@@ -19,6 +19,8 @@
  */
 module io.github.ericmedvet.jsdynsym.control {
   exports io.github.ericmedvet.jsdynsym.control;
+  exports io.github.ericmedvet.jsdynsym.control.navigation;
+  exports io.github.ericmedvet.jsdynsym.control.geometry;
 
   requires io.github.ericmedvet.jsdynsym.core;
   requires io.github.ericmedvet.jnb.datastructure;
