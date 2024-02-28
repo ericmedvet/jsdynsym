@@ -29,7 +29,6 @@ import io.github.ericmedvet.jsdynsym.control.navigation.NavigationEnvironment.St
 import io.github.ericmedvet.jsdynsym.core.DynamicalSystem;
 import io.github.ericmedvet.jsdynsym.core.numerical.NumericalStatelessSystem;
 import io.github.ericmedvet.jviz.core.util.Misc;
-import io.github.ericmedvet.jviz.core.util.VideoUtils;
 import java.io.File;
 import java.io.IOException;
 import java.util.Random;
@@ -40,7 +39,7 @@ public class Main {
 
   public static void main(String[] args) throws IOException {
     RandomGenerator rg = new Random();
-    NavigationEnvironment environment = new NavigationEnvironment(
+    NavigationEnvironment environment = new NavigationEnvironment(new NavigationEnvironment.Configuration(
         new DoubleRange(0.5, 0.5),
         new DoubleRange(0.8, 0.8),
         new DoubleRange(0., 0.),
@@ -53,7 +52,7 @@ public class Main {
         1,
         true,
         Prepared.LARGE_BARRIER.arena(),
-        rg);
+        rg));
     NumericalStatelessSystem agent = NumericalStatelessSystem.from(
         7, 2, (t, in) -> new double[] {rg.nextGaussian(0.35, 0.3), rg.nextGaussian(0.5, 0.1)});
     SingleAgentTask<DynamicalSystem<double[], double[], ?>, double[], double[], State> task =
@@ -61,6 +60,6 @@ public class Main {
     SortedMap<Double, Step<double[], double[], State>> outcome = task.simulate(agent);
     NavigationDrawer d = new NavigationDrawer(Configuration.DEFAULT);
     Misc.showImage(d.draw(500, 500, outcome));
-    VideoUtils.encodeAndSave(d.drawAll(300, 300, outcome), 30, new File("../nav.mp4"));
+    d.saveVideo(300, 300, new File("../nav.mp4"), outcome);
   }
 }

@@ -31,31 +31,7 @@ import java.util.random.RandomGenerator;
 
 public class NavigationEnvironment implements NumericalDynamicalSystem<State> {
 
-  public record State(
-      Arena arena,
-      Point targetPosition,
-      Point robotPosition,
-      double robotDirection,
-      double robotRadius,
-      int nOfCollisions) {}
-
-  private final DoubleRange initialRobotXRange;
-  private final DoubleRange initialRobotYRange;
-  private final DoubleRange initialRobotDirection;
-  private final DoubleRange targetXRange;
-  private final DoubleRange targetYRange;
-  private final double robotRadius;
-  private final double robotMaxV;
-  private final DoubleRange sensorsAngleRange;
-  private final int nOfSensors;
-  private final double sensorRange;
-  private final boolean senseTarget;
-  private final Arena arena;
-  private final RandomGenerator randomGenerator;
-
-  private State state;
-
-  public NavigationEnvironment(
+  public record Configuration(
       DoubleRange initialRobotXRange,
       DoubleRange initialRobotYRange,
       DoubleRange initialRobotDirection,
@@ -68,20 +44,21 @@ public class NavigationEnvironment implements NumericalDynamicalSystem<State> {
       double sensorRange,
       boolean senseTarget,
       Arena arena,
-      RandomGenerator randomGenerator) {
-    this.initialRobotXRange = initialRobotXRange;
-    this.initialRobotYRange = initialRobotYRange;
-    this.initialRobotDirection = initialRobotDirection;
-    this.targetXRange = targetXRange;
-    this.targetYRange = targetYRange;
-    this.robotRadius = robotRadius;
-    this.robotMaxV = robotMaxV;
-    this.sensorsAngleRange = sensorsAngleRange;
-    this.nOfSensors = nOfSensors;
-    this.sensorRange = sensorRange;
-    this.senseTarget = senseTarget;
-    this.arena = arena;
-    this.randomGenerator = randomGenerator;
+      RandomGenerator randomGenerator) {}
+
+  public record State(
+      Configuration configuration,
+      Point targetPosition,
+      Point robotPosition,
+      double robotDirection,
+      int nOfCollisions) {}
+
+  private final Configuration configuration;
+  private State state;
+
+  public NavigationEnvironment(Configuration configuration) {
+    this.configuration = configuration;
+    reset();
   }
 
   @Override
@@ -92,15 +69,14 @@ public class NavigationEnvironment implements NumericalDynamicalSystem<State> {
   @Override
   public void reset() {
     state = new State(
-        arena,
+        configuration,
         new Point(
-            targetXRange.denormalize(randomGenerator.nextDouble()),
-            targetYRange.denormalize(randomGenerator.nextDouble())),
+            configuration.targetXRange.denormalize(configuration.randomGenerator.nextDouble()),
+            configuration.targetYRange.denormalize(configuration.randomGenerator.nextDouble())),
         new Point(
-            initialRobotXRange.denormalize(randomGenerator.nextDouble()),
-            initialRobotYRange.denormalize(randomGenerator.nextDouble())),
-        initialRobotDirection.denormalize(randomGenerator.nextDouble()),
-        robotRadius,
+            configuration.initialRobotXRange.denormalize(configuration.randomGenerator.nextDouble()),
+            configuration.initialRobotYRange.denormalize(configuration.randomGenerator.nextDouble())),
+        configuration.initialRobotDirection.denormalize(configuration.randomGenerator.nextDouble()),
         0);
   }
 
@@ -112,27 +88,27 @@ public class NavigationEnvironment implements NumericalDynamicalSystem<State> {
           .formatted(action.length, nOfInputs()));
     }
     // prepare
-    List<Segment> segments = arena.segments();
-    DoubleRange sensorsRange = new DoubleRange(robotRadius, sensorRange);
+    List<Segment> segments = configuration.arena.segments();
+    DoubleRange sensorsRange = new DoubleRange(configuration.robotRadius, configuration.sensorRange);
     // apply action
-    double v1 = DoubleRange.SYMMETRIC_UNIT.clip(action[0]) * robotMaxV;
-    double v2 = DoubleRange.SYMMETRIC_UNIT.clip(action[1]) * robotMaxV;
+    double v1 = DoubleRange.SYMMETRIC_UNIT.clip(action[0]) * configuration.robotMaxV;
+    double v2 = DoubleRange.SYMMETRIC_UNIT.clip(action[1]) * configuration.robotMaxV;
     // compute new pose
     Point newRobotP = state.robotPosition.sum(new Point(state.robotDirection).scale((v1 + v2) / 2d));
-    double deltaA = Math.asin((v2 - v1) / 2d / robotRadius);
+    double deltaA = Math.asin((v2 - v1) / 2d / configuration.robotRadius);
     // check collision and update pose
     double minD = segments.stream().mapToDouble(newRobotP::distance).min().orElseThrow();
     state = new State(
-        arena,
+        configuration,
         state.targetPosition,
-        (minD > robotRadius) ? newRobotP : state.robotPosition,
+        (minD > configuration.robotRadius) ? newRobotP : state.robotPosition,
         state.robotDirection + deltaA,
-        robotRadius,
-        state.nOfCollisions + ((minD > robotRadius) ? 0 : 1));
+        state.nOfCollisions + ((minD > configuration.robotRadius) ? 0 : 1));
     // compute observation
-    double[] sInputs = sensorsAngleRange
+    double[] sInputs = configuration
+        .sensorsAngleRange
         .delta(state.robotDirection)
-        .points(nOfSensors - 1)
+        .points(configuration.nOfSensors - 1)
         .map(a -> {
           Semiline sl = new Semiline(state.robotPosition, a);
           double d = segments.stream()
@@ -144,8 +120,8 @@ public class NavigationEnvironment implements NumericalDynamicalSystem<State> {
           return sensorsRange.normalize(d);
         })
         .toArray();
-    double[] observation = senseTarget ? new double[nOfSensors + 2] : sInputs;
-    if (senseTarget) {
+    double[] observation = configuration.senseTarget ? new double[configuration.nOfSensors + 2] : sInputs;
+    if (configuration.senseTarget) {
       System.arraycopy(sInputs, 0, observation, 2, sInputs.length);
       observation[0] = sensorsRange.normalize(state.robotPosition.distance(state.targetPosition));
       observation[1] = state.targetPosition.diff(state.robotPosition).direction() - state.robotDirection;
@@ -167,6 +143,6 @@ public class NavigationEnvironment implements NumericalDynamicalSystem<State> {
 
   @Override
   public int nOfOutputs() {
-    return nOfSensors + (senseTarget ? 2 : 0);
+    return configuration.nOfSensors + (configuration.senseTarget ? 2 : 0);
   }
 }

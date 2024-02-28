@@ -22,6 +22,7 @@ package io.github.ericmedvet.jsdynsym.control.navigation;
 import io.github.ericmedvet.jsdynsym.control.SingleAgentTask;
 import io.github.ericmedvet.jsdynsym.control.geometry.Point;
 import io.github.ericmedvet.jviz.core.drawer.TimedSequenceDrawer;
+import io.github.ericmedvet.jviz.core.util.GraphicsUtils;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -47,11 +48,12 @@ public class NavigationDrawer
       double targetThickness,
       double segmentThickness,
       double trajectoryThickness,
+      double robotFillAlpha,
       double targetSize,
       double marginRate) {
 
     public static final Configuration DEFAULT =
-        new Configuration(Color.MAGENTA, Color.RED, Color.DARK_GRAY, Color.BLUE, 2, 2, 3, 1, 5, 0.01);
+        new Configuration(Color.MAGENTA, Color.RED, Color.DARK_GRAY, Color.BLUE, 2, 2, 3, 1, 0.25, 5, 0.01);
   }
 
   public NavigationDrawer(Configuration configuration) {
@@ -62,7 +64,7 @@ public class NavigationDrawer
   public void drawAll(
       Graphics2D g,
       SortedMap<Double, SingleAgentTask.Step<double[], double[], NavigationEnvironment.State>> map) {
-    Arena arena = map.values().iterator().next().state().arena();
+    Arena arena = map.values().iterator().next().state().configuration().arena();
     // set transform
     AffineTransform previousTransform = setTransform(g, arena);
     // draw robot and trajectory
@@ -85,7 +87,7 @@ public class NavigationDrawer
   public void drawSingle(
       Graphics2D g, double t, SingleAgentTask.Step<double[], double[], NavigationEnvironment.State> step) {
     // draw info
-    Arena arena = step.state().arena();
+    Arena arena = step.state().configuration().arena();
     g.setStroke(new BasicStroke(1f));
     g.setColor(configuration.infoColor);
     g.drawString("%.2fs".formatted(t), 5, 5 + g.getFontMetrics().getHeight());
@@ -100,10 +102,11 @@ public class NavigationDrawer
     drawRobot(
         g,
         configuration.robotColor,
+        configuration.robotFillAlpha,
         configuration.robotThickness / g.getTransform().getScaleX(),
         step.state().robotPosition(),
         step.state().robotDirection(),
-        step.state().robotRadius());
+        step.state().configuration().robotRadius());
     // draw target
     drawTarget(
         g,
@@ -141,9 +144,11 @@ public class NavigationDrawer
     g.draw(path);
   }
 
-  private static void drawRobot(Graphics2D g, Color c, double th, Point p, double a, double r) {
+  private static void drawRobot(Graphics2D g, Color c, double alpha, double th, Point p, double a, double r) {
     g.setStroke(new BasicStroke((float) th));
     Shape shape = new Ellipse2D.Double(p.x() - r, p.y() - r, 2d * r, 2d * r);
+    g.setColor(GraphicsUtils.alphaed(c, alpha));
+    g.fill(shape);
     g.setColor(c);
     g.draw(shape);
     Point hP = p.sum(new Point(a).scale(r));
