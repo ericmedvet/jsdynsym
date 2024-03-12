@@ -27,7 +27,8 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.function.Supplier;
 
-public interface SingleAgentTask<C extends DynamicalSystem<O, A, ?>, O, A, S> extends Simulation<C, Step<O, A, S>> {
+public interface SingleAgentTask<C extends DynamicalSystem<O, A, ?>, O, A, S>
+    extends Simulation<C, Step<O, A, S>, Simulation.Outcome<Step<O, A, S>>> {
 
   record Step<O, A, S>(O observation, A action, S state) {}
 
@@ -62,7 +63,7 @@ public interface SingleAgentTask<C extends DynamicalSystem<O, A, ?>, O, A, S> ex
         steps.put(t, new Step<>(observation, action, environment.getState()));
         t = t + dT;
       }
-      return new TreeMap<>(steps);
+      return Outcome.of(new TreeMap<>(steps));
     };
   }
 

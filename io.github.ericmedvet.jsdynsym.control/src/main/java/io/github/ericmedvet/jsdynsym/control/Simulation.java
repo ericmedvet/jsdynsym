@@ -21,7 +21,15 @@ package io.github.ericmedvet.jsdynsym.control;
 
 import java.util.SortedMap;
 
-public interface Simulation<T, S> {
+public interface Simulation<T, S, O extends Simulation.Outcome<S>> {
 
-  SortedMap<Double, S> simulate(T t);
+  interface Outcome<S> {
+    SortedMap<Double, S> snapshots();
+
+    static <S> Outcome<S> of(SortedMap<Double, S> snapshots) {
+      return () -> snapshots;
+    }
+  }
+
+  O simulate(T t);
 }

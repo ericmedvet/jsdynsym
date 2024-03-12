@@ -37,32 +37,36 @@ package io.github.ericmedvet.jsdynsym.buildable.builders;
 
 import io.github.ericmedvet.jnb.core.NamedBuilder;
 import io.github.ericmedvet.jnb.datastructure.DoubleRange;
+import io.github.ericmedvet.jsdynsym.control.Simulation;
 import io.github.ericmedvet.jsdynsym.control.SingleAgentTask;
 import io.github.ericmedvet.jsdynsym.control.navigation.NavigationDrawer;
 import io.github.ericmedvet.jsdynsym.control.navigation.NavigationEnvironment;
 import io.github.ericmedvet.jsdynsym.core.DynamicalSystem;
-import io.github.ericmedvet.jsdynsym.core.numerical.NumericalDynamicalSystem;
 import io.github.ericmedvet.jsdynsym.core.numerical.ann.MultiLayerPerceptron;
-
-import java.io.File;
 import java.io.IOException;
 import java.util.Random;
-import java.util.SortedMap;
 import java.util.stream.IntStream;
 
 public class Main {
   public static void main(String[] args) throws IOException {
     NamedBuilder<?> nb = NamedBuilder.fromDiscovery();
     NavigationEnvironment environment = (NavigationEnvironment) nb.build("ds.e.navigation()");
-    @SuppressWarnings("unchecked") MultiLayerPerceptron mlp = ((NumericalDynamicalSystems.Builder<MultiLayerPerceptron, ?>) nb.build("ds.num.mlp()")).apply(
-        IntStream.range(0, environment.nOfOutputs()).mapToObj("x%02d"::formatted).toList(),
-        IntStream.range(0, environment.nOfInputs()).mapToObj("y%02d"::formatted).toList()
-    );
+    @SuppressWarnings("unchecked")
+    MultiLayerPerceptron mlp = ((NumericalDynamicalSystems.Builder<MultiLayerPerceptron, ?>)
+            nb.build("ds.num.mlp()"))
+        .apply(
+            IntStream.range(0, environment.nOfOutputs())
+                .mapToObj("x%02d"::formatted)
+                .toList(),
+            IntStream.range(0, environment.nOfInputs())
+                .mapToObj("y%02d"::formatted)
+                .toList());
     mlp.randomize(new Random(), DoubleRange.SYMMETRIC_UNIT);
     SingleAgentTask<DynamicalSystem<double[], double[], ?>, double[], double[], NavigationEnvironment.State> task =
         SingleAgentTask.fromEnvironment(environment, new double[2], new DoubleRange(0, 60), 0.1);
-    SortedMap<Double, SingleAgentTask.Step<double[], double[], NavigationEnvironment.State>> outcome = task.simulate(mlp);
+    Simulation.Outcome<SingleAgentTask.Step<double[], double[], NavigationEnvironment.State>> outcome =
+        task.simulate(mlp);
     NavigationDrawer d = new NavigationDrawer(NavigationDrawer.Configuration.DEFAULT);
-    d.showImage(500, 500, outcome);
+    d.showImage(500, 500, outcome.snapshots());
   }
 }
