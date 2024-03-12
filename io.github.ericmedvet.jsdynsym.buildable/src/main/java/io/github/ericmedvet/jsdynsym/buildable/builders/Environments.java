@@ -40,7 +40,7 @@ import io.github.ericmedvet.jnb.core.Param;
 import io.github.ericmedvet.jnb.datastructure.DoubleRange;
 import io.github.ericmedvet.jsdynsym.control.navigation.Arena;
 import io.github.ericmedvet.jsdynsym.control.navigation.NavigationEnvironment;
-import java.util.Random;
+import java.util.random.RandomGenerator;
 
 @Discoverable(prefixTemplate = "dynamicalSystem|dynSys|ds.environment|env|e")
 public class Environments {
@@ -49,20 +49,20 @@ public class Environments {
   @SuppressWarnings("unused")
   public static NavigationEnvironment navigation(
       @Param(value = "name", iS = "nav-{arena}") String name,
-      @Param(value = "initialRobotXRange", dNPM = "ds.range(min=0.45;max=0.55)") DoubleRange initialRobotXRange,
-      @Param(value = "initialRobotYRange", dNPM = "ds.range(min=0.8;max=0.85)") DoubleRange initialRobotYRange,
-      @Param(value = "initialRobotDirectionRange", dNPM = "ds.range(min=0;max=0)")
+      @Param(value = "initialRobotXRange", dNPM = "m.range(min=0.45;max=0.55)") DoubleRange initialRobotXRange,
+      @Param(value = "initialRobotYRange", dNPM = "m.range(min=0.8;max=0.85)") DoubleRange initialRobotYRange,
+      @Param(value = "initialRobotDirectionRange", dNPM = "m.range(min=0;max=0)")
           DoubleRange initialRobotDirectionRange,
-      @Param(value = "targetXRange", dNPM = "ds.range(min=0.5;max=0.5)") DoubleRange targetXRange,
-      @Param(value = "targetYRange", dNPM = "ds.range(min=0.15;max=0.15)") DoubleRange targetYRange,
+      @Param(value = "targetXRange", dNPM = "m.range(min=0.5;max=0.5)") DoubleRange targetXRange,
+      @Param(value = "targetYRange", dNPM = "m.range(min=0.15;max=0.15)") DoubleRange targetYRange,
       @Param(value = "robotRadius", dD = 0.05) double robotRadius,
       @Param(value = "robotMaxV", dD = 0.01) double robotMaxV,
-      @Param(value = "sensorsAngleRange", dNPM = "ds.range(min=-1.57;max=1.57)") DoubleRange sensorsAngleRange,
+      @Param(value = "sensorsAngleRange", dNPM = "m.range(min=-1.57;max=1.57)") DoubleRange sensorsAngleRange,
       @Param(value = "nOfSensors", dI = 5) int nOfSensors,
       @Param(value = "sensorRange", dD = 1) double sensorRange,
       @Param(value = "senseTarget", dB = true) boolean senseTarget,
       @Param(value = "arena", dS = "empty") Arena.Prepared arena,
-      @Param(value = "seed", dI = 1) int randomSeed) {
+      @Param(value = "randomGenerator", dNPM = "m.defaultRG()") RandomGenerator randomGenerator) {
     return new NavigationEnvironment(new NavigationEnvironment.Configuration(
         initialRobotXRange,
         initialRobotYRange,
@@ -76,6 +76,6 @@ public class Environments {
         sensorRange,
         senseTarget,
         arena.arena(),
-        new Random(randomSeed)));
+        randomGenerator));
   }
 }

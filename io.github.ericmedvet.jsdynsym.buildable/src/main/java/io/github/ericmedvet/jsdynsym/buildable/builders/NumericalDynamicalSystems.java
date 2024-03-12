@@ -47,7 +47,7 @@ public class NumericalDynamicalSystems {
 
   @SuppressWarnings("unused")
   public static Builder<DelayedRecurrentNetwork, DelayedRecurrentNetwork.State> drn(
-      @Param(value = "timeRange", dNPM = "ds.range(min=0;max=1)") DoubleRange timeRange,
+      @Param(value = "timeRange", dNPM = "m.range(min=0;max=1)") DoubleRange timeRange,
       @Param(value = "innerNeuronsRatio", dD = 1d) double innerNeuronsRatio,
       @Param(value = "activationFunction", dS = "tanh")
           MultiLayerPerceptron.ActivationFunction activationFunction,
@@ -121,7 +121,7 @@ public class NumericalDynamicalSystems {
   public static <S> Builder<Noised<S>, S> noised(
       @Param(value = "inputSigma", dD = 0) double inputSigma,
       @Param(value = "outputSigma", dD = 0) double outputSigma,
-      @Param(value = "randomGenerator", dNPM = "ds.defaultRG()") RandomGenerator randomGenerator,
+      @Param(value = "randomGenerator", dNPM = "m.defaultRG()") RandomGenerator randomGenerator,
       @Param("inner") Builder<? extends NumericalDynamicalSystem<S>, S> inner) {
     return (xVarNames, yVarNames) ->
         new Noised<>(inner.apply(xVarNames, yVarNames), inputSigma, outputSigma, randomGenerator);
@@ -137,10 +137,10 @@ public class NumericalDynamicalSystems {
 
   @SuppressWarnings("unused")
   public static Builder<Sinusoidal, StatelessSystem.State> sin(
-      @Param(value = "p", dNPM = "ds.range(min=-1.57;max=1.57)") DoubleRange phaseRange,
-      @Param(value = "f", dNPM = "ds.range(min=0;max=1)") DoubleRange frequencyRange,
-      @Param(value = "a", dNPM = "ds.range(min=0;max=1)") DoubleRange amplitudeRange,
-      @Param(value = "b", dNPM = "ds.range(min=-0.5;max=0.5)") DoubleRange biasRange) {
+      @Param(value = "p", dNPM = "m.range(min=-1.57;max=1.57)") DoubleRange phaseRange,
+      @Param(value = "f", dNPM = "m.range(min=0;max=1)") DoubleRange frequencyRange,
+      @Param(value = "a", dNPM = "m.range(min=0;max=1)") DoubleRange amplitudeRange,
+      @Param(value = "b", dNPM = "m.range(min=-0.5;max=0.5)") DoubleRange biasRange) {
     return (xVarNames, yVarNames) -> new Sinusoidal(
         xVarNames.size(), yVarNames.size(), phaseRange, frequencyRange, amplitudeRange, biasRange);
   }
