@@ -20,7 +20,9 @@
 
 package io.github.ericmedvet.jsdynsym.core.numerical;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.function.DoubleUnaryOperator;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 
@@ -57,5 +59,20 @@ public interface MultivariateRealFunction extends NumericalTimeInvariantStateles
   @Override
   default double[] step(double[] input) {
     return compute(input);
+  }
+
+  default MultivariateRealFunction andThen(MultivariateRealFunction other) {
+    if (other.nOfInputs() != nOfOutputs()) {
+      throw new IllegalArgumentException(
+          "Incompatible input/output size: input=%d, output=%d".formatted(other.nOfInputs(), nOfOutputs()));
+    }
+    MultivariateRealFunction thisMrf = this;
+    return MultivariateRealFunction.from(
+        in -> other.compute(thisMrf.compute(in)), thisMrf.nOfInputs(), other.nOfOutputs());
+  }
+
+  default MultivariateRealFunction andThen(DoubleUnaryOperator f) {
+    return MultivariateRealFunction.from(
+        in -> Arrays.stream(compute(in)).map(f).toArray(), nOfInputs(), nOfOutputs());
   }
 }

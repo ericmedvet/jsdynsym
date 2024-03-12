@@ -34,4 +34,9 @@ public interface StatelessSystem<I, O> extends DynamicalSystem<I, O, StatelessSy
 
   @Override
   default void reset() {}
+
+  default <P> StatelessSystem<I, P> andThen(StatelessSystem<O, P> other) {
+    StatelessSystem<I, O> thisSystem = this;
+    return (t, input) -> other.step(t, thisSystem.step(t, input));
+  }
 }

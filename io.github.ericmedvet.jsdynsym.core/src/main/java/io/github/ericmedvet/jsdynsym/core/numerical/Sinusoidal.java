@@ -25,7 +25,7 @@ import io.github.ericmedvet.jnb.datastructure.NumericalParametrized;
 import java.util.Arrays;
 import java.util.stream.IntStream;
 
-public class Sinusoidal implements NumericalStatelessSystem, NumericalParametrized {
+public class Sinusoidal implements NumericalStatelessSystem, NumericalParametrized<Sinusoidal> {
   private static final DoubleRange PARAM_RANGE = DoubleRange.SYMMETRIC_UNIT;
 
   private final int nOfInputs;

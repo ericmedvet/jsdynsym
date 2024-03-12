@@ -27,10 +27,7 @@ import io.github.ericmedvet.jsdynsym.core.StatelessSystem;
 import io.github.ericmedvet.jsdynsym.core.composed.InStepped;
 import io.github.ericmedvet.jsdynsym.core.composed.OutStepped;
 import io.github.ericmedvet.jsdynsym.core.composed.Stepped;
-import io.github.ericmedvet.jsdynsym.core.numerical.EnhancedInput;
-import io.github.ericmedvet.jsdynsym.core.numerical.Noised;
-import io.github.ericmedvet.jsdynsym.core.numerical.NumericalDynamicalSystem;
-import io.github.ericmedvet.jsdynsym.core.numerical.Sinusoidal;
+import io.github.ericmedvet.jsdynsym.core.numerical.*;
 import io.github.ericmedvet.jsdynsym.core.numerical.ann.DelayedRecurrentNetwork;
 import io.github.ericmedvet.jsdynsym.core.numerical.ann.MultiLayerPerceptron;
 import java.util.List;
@@ -43,7 +40,13 @@ public class NumericalDynamicalSystems {
   private NumericalDynamicalSystems() {}
 
   public interface Builder<F extends NumericalDynamicalSystem<S>, S>
-      extends BiFunction<List<String>, List<String>, F> {}
+      extends BiFunction<List<String>, List<String>, F> {
+    default F apply(int nOfInputs, int nOfOutputs) {
+      return apply(
+          MultivariateRealFunction.varNames("x", nOfInputs),
+          MultivariateRealFunction.varNames("y", nOfOutputs));
+    }
+  }
 
   @SuppressWarnings("unused")
   public static Builder<DelayedRecurrentNetwork, DelayedRecurrentNetwork.State> drn(

@@ -27,7 +27,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class DelayedRecurrentNetwork
-    implements NumericalDynamicalSystem<DelayedRecurrentNetwork.State>, NumericalParametrized {
+    implements NumericalDynamicalSystem<DelayedRecurrentNetwork.State>,
+        NumericalParametrized<DelayedRecurrentNetwork> {
   private final MultiLayerPerceptron.ActivationFunction activationFunction;
   private final int nOfInputs;
   private final int nOfOutputs;

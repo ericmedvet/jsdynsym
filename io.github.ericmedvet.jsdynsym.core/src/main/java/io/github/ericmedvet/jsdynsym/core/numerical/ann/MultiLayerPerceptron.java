@@ -27,7 +27,7 @@ import java.util.Arrays;
 import java.util.function.DoubleUnaryOperator;
 import java.util.stream.Collectors;
 
-public class MultiLayerPerceptron implements MultivariateRealFunction, NumericalParametrized {
+public class MultiLayerPerceptron implements MultivariateRealFunction, NumericalParametrized<MultiLayerPerceptron> {
 
   protected final ActivationFunction activationFunction;
   protected final double[][][] weights;

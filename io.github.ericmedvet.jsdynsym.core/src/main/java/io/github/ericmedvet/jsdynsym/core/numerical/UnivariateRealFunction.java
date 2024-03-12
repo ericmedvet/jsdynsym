@@ -20,6 +20,7 @@
 
 package io.github.ericmedvet.jsdynsym.core.numerical;
 
+import java.util.function.DoubleUnaryOperator;
 import java.util.function.ToDoubleFunction;
 
 public interface UnivariateRealFunction extends MultivariateRealFunction, ToDoubleFunction<double[]> {
@@ -54,5 +55,10 @@ public interface UnivariateRealFunction extends MultivariateRealFunction, ToDoub
 
   default UnivariateRealFunction scaledOutput(double slope, double intercept) {
     return UnivariateRealFunction.from(xs -> slope * applyAsDouble(xs) + intercept, nOfInputs());
+  }
+
+  @Override
+  default UnivariateRealFunction andThen(DoubleUnaryOperator f) {
+    return UnivariateRealFunction.from(in -> f.applyAsDouble(applyAsDouble(in)), nOfInputs());
   }
 }

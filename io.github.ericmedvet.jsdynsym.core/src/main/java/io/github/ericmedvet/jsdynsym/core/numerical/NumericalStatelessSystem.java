@@ -21,7 +21,9 @@
 package io.github.ericmedvet.jsdynsym.core.numerical;
 
 import io.github.ericmedvet.jsdynsym.core.StatelessSystem;
+import java.util.Arrays;
 import java.util.function.BiFunction;
+import java.util.function.DoubleUnaryOperator;
 
 public interface NumericalStatelessSystem
     extends NumericalDynamicalSystem<StatelessSystem.State>, StatelessSystem<double[], double[]> {
@@ -59,5 +61,21 @@ public interface NumericalStatelessSystem
   @SuppressWarnings("unused")
   static NumericalStatelessSystem zeros(int nOfInputs, int nOfOutputs) {
     return from(nOfInputs, nOfOutputs, (t, in) -> new double[nOfOutputs]);
+  }
+
+  default NumericalStatelessSystem andThen(NumericalStatelessSystem other) {
+    if (other.nOfInputs() != nOfOutputs()) {
+      throw new IllegalArgumentException(
+          "Incompatible input/output size: input=%d, output=%d".formatted(other.nOfInputs(), nOfOutputs()));
+    }
+    NumericalStatelessSystem thisSystem = this;
+    return NumericalStatelessSystem.from(
+        thisSystem.nOfInputs(), other.nOfOutputs(), (t, in) -> other.step(t, thisSystem.step(t, in)));
+  }
+
+  default NumericalStatelessSystem andThen(DoubleUnaryOperator f) {
+    return NumericalStatelessSystem.from(nOfInputs(), nOfOutputs(), (t, in) -> Arrays.stream(step(t, in))
+        .map(f)
+        .toArray());
   }
 }

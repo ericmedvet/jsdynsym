@@ -37,14 +37,26 @@ package io.github.ericmedvet.jsdynsym.buildable.builders;
 
 import io.github.ericmedvet.jnb.core.Discoverable;
 import io.github.ericmedvet.jnb.core.Param;
+import io.github.ericmedvet.jnb.datastructure.FormattedNamedFunction;
 import io.github.ericmedvet.jnb.datastructure.NamedFunction;
 import io.github.ericmedvet.jsdynsym.control.Simulation;
+import io.github.ericmedvet.jsdynsym.core.numerical.ann.MultiLayerPerceptron;
 import java.util.SortedMap;
 import java.util.function.Function;
 
 @Discoverable(prefixTemplate = "dynamicalSystem|dynSys|ds.function|f")
 public class Functions {
   private Functions() {}
+
+  @SuppressWarnings("unused")
+  public static <X> FormattedNamedFunction<X, Double> doubleOp(
+      @Param(value = "of", dNPM = "f.identity()") Function<X, Double> beforeF,
+      @Param(value = "activationF", dS = "identity") MultiLayerPerceptron.ActivationFunction activationF) {
+
+    Function<Double, Double> f = activationF::applyAsDouble;
+    return FormattedNamedFunction.from(f, "%.1f", activationF.name().toLowerCase())
+        .compose(beforeF);
+  }
 
   @SuppressWarnings("unused")
   public static <X, S> NamedFunction<X, SortedMap<Double, S>> simOutcome(

@@ -45,7 +45,6 @@ import io.github.ericmedvet.jsdynsym.core.DynamicalSystem;
 import io.github.ericmedvet.jsdynsym.core.numerical.ann.MultiLayerPerceptron;
 import java.io.IOException;
 import java.util.Random;
-import java.util.stream.IntStream;
 
 public class Main {
   public static void main(String[] args) throws IOException {
@@ -54,13 +53,7 @@ public class Main {
     @SuppressWarnings("unchecked")
     MultiLayerPerceptron mlp = ((NumericalDynamicalSystems.Builder<MultiLayerPerceptron, ?>)
             nb.build("ds.num.mlp()"))
-        .apply(
-            IntStream.range(0, environment.nOfOutputs())
-                .mapToObj("x%02d"::formatted)
-                .toList(),
-            IntStream.range(0, environment.nOfInputs())
-                .mapToObj("y%02d"::formatted)
-                .toList());
+        .apply(environment.nOfOutputs(), environment.nOfInputs());
     mlp.randomize(new Random(), DoubleRange.SYMMETRIC_UNIT);
     SingleAgentTask<DynamicalSystem<double[], double[], ?>, double[], double[], NavigationEnvironment.State> task =
         SingleAgentTask.fromEnvironment(environment, new double[2], new DoubleRange(0, 60), 0.1);
