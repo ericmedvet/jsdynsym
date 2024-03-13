@@ -30,18 +30,8 @@
   <dependencies>
     <dependency>
       <groupId>io.github.ericmedvet</groupId>
-      <artifactId>jnb.core</artifactId>
-      <version>${jnb.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>io.github.ericmedvet</groupId>
       <artifactId>jnb.buildable</artifactId>
       <version>${jnb.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>io.github.ericmedvet</groupId>
-      <artifactId>jsdynsym.core</artifactId>
-      <version>${revision}</version>
     </dependency>
     <dependency>
       <groupId>io.github.ericmedvet</groupId>
