@@ -20,6 +20,7 @@
 
 package io.github.ericmedvet.jsdynsym.core.numerical;
 
+import io.github.ericmedvet.jnb.datastructure.NamedFunction;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.DoubleUnaryOperator;
@@ -46,6 +47,11 @@ public interface MultivariateRealFunction extends NumericalTimeInvariantStateles
       public int nOfOutputs() {
         return nOfOutputs;
       }
+
+      @Override
+      public String toString() {
+        return f.toString();
+      }
     };
   }
 
@@ -68,11 +74,15 @@ public interface MultivariateRealFunction extends NumericalTimeInvariantStateles
     }
     MultivariateRealFunction thisMrf = this;
     return MultivariateRealFunction.from(
-        in -> other.compute(thisMrf.compute(in)), thisMrf.nOfInputs(), other.nOfOutputs());
+        NamedFunction.from(in -> other.compute(thisMrf.compute(in)), this + "[then:%s]".formatted(other)),
+        thisMrf.nOfInputs(),
+        other.nOfOutputs());
   }
 
   default MultivariateRealFunction andThen(DoubleUnaryOperator f) {
     return MultivariateRealFunction.from(
-        in -> Arrays.stream(compute(in)).map(f).toArray(), nOfInputs(), nOfOutputs());
+        NamedFunction.from(in -> Arrays.stream(compute(in)).map(f).toArray(), "[all:%s]".formatted(f)),
+        nOfInputs(),
+        nOfOutputs());
   }
 }

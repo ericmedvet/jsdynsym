@@ -25,6 +25,18 @@ import java.util.function.ToDoubleFunction;
 
 public interface UnivariateRealFunction extends MultivariateRealFunction, ToDoubleFunction<double[]> {
 
+  record NamedToDoubleFunction<T>(ToDoubleFunction<T> f, String name) implements ToDoubleFunction<T> {
+    @Override
+    public String toString() {
+      return name;
+    }
+
+    @Override
+    public double applyAsDouble(T in) {
+      return f.applyAsDouble(in);
+    }
+  }
+
   static UnivariateRealFunction from(ToDoubleFunction<double[]> f, int nOfInputs) {
     return new UnivariateRealFunction() {
       @Override
@@ -36,11 +48,19 @@ public interface UnivariateRealFunction extends MultivariateRealFunction, ToDoub
       public int nOfInputs() {
         return nOfInputs;
       }
+
+      @Override
+      public String toString() {
+        return f.toString();
+      }
     };
   }
 
   static UnivariateRealFunction from(MultivariateRealFunction multivariateRealFunction) {
-    return from(xs -> multivariateRealFunction.compute(xs)[0], multivariateRealFunction.nOfInputs());
+    return from(
+        new NamedToDoubleFunction<>(
+            (double[] xs) -> multivariateRealFunction.compute(xs)[0], multivariateRealFunction.toString()),
+        multivariateRealFunction.nOfInputs());
   }
 
   @Override
@@ -54,11 +74,18 @@ public interface UnivariateRealFunction extends MultivariateRealFunction, ToDoub
   }
 
   default UnivariateRealFunction scaledOutput(double slope, double intercept) {
-    return UnivariateRealFunction.from(xs -> slope * applyAsDouble(xs) + intercept, nOfInputs());
+    return from(
+        new NamedToDoubleFunction<>(
+            (double[] xs) -> slope * applyAsDouble(xs) + intercept,
+            this + "[scaled:m=%f;q=%f]".formatted(slope, intercept)),
+        nOfInputs());
   }
 
   @Override
   default UnivariateRealFunction andThen(DoubleUnaryOperator f) {
-    return UnivariateRealFunction.from(in -> f.applyAsDouble(applyAsDouble(in)), nOfInputs());
+    return from(
+        new NamedToDoubleFunction<>(
+            (double[] xs) -> f.applyAsDouble(applyAsDouble(xs)), this + "[then:%s]".formatted(f)),
+        nOfInputs());
   }
 }
