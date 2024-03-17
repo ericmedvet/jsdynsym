@@ -19,14 +19,11 @@
  */
 package io.github.ericmedvet.jsdynsym.control.navigation;
 
+import io.github.ericmedvet.jsdynsym.control.SimulationOutcomeDrawer;
 import io.github.ericmedvet.jsdynsym.control.SingleAgentTask;
 import io.github.ericmedvet.jsdynsym.control.geometry.Point;
-import io.github.ericmedvet.jviz.core.drawer.TimedSequenceDrawer;
 import io.github.ericmedvet.jviz.core.util.GraphicsUtils;
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.Shape;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
@@ -35,7 +32,7 @@ import java.util.List;
 import java.util.SortedMap;
 
 public class NavigationDrawer
-    implements TimedSequenceDrawer<SingleAgentTask.Step<double[], double[], NavigationEnvironment.State>> {
+    implements SimulationOutcomeDrawer<SingleAgentTask.Step<double[], double[], NavigationEnvironment.State>> {
 
   private final Configuration configuration;
 

@@ -22,6 +22,7 @@ module io.github.ericmedvet.jsdynsym.buildable {
   requires io.github.ericmedvet.jsdynsym.control;
   requires io.github.ericmedvet.jnb.core;
   requires io.github.ericmedvet.jnb.datastructure;
+  requires io.github.ericmedvet.jviz.core;
 
   exports io.github.ericmedvet.jsdynsym.buildable.builders;
 
