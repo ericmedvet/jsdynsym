@@ -27,8 +27,11 @@ import java.util.stream.Stream;
 public record Arena(double xExtent, double yExtent, List<Segment> obstacles) {
   public enum Prepared {
     EMPTY(new Arena(1, 1, List.of())),
-    SMALL_BARRIER(new Arena(1, 1, List.of(new Segment(new Point(0.4, 0.3), new Point(0.6, 0.3))))),
-    LARGE_BARRIER(new Arena(1, 1, List.of(new Segment(new Point(0.2, 0.3), new Point(0.8, 0.3))))),
+    XS_BARRIER(new Arena(1, 1, List.of(new Segment(new Point(0.40, 0.3), new Point(0.60, 0.3))))),
+    S_BARRIER(new Arena(1, 1, List.of(new Segment(new Point(0.35, 0.3), new Point(0.65, 0.3))))),
+    M_BARRIER(new Arena(1, 1, List.of(new Segment(new Point(0.30, 0.3), new Point(0.70, 0.3))))),
+    L_BARRIER(new Arena(1, 1, List.of(new Segment(new Point(0.25, 0.3), new Point(0.75, 0.3))))),
+    XL_BARRIER(new Arena(1, 1, List.of(new Segment(new Point(0.20, 0.3), new Point(0.80, 0.3))))),
     U_BARRIER(new Arena(
         1,
         1,
@@ -48,6 +51,24 @@ public record Arena(double xExtent, double yExtent, List<Segment> obstacles) {
         List.of(
             new Segment(new Point(0, 0.35), new Point(0.7, 0.35)),
             new Segment(new Point(1, 0.65), new Point(0.3, 0.65))))),
+    EASY_FLAT_MAZE(new Arena(
+        1,
+        1,
+        List.of(
+            new Segment(new Point(0, 0.33), new Point(0.5, 0.33)),
+            new Segment(new Point(1, 0.66), new Point(0.5, 0.66))))),
+    MEDIUM_FLAT_MAZE(new Arena(
+        1,
+        1,
+        List.of(
+            new Segment(new Point(0, 0.33), new Point(0.6, 0.33)),
+            new Segment(new Point(1, 0.66), new Point(0.4, 0.66))))),
+    HARD_FLAT_MAZE(new Arena(
+        1,
+        1,
+        List.of(
+            new Segment(new Point(0, 0.33), new Point(0.7, 0.33)),
+            new Segment(new Point(1, 0.66), new Point(0.3, 0.66))))),
     DECEPTIVE_MAZE(new Arena(
         1,
         1,

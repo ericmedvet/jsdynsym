@@ -44,8 +44,6 @@ import io.github.ericmedvet.jsdynsym.control.navigation.NavigationEnvironment;
 import io.github.ericmedvet.jsdynsym.core.DynamicalSystem;
 import io.github.ericmedvet.jsdynsym.core.numerical.ann.MultiLayerPerceptron;
 import io.github.ericmedvet.jviz.core.drawer.ImageBuilder;
-import io.github.ericmedvet.jviz.core.drawer.VideoBuilder;
-import io.github.ericmedvet.jviz.core.util.VideoUtils;
 import java.io.File;
 import java.io.IOException;
 import java.util.Random;
@@ -53,7 +51,7 @@ import java.util.Random;
 public class Main {
   public static void main(String[] args) throws IOException {
     NamedBuilder<?> nb = NamedBuilder.fromDiscovery();
-    NavigationEnvironment environment = (NavigationEnvironment) nb.build("ds.e.navigation(arena = u_barrier)");
+    NavigationEnvironment environment = (NavigationEnvironment) nb.build("ds.e.navigation(arena = HARD_FLAT_MAZE)");
     @SuppressWarnings("unchecked")
     MultiLayerPerceptron mlp = ((NumericalDynamicalSystems.Builder<MultiLayerPerceptron, ?>)
             nb.build("ds.num.mlp()"))
@@ -64,10 +62,10 @@ public class Main {
     Simulation.Outcome<SingleAgentTask.Step<double[], double[], NavigationEnvironment.State>> outcome =
         task.simulate(mlp);
     NavigationDrawer d = new NavigationDrawer(NavigationDrawer.Configuration.DEFAULT);
-    d.show(new ImageBuilder.ImageInfo(100, 100), outcome);
+    // d.show(new ImageBuilder.ImageInfo(500, 500), outcome);
     d.save(
-        new VideoBuilder.VideoInfo(100, 100, VideoUtils.EncoderFacility.FFMPEG_SMALL),
-        new File("../nav_u.mp4"),
+        new ImageBuilder.ImageInfo(500, 500),
+        new File("/home/melsalib/Downloads/HARD_FLAT_MAZE.png"),
         outcome);
   }
 }
