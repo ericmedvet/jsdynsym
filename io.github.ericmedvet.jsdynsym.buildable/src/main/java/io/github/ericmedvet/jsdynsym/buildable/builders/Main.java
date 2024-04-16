@@ -51,7 +51,7 @@ import java.util.Random;
 public class Main {
   public static void main(String[] args) throws IOException {
     NamedBuilder<?> nb = NamedBuilder.fromDiscovery();
-    NavigationEnvironment environment = (NavigationEnvironment) nb.build("ds.e.navigation(arena = HARD_FLAT_MAZE)");
+    NavigationEnvironment environment = (NavigationEnvironment) nb.build("ds.e.navigation(arena = E_MAZE)");
     @SuppressWarnings("unchecked")
     MultiLayerPerceptron mlp = ((NumericalDynamicalSystems.Builder<MultiLayerPerceptron, ?>)
             nb.build("ds.num.mlp()"))
@@ -62,10 +62,10 @@ public class Main {
     Simulation.Outcome<SingleAgentTask.Step<double[], double[], NavigationEnvironment.State>> outcome =
         task.simulate(mlp);
     NavigationDrawer d = new NavigationDrawer(NavigationDrawer.Configuration.DEFAULT);
-    // d.show(new ImageBuilder.ImageInfo(500, 500), outcome);
+//    d.show(new ImageBuilder.ImageInfo(500, 500), outcome);
     d.save(
         new ImageBuilder.ImageInfo(500, 500),
-        new File("/home/melsalib/Downloads/HARD_FLAT_MAZE.png"),
+        new File("/home/melsalib/Downloads/E_MAZE.png"),
         outcome);
   }
 }

@@ -27,11 +27,11 @@ import java.util.stream.Stream;
 public record Arena(double xExtent, double yExtent, List<Segment> obstacles) {
   public enum Prepared {
     EMPTY(new Arena(1, 1, List.of())),
-    XS_BARRIER(new Arena(1, 1, List.of(new Segment(new Point(0.40, 0.3), new Point(0.60, 0.3))))),
-    S_BARRIER(new Arena(1, 1, List.of(new Segment(new Point(0.35, 0.3), new Point(0.65, 0.3))))),
-    M_BARRIER(new Arena(1, 1, List.of(new Segment(new Point(0.30, 0.3), new Point(0.70, 0.3))))),
-    L_BARRIER(new Arena(1, 1, List.of(new Segment(new Point(0.25, 0.3), new Point(0.75, 0.3))))),
-    XL_BARRIER(new Arena(1, 1, List.of(new Segment(new Point(0.20, 0.3), new Point(0.80, 0.3))))),
+    A_BARRIER(new Arena(1, 1, List.of(new Segment(new Point(0.40, 0.3), new Point(0.60, 0.3))))),
+    B_BARRIER(new Arena(1, 1, List.of(new Segment(new Point(0.35, 0.3), new Point(0.65, 0.3))))),
+    C_BARRIER(new Arena(1, 1, List.of(new Segment(new Point(0.30, 0.3), new Point(0.70, 0.3))))),
+    D_BARRIER(new Arena(1, 1, List.of(new Segment(new Point(0.25, 0.3), new Point(0.75, 0.3))))),
+    E_BARRIER(new Arena(1, 1, List.of(new Segment(new Point(0.20, 0.3), new Point(0.80, 0.3))))),
     U_BARRIER(new Arena(
         1,
         1,
@@ -51,24 +51,36 @@ public record Arena(double xExtent, double yExtent, List<Segment> obstacles) {
         List.of(
             new Segment(new Point(0, 0.35), new Point(0.7, 0.35)),
             new Segment(new Point(1, 0.65), new Point(0.3, 0.65))))),
-    EASY_FLAT_MAZE(new Arena(
+    A_MAZE(new Arena(
         1,
         1,
         List.of(
-            new Segment(new Point(0, 0.33), new Point(0.5, 0.33)),
-            new Segment(new Point(1, 0.66), new Point(0.5, 0.66))))),
-    MEDIUM_FLAT_MAZE(new Arena(
+            new Segment(new Point(0, 0.33), new Point(0.45, 0.33)),
+            new Segment(new Point(1, 0.66), new Point(0.55, 0.66))))),
+    B_MAZE(new Arena(
         1,
         1,
         List.of(
-            new Segment(new Point(0, 0.33), new Point(0.6, 0.33)),
-            new Segment(new Point(1, 0.66), new Point(0.4, 0.66))))),
-    HARD_FLAT_MAZE(new Arena(
+            new Segment(new Point(0, 0.33), new Point(0.52, 0.33)),
+            new Segment(new Point(1, 0.66), new Point(0.48, 0.66))))),
+    C_MAZE(new Arena(
         1,
         1,
         List.of(
-            new Segment(new Point(0, 0.33), new Point(0.7, 0.33)),
-            new Segment(new Point(1, 0.66), new Point(0.3, 0.66))))),
+            new Segment(new Point(0, 0.33), new Point(0.59, 0.33)),
+            new Segment(new Point(1, 0.66), new Point(0.41, 0.66))))),
+    D_MAZE(new Arena(
+        1,
+        1,
+        List.of(
+            new Segment(new Point(0, 0.33), new Point(0.66, 0.33)),
+            new Segment(new Point(1, 0.66), new Point(0.34, 0.66))))),
+    E_MAZE(new Arena(
+        1,
+        1,
+        List.of(
+            new Segment(new Point(0, 0.33), new Point(0.73, 0.33)),
+            new Segment(new Point(1, 0.66), new Point(0.27, 0.66))))),
     DECEPTIVE_MAZE(new Arena(
         1,
         1,

@@ -30,32 +30,55 @@ public class LandscapeCharacterizer {
   // Start parameters settings
   private final static String CSV_PATH = "/home/melsalib/Downloads/navigationFitnessSamples.csv";
   private final static long SEED = 0;
-  private final static int N_POINTS = 10;
-  private final static int N_NEIGHBORS = 10;
-  private final static int N_SAMPLES = 10;
+  private final static int N_POINTS = 20;
+  private final static int N_NEIGHBORS = 20;
+  private final static int N_SAMPLES = 30;
   private final static double SEGMENT_LENGTH = 1;
   private final static Range GENOTYPE_BOUNDS = new Range(-3, 3);
   private final static List<Pair> PROBLEMS = List.of(
-      // Per grafico innerLayerRatio (1, 2, 3, 4, 5) con nOfSensors=7 e Barrier=M_BARRIER
-      new Pair("ds.e.navigation(arena = M_BARRIER; nOfSensors = 7)", "ds.num.mlp(innerLayerRatio = 1)"),
-      new Pair("ds.e.navigation(arena = M_BARRIER; nOfSensors = 7)", "ds.num.mlp(innerLayerRatio = 2)"),
-      new Pair("ds.e.navigation(arena = M_BARRIER; nOfSensors = 7)", "ds.num.mlp(innerLayerRatio = 3)"),
-      new Pair("ds.e.navigation(arena = M_BARRIER; nOfSensors = 7)", "ds.num.mlp(innerLayerRatio = 4)"),
-      new Pair("ds.e.navigation(arena = M_BARRIER; nOfSensors = 7)", "ds.num.mlp(innerLayerRatio = 5)"),
+      // BARRIER
+      // Per grafico innerLayerRatio (1, 2, 3, 4, 5) con nOfSensors=7 e Barrier=C_BARRIER
+      new Pair("ds.e.navigation(arena = C_BARRIER; nOfSensors = 7; initialRobotXRange = m.range(min=0.5;max=0.5); initialRobotYRange = m.range(min=0.85;max=0.85))", "ds.num.mlp(innerLayerRatio = 1)"),
+      new Pair("ds.e.navigation(arena = C_BARRIER; nOfSensors = 7; initialRobotXRange = m.range(min=0.5;max=0.5); initialRobotYRange = m.range(min=0.85;max=0.85))", "ds.num.mlp(innerLayerRatio = 2)"),
+      new Pair("ds.e.navigation(arena = C_BARRIER; nOfSensors = 7; initialRobotXRange = m.range(min=0.5;max=0.5); initialRobotYRange = m.range(min=0.85;max=0.85))", "ds.num.mlp(innerLayerRatio = 3)"),
+      new Pair("ds.e.navigation(arena = C_BARRIER; nOfSensors = 7; initialRobotXRange = m.range(min=0.5;max=0.5); initialRobotYRange = m.range(min=0.85;max=0.85))", "ds.num.mlp(innerLayerRatio = 4)"),
+      new Pair("ds.e.navigation(arena = C_BARRIER; nOfSensors = 7; initialRobotXRange = m.range(min=0.5;max=0.5); initialRobotYRange = m.range(min=0.85;max=0.85))", "ds.num.mlp(innerLayerRatio = 5)"),
 
-      // Per grafico nOfSensors (3, 5, 7, 9, 11) con innerLayerRatio=3 e Barrier=M_BARRIER
-      new Pair("ds.e.navigation(arena = M_BARRIER; nOfSensors = 3)", "ds.num.mlp(innerLayerRatio = 3)"),
-      new Pair("ds.e.navigation(arena = M_BARRIER; nOfSensors = 5)", "ds.num.mlp(innerLayerRatio = 3)"),
-      //new Pair("ds.e.navigation(arena = M_BARRIER; nOfSensors = 7)", "ds.num.mlp(innerLayerRatio = 3)"),
-      new Pair("ds.e.navigation(arena = M_BARRIER; nOfSensors = 9)", "ds.num.mlp(innerLayerRatio = 3)"),
-      new Pair("ds.e.navigation(arena = M_BARRIER; nOfSensors = 11)", "ds.num.mlp(innerLayerRatio = 3)"),
+      // Per grafico nOfSensors (3, 5, 7, 9, 11) con innerLayerRatio=3 e Barrier=C_BARRIER
+      new Pair("ds.e.navigation(arena = C_BARRIER; nOfSensors = 3; initialRobotXRange = m.range(min=0.5;max=0.5); initialRobotYRange = m.range(min=0.85;max=0.85))", "ds.num.mlp(innerLayerRatio = 3)"),
+      new Pair("ds.e.navigation(arena = C_BARRIER; nOfSensors = 5; initialRobotXRange = m.range(min=0.5;max=0.5); initialRobotYRange = m.range(min=0.85;max=0.85))", "ds.num.mlp(innerLayerRatio = 3)"),
+      //new Pair("ds.e.navigation(arena = C_BARRIER; nOfSensors = 7; initialRobotXRange = m.range(min=0.5;max=0.5); initialRobotYRange = m.range(min=0.85;max=0.85))", "ds.num.mlp(innerLayerRatio = 3)"),
+      new Pair("ds.e.navigation(arena = C_BARRIER; nOfSensors = 9; initialRobotXRange = m.range(min=0.5;max=0.5); initialRobotYRange = m.range(min=0.85;max=0.85))", "ds.num.mlp(innerLayerRatio = 3)"),
+      new Pair("ds.e.navigation(arena = C_BARRIER; nOfSensors = 11; initialRobotXRange = m.range(min=0.5;max=0.5); initialRobotYRange = m.range(min=0.85;max=0.85))", "ds.num.mlp(innerLayerRatio = 3)"),
 
-      // Per grafico barrier (XS_BARRIER, S_BARRIER, M_BARRIER, L_BARRIER, XL_BARRIER) con innerLayerRatio=3 e nOfSensors=7
-      new Pair("ds.e.navigation(arena = XS_BARRIER; nOfSensors = 7)", "ds.num.mlp(innerLayerRatio = 3)"),
-      new Pair("ds.e.navigation(arena = S_BARRIER; nOfSensors = 7)", "ds.num.mlp(innerLayerRatio = 3)"),
-      //new Pair("ds.e.navigation(arena = M_BARRIER; nOfSensors = 7)", "ds.num.mlp(innerLayerRatio = 3)"),
-      new Pair("ds.e.navigation(arena = L_BARRIER; nOfSensors = 7)", "ds.num.mlp(innerLayerRatio = 3)"),
-      new Pair("ds.e.navigation(arena = XL_BARRIER; nOfSensors = 7)", "ds.num.mlp(innerLayerRatio = 3)")
+      // Per grafico barrier (A_BARRIER, B_BARRIER, C_BARRIER, D_BARRIER, E_BARRIER) con innerLayerRatio=3 e nOfSensors=7
+      new Pair("ds.e.navigation(arena = A_BARRIER; nOfSensors = 7; initialRobotXRange = m.range(min=0.5;max=0.5); initialRobotYRange = m.range(min=0.85;max=0.85))", "ds.num.mlp(innerLayerRatio = 3)"),
+      new Pair("ds.e.navigation(arena = B_BARRIER; nOfSensors = 7; initialRobotXRange = m.range(min=0.5;max=0.5); initialRobotYRange = m.range(min=0.85;max=0.85))", "ds.num.mlp(innerLayerRatio = 3)"),
+      //new Pair("ds.e.navigation(arena = C_BARRIER; nOfSensors = 7; initialRobotXRange = m.range(min=0.5;max=0.5); initialRobotYRange = m.range(min=0.85;max=0.85))", "ds.num.mlp(innerLayerRatio = 3)"),
+      new Pair("ds.e.navigation(arena = D_BARRIER; nOfSensors = 7; initialRobotXRange = m.range(min=0.5;max=0.5); initialRobotYRange = m.range(min=0.85;max=0.85))", "ds.num.mlp(innerLayerRatio = 3)"),
+      new Pair("ds.e.navigation(arena = E_BARRIER; nOfSensors = 7; initialRobotXRange = m.range(min=0.5;max=0.5); initialRobotYRange = m.range(min=0.85;max=0.85))", "ds.num.mlp(innerLayerRatio = 3)"),
+
+      // MAZE
+      // Per grafico innerLayerRatio (1, 2, 3, 4, 5) con nOfSensors=7 e Barrier=C_MAZE
+      new Pair("ds.e.navigation(arena = C_MAZE; nOfSensors = 7; initialRobotXRange = m.range(min=0.5;max=0.5); initialRobotYRange = m.range(min=0.85;max=0.85))", "ds.num.mlp(innerLayerRatio = 1)"),
+      new Pair("ds.e.navigation(arena = C_MAZE; nOfSensors = 7; initialRobotXRange = m.range(min=0.5;max=0.5); initialRobotYRange = m.range(min=0.85;max=0.85))", "ds.num.mlp(innerLayerRatio = 2)"),
+      new Pair("ds.e.navigation(arena = C_MAZE; nOfSensors = 7; initialRobotXRange = m.range(min=0.5;max=0.5); initialRobotYRange = m.range(min=0.85;max=0.85))", "ds.num.mlp(innerLayerRatio = 3)"),
+      new Pair("ds.e.navigation(arena = C_MAZE; nOfSensors = 7; initialRobotXRange = m.range(min=0.5;max=0.5); initialRobotYRange = m.range(min=0.85;max=0.85))", "ds.num.mlp(innerLayerRatio = 4)"),
+      new Pair("ds.e.navigation(arena = C_MAZE; nOfSensors = 7; initialRobotXRange = m.range(min=0.5;max=0.5); initialRobotYRange = m.range(min=0.85;max=0.85))", "ds.num.mlp(innerLayerRatio = 5)"),
+
+      // Per grafico nOfSensors (3, 5, 7, 9, 11) con innerLayerRatio=3 e Barrier=C_MAZE
+      new Pair("ds.e.navigation(arena = C_MAZE; nOfSensors = 3; initialRobotXRange = m.range(min=0.5;max=0.5); initialRobotYRange = m.range(min=0.85;max=0.85))", "ds.num.mlp(innerLayerRatio = 3)"),
+      new Pair("ds.e.navigation(arena = C_MAZE; nOfSensors = 5; initialRobotXRange = m.range(min=0.5;max=0.5); initialRobotYRange = m.range(min=0.85;max=0.85))", "ds.num.mlp(innerLayerRatio = 3)"),
+      //new Pair("ds.e.navigation(arena = C_MAZE; nOfSensors = 7; initialRobotXRange = m.range(min=0.5;max=0.5); initialRobotYRange = m.range(min=0.85;max=0.85))", "ds.num.mlp(innerLayerRatio = 3)"),
+      new Pair("ds.e.navigation(arena = C_MAZE; nOfSensors = 9; initialRobotXRange = m.range(min=0.5;max=0.5); initialRobotYRange = m.range(min=0.85;max=0.85))", "ds.num.mlp(innerLayerRatio = 3)"),
+      new Pair("ds.e.navigation(arena = C_MAZE; nOfSensors = 11; initialRobotXRange = m.range(min=0.5;max=0.5); initialRobotYRange = m.range(min=0.85;max=0.85))", "ds.num.mlp(innerLayerRatio = 3)"),
+
+      // Per grafico barrier (A_MAZE, B_MAZE, C_MAZE, D_MAZE, E_MAZE) con innerLayerRatio=3 e nOfSensors=7
+      new Pair("ds.e.navigation(arena = A_MAZE; nOfSensors = 7; initialRobotXRange = m.range(min=0.5;max=0.5); initialRobotYRange = m.range(min=0.85;max=0.85))", "ds.num.mlp(innerLayerRatio = 3)"),
+      new Pair("ds.e.navigation(arena = B_MAZE; nOfSensors = 7; initialRobotXRange = m.range(min=0.5;max=0.5); initialRobotYRange = m.range(min=0.85;max=0.85))", "ds.num.mlp(innerLayerRatio = 3)"),
+      //new Pair("ds.e.navigation(arena = C_MAZE; nOfSensors = 7; initialRobotXRange = m.range(min=0.5;max=0.5); initialRobotYRange = m.range(min=0.85;max=0.85))", "ds.num.mlp(innerLayerRatio = 3)"),
+      new Pair("ds.e.navigation(arena = D_MAZE; nOfSensors = 7; initialRobotXRange = m.range(min=0.5;max=0.5); initialRobotYRange = m.range(min=0.85;max=0.85))", "ds.num.mlp(innerLayerRatio = 3)"),
+      new Pair("ds.e.navigation(arena = E_MAZE; nOfSensors = 7; initialRobotXRange = m.range(min=0.5;max=0.5); initialRobotYRange = m.range(min=0.85;max=0.85))", "ds.num.mlp(innerLayerRatio = 3)")
   );
   private final static List<String> FITNESS_FUNCTIONS = List.of(
       "ds.e.n.avgD()",
@@ -72,7 +95,7 @@ public class LandscapeCharacterizer {
     MultiLayerPerceptron mlp = ((NumericalDynamicalSystems.Builder<MultiLayerPerceptron, ?>) NamedBuilder.fromDiscovery().build(problem.builder))
         .apply(environment.nOfOutputs(), environment.nOfInputs());
     SingleAgentTask<DynamicalSystem<double[], double[], ?>, double[], double[], NavigationEnvironment.State> task =
-        SingleAgentTask.fromEnvironment(environment, new double[2], new DoubleRange(0, 60), 1/60d);
+        SingleAgentTask.fromEnvironment(environment, new double[2], new DoubleRange(0, 60), 1 / 60d);
     mlp.setParams(mlpWeights);
     Simulation.Outcome<SingleAgentTask.Step<double[], double[], NavigationEnvironment.State>> outcome =
         task.simulate(mlp);
@@ -85,7 +108,7 @@ public class LandscapeCharacterizer {
   public static void main(String[] args) throws FileNotFoundException {
 
     PrintStream ps = new PrintStream(CSV_PATH);
-    String header = "ENVIRONMENT;BUILDER;POINT_INDEX;NEIGHBOR_INDEX;SAMPLE_INDEX;SEGMENT_LENGTH;" + String.join(";", FITNESS_FUNCTIONS);
+    String header = "ENVIRONMENT,BUILDER,POINT_INDEX,NEIGHBOR_INDEX,SAMPLE_INDEX,SEGMENT_LENGTH," + String.join(",", FITNESS_FUNCTIONS);
     ps.println(header);
     ExecutorService executorService =
         Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() - 1);
@@ -97,33 +120,33 @@ public class LandscapeCharacterizer {
           .apply(environment.nOfOutputs(), environment.nOfInputs());
       int genotypeLength = mlp.getParams().length;
       for (int point = 0; point < N_POINTS; point++) {
-        double[] centralGenotype = IntStream.range(0, mlp.getParams().length)
+        double[] centralGenotype = IntStream.range(0, genotypeLength)
             .mapToDouble(i -> GENOTYPE_BOUNDS.min() + random.nextDouble() * (GENOTYPE_BOUNDS.max() - GENOTYPE_BOUNDS.min()))
             .toArray();
 
         // Calculate and store the centralGenotype fitness for the current point once and for all here
-        double[] centralGenotypeFitnessValues = getFitnessValues(problem, centralGenotype);
         int finalPoint = point;
         executorService.submit(() -> {
-          double[] fitnessValues = getFitnessValues(problem, centralGenotypeFitnessValues);
-          for (int neighbor = 0; neighbor < N_NEIGHBORS; neighbor++) {
+          double[] fitnessValues = getFitnessValues(problem, centralGenotype);
+          // For each neighbor n, save a line for the centralGenotype fitness values
+          for (int n = 0; n < N_NEIGHBORS; n++) {
             StringBuilder line = new StringBuilder();
-            line.append("%s;%s;%d;%d;%d;%.3f;"
+            line.append("%s,%s,%d,%d,%d,%.2e,"
                 .formatted(
                     problem.environment,
                     problem.builder,
                     finalPoint,
-                    neighbor,
+                    n,
                     0,
                     SEGMENT_LENGTH
                 )
             );
             line.append(Arrays.stream(fitnessValues)
-                .mapToObj(value -> String.format("%.5f", value))
-                .collect(Collectors.joining(";")));
+                .mapToObj(value -> String.format("%.5e", value))
+                .collect(Collectors.joining(",")));
             ps.println(line);
-            System.out.println(header.replace(';', '\t'));
-            System.out.println(line.toString().replace(';', '\t'));
+            System.out.println(header.replace(',', '\t'));
+            System.out.println(line.toString().replace(',', '\t'));
           }
         });
 
@@ -147,7 +170,7 @@ public class LandscapeCharacterizer {
             int finalSample = sample;
             executorService.submit(() -> {
               StringBuilder line = new StringBuilder();
-              line.append("%s;%s;%d;%d;%d;%.3f;"
+              line.append("%s,%s,%d,%d,%d,%.2e,"
                   .formatted(
                       problem.environment,
                       problem.builder,
@@ -163,10 +186,10 @@ public class LandscapeCharacterizer {
                   .toArray();
               double[] fitnessValues = getFitnessValues(problem, sampleGenotype);
               line.append(Arrays.stream(fitnessValues)
-                  .mapToObj(value -> String.format("%.5f", value))
-                  .collect(Collectors.joining(";")));
+                  .mapToObj(value -> String.format("%.5e", value))
+                  .collect(Collectors.joining(",")));
               ps.println(line);
-              System.out.println(line.toString().replace(';', '\t'));
+              System.out.println(line.toString().replace(',', '\t'));
             });
           }
 
