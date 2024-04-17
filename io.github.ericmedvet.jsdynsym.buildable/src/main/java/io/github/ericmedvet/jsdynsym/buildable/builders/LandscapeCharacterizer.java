@@ -125,10 +125,9 @@ public class LandscapeCharacterizer {
             .toArray();
 
         // Calculate and store the centralGenotype fitness for the current point once and for all here
-        double[] centralGenotypeFitnessValues = getFitnessValues(problem, centralGenotype);
         int finalPoint = point;
         executorService.submit(() -> {
-          double[] fitnessValues = getFitnessValues(problem, centralGenotypeFitnessValues);
+          double[] centralGenotypefitnessValues = getFitnessValues(problem, centralGenotype);
           for (int neighbor = 0; neighbor < N_NEIGHBORS; neighbor++) {
             StringBuilder line = new StringBuilder();
             line.append("%s,%s,%d,%d,%d,%.3e,"
@@ -141,7 +140,7 @@ public class LandscapeCharacterizer {
                     SEGMENT_LENGTH
                 )
             );
-            line.append(Arrays.stream(fitnessValues)
+            line.append(Arrays.stream(centralGenotypefitnessValues)
                 .mapToObj(value -> String.format("%.5e", value))
                 .collect(Collectors.joining(",")));
             ps.println(line);
