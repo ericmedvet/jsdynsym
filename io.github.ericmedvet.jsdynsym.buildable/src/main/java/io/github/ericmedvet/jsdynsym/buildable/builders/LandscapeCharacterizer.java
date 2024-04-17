@@ -30,9 +30,9 @@ public class LandscapeCharacterizer {
   // Start parameters settings
   private final static String CSV_PATH = "/home/melsalib/Downloads/navigationFitnessSamples.csv";
   private final static long SEED = 0;
-  private final static int N_POINTS = 10;
-  private final static int N_NEIGHBORS = 10;
-  private final static int N_SAMPLES = 10;
+  private final static int N_POINTS = 20;
+  private final static int N_NEIGHBORS = 20;
+  private final static int N_SAMPLES = 30;
   private final static double SEGMENT_LENGTH = 1;
   private final static Range GENOTYPE_BOUNDS = new Range(-3, 3);
   private final static List<Pair> PROBLEMS = List.of(
@@ -108,7 +108,7 @@ public class LandscapeCharacterizer {
   public static void main(String[] args) throws FileNotFoundException {
 
     PrintStream ps = new PrintStream(CSV_PATH);
-    String header = "ENVIRONMENT;BUILDER;POINT_INDEX;NEIGHBOR_INDEX;SAMPLE_INDEX;SEGMENT_LENGTH;" + String.join(";", FITNESS_FUNCTIONS);
+    String header = "ENVIRONMENT,BUILDER,POINT_INDEX,NEIGHBOR_INDEX,SAMPLE_INDEX,SEGMENT_LENGTH," + String.join(",", FITNESS_FUNCTIONS);
     ps.println(header);
     ExecutorService executorService =
         Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() - 1);
@@ -131,7 +131,7 @@ public class LandscapeCharacterizer {
           double[] fitnessValues = getFitnessValues(problem, centralGenotypeFitnessValues);
           for (int neighbor = 0; neighbor < N_NEIGHBORS; neighbor++) {
             StringBuilder line = new StringBuilder();
-            line.append("%s;%s;%d;%d;%d;%.3f;"
+            line.append("%s,%s,%d,%d,%d,%.3e,"
                 .formatted(
                     problem.environment,
                     problem.builder,
@@ -142,11 +142,11 @@ public class LandscapeCharacterizer {
                 )
             );
             line.append(Arrays.stream(fitnessValues)
-                .mapToObj(value -> String.format("%.5f", value))
-                .collect(Collectors.joining(";")));
+                .mapToObj(value -> String.format("%.5e", value))
+                .collect(Collectors.joining(",")));
             ps.println(line);
-            System.out.println(header.replace(';', '\t'));
-            System.out.println(line.toString().replace(';', '\t'));
+            System.out.println(header.replace(',', '\t'));
+            System.out.println(line.toString().replace(',', '\t'));
           }
         });
 
@@ -170,7 +170,7 @@ public class LandscapeCharacterizer {
             int finalSample = sample;
             executorService.submit(() -> {
               StringBuilder line = new StringBuilder();
-              line.append("%s;%s;%d;%d;%d;%.3f;"
+              line.append("%s,%s,%d,%d,%d,%.3e,"
                   .formatted(
                       problem.environment,
                       problem.builder,
@@ -186,10 +186,9 @@ public class LandscapeCharacterizer {
                   .toArray();
               double[] fitnessValues = getFitnessValues(problem, sampleGenotype);
               line.append(Arrays.stream(fitnessValues)
-                  .mapToObj(value -> String.format("%.5f", value))
-                  .collect(Collectors.joining(";")));
+                  .mapToObj(value -> String.format("%.5e", value))
+                  .collect(Collectors.joining(",")));
               ps.println(line);
-              System.out.println(line.toString().replace(';', '\t'));
             });
           }
 
