@@ -28,12 +28,12 @@ public class LandscapeCharacterizer {
   }
 
   // Start parameters settings
-  private final static String CSV_PATH = "/home/melsalib/Downloads/navigationFitnessSamples.csv";
+  private final static String CSV_PATH = "//home/michelelsaliby/paper_002/50x50x60_2_navigationFitnessSamples.csv";
   private final static long SEED = 0;
-  private final static int N_POINTS = 20;
-  private final static int N_NEIGHBORS = 20;
-  private final static int N_SAMPLES = 30;
-  private final static double SEGMENT_LENGTH = 1;
+  private final static int N_POINTS = 50;
+  private final static int N_NEIGHBORS = 50;
+  private final static int N_SAMPLES = 60;
+  private final static double SEGMENT_LENGTH = 2;
   private final static Range GENOTYPE_BOUNDS = new Range(-3, 3);
   private final static List<Pair> PROBLEMS = List.of(
       // BARRIER
@@ -95,7 +95,7 @@ public class LandscapeCharacterizer {
     MultiLayerPerceptron mlp = ((NumericalDynamicalSystems.Builder<MultiLayerPerceptron, ?>) NamedBuilder.fromDiscovery().build(problem.builder))
         .apply(environment.nOfOutputs(), environment.nOfInputs());
     SingleAgentTask<DynamicalSystem<double[], double[], ?>, double[], double[], NavigationEnvironment.State> task =
-        SingleAgentTask.fromEnvironment(environment, new double[2], new DoubleRange(0, 60), 1/60d);
+        SingleAgentTask.fromEnvironment(environment, new double[2], new DoubleRange(0, 60), 1 / 60d);
     mlp.setParams(mlpWeights);
     Simulation.Outcome<SingleAgentTask.Step<double[], double[], NavigationEnvironment.State>> outcome =
         task.simulate(mlp);
@@ -120,7 +120,7 @@ public class LandscapeCharacterizer {
           .apply(environment.nOfOutputs(), environment.nOfInputs());
       int genotypeLength = mlp.getParams().length;
       for (int point = 0; point < N_POINTS; point++) {
-        double[] centralGenotype = IntStream.range(0, mlp.getParams().length)
+        double[] centralGenotype = IntStream.range(0, genotypeLength)
             .mapToDouble(i -> GENOTYPE_BOUNDS.min() + random.nextDouble() * (GENOTYPE_BOUNDS.max() - GENOTYPE_BOUNDS.min()))
             .toArray();
 
@@ -128,14 +128,14 @@ public class LandscapeCharacterizer {
         int finalPoint = point;
         executorService.submit(() -> {
           double[] centralGenotypefitnessValues = getFitnessValues(problem, centralGenotype);
-          for (int neighbor = 0; neighbor < N_NEIGHBORS; neighbor++) {
+          for (int n = 0; n < N_NEIGHBORS; n++) {
             StringBuilder line = new StringBuilder();
-            line.append("%s,%s,%d,%d,%d,%.3e,"
+            line.append("%s,%s,%d,%d,%d,%.2e,"
                 .formatted(
                     problem.environment,
                     problem.builder,
                     finalPoint,
-                    neighbor,
+                    n,
                     0,
                     SEGMENT_LENGTH
                 )
@@ -169,7 +169,7 @@ public class LandscapeCharacterizer {
             int finalSample = sample;
             executorService.submit(() -> {
               StringBuilder line = new StringBuilder();
-              line.append("%s,%s,%d,%d,%d,%.3e,"
+              line.append("%s,%s,%d,%d,%d,%.2e,"
                   .formatted(
                       problem.environment,
                       problem.builder,
