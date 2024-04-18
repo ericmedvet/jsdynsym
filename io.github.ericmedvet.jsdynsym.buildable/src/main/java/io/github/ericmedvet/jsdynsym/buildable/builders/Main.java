@@ -62,10 +62,7 @@ public class Main {
     Simulation.Outcome<SingleAgentTask.Step<double[], double[], NavigationEnvironment.State>> outcome =
         task.simulate(mlp);
     NavigationDrawer d = new NavigationDrawer(NavigationDrawer.Configuration.DEFAULT);
-//    d.show(new ImageBuilder.ImageInfo(500, 500), outcome);
-    d.save(
-        new ImageBuilder.ImageInfo(500, 500),
-        new File("/home/melsalib/Downloads/E_MAZE.png"),
-        outcome);
+    //    d.show(new ImageBuilder.ImageInfo(500, 500), outcome);
+    d.save(new ImageBuilder.ImageInfo(500, 500), new File("/home/melsalib/Downloads/E_MAZE.png"), outcome);
   }
 }
