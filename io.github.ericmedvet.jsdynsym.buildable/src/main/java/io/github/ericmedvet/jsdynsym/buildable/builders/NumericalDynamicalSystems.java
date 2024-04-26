@@ -46,6 +46,12 @@ public class NumericalDynamicalSystems {
           MultivariateRealFunction.varNames("x", nOfInputs),
           MultivariateRealFunction.varNames("y", nOfOutputs));
     }
+
+    static NumericalDynamicalSystems.Builder<NumericalDynamicalSystem<StatelessSystem.State>, StatelessSystem.State>
+        empty() {
+      return (xVarNames, yVarNames) -> NumericalStatelessSystem.from(
+          xVarNames.size(), yVarNames.size(), (t, x) -> new double[yVarNames.size()]);
+    }
   }
 
   @SuppressWarnings("unused")
