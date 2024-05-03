@@ -128,8 +128,8 @@ public class NumericalDynamicalSystems {
 
   @SuppressWarnings("unused")
   public static <S> Builder<Noised<S>, S> noised(
-      @Param(value = "inputSigma", dD = 0) double inputSigma,
-      @Param(value = "outputSigma", dD = 0) double outputSigma,
+      @Param(value = "inputSigma", dD = 0.01) double inputSigma,
+      @Param(value = "outputSigma", dD = 0.01) double outputSigma,
       @Param(value = "randomGenerator", dNPM = "m.defaultRG()") RandomGenerator randomGenerator,
       @Param("inner") Builder<? extends NumericalDynamicalSystem<S>, S> inner) {
     return (xVarNames, yVarNames) ->
@@ -156,7 +156,7 @@ public class NumericalDynamicalSystems {
 
   @SuppressWarnings("unused")
   public static <S> Builder<NumericalDynamicalSystem<Stepped.State<S>>, Stepped.State<S>> stepped(
-      @Param(value = "stepT", dD = 1) double interval,
+      @Param(value = "stepT", dD = 0.1) double interval,
       @Param("inner") Builder<? extends NumericalDynamicalSystem<S>, S> inner) {
     return (xVarNames, yVarNames) -> NumericalDynamicalSystem.from(
         new Stepped<>(inner.apply(xVarNames, yVarNames), interval), xVarNames.size(), yVarNames.size());
