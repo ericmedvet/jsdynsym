@@ -98,16 +98,11 @@ public class PointNavigationEnvironment implements NumericalDynamicalSystem<Stat
     double v1 = DoubleRange.SYMMETRIC_UNIT.clip(action[0]) * configuration.robotMaxV;
     double v2 = DoubleRange.SYMMETRIC_UNIT.clip(action[1]) * configuration.robotMaxV;
     // compute new pose
-    Point newRobotP = state.robotPosition.sum(new Point(state.robotDirection).scale((v1 + v2) / 2d));
-    double deltaA = Math.asin((v2 - v1) / 2d / configuration.robotRadius);
+    Point newRobotP = state.robotPosition.sum(new Point(v1, v2);
     // check collision and update pose
-    double minD = segments.stream().mapToDouble(newRobotP::distance).min().orElseThrow();
-    state = new State(
-        configuration,
-        state.targetPosition,
-        (minD > configuration.robotRadius) ? newRobotP : state.robotPosition,
-        state.robotDirection + deltaA,
-        state.nOfCollisions + ((minD > configuration.robotRadius) ? 0 : 1));
+
+    //TODO
+
     // compute observation
     double[] sInputs = configuration
         .sensorsAngleRange
