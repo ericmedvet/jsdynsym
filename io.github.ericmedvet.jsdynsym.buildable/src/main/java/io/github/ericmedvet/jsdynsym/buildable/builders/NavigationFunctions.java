@@ -45,6 +45,7 @@ import io.github.ericmedvet.jsdynsym.control.SingleAgentTask;
 import io.github.ericmedvet.jsdynsym.control.geometry.Point;
 import io.github.ericmedvet.jsdynsym.control.navigation.Arena;
 import io.github.ericmedvet.jsdynsym.control.navigation.NavigationEnvironment;
+import io.github.ericmedvet.jsdynsym.control.navigation.PointNavigationEnvironment;
 import java.util.Comparator;
 import java.util.function.Function;
 
@@ -122,6 +123,25 @@ public class NavigationFunctions {
                 .get(o.snapshots().lastKey())
                 .state()
                 .targetPosition());
+    return FormattedNamedFunction.from(f, format, "final.dist").compose(beforeF);
+  }
+
+  // TODO REFACTORING
+  @SuppressWarnings("unused")
+  public static <X> FormattedNamedFunction<X, Double> pointFinalD(
+      @Param(value = "of", dNPM = "f.identity()")
+          Function<
+                  X,
+                  Simulation.Outcome<
+                      SingleAgentTask.Step<double[], double[], PointNavigationEnvironment.State>>>
+              beforeF,
+      @Param(value = "format", dS = "%5.3f") String format) {
+    Function<Simulation.Outcome<SingleAgentTask.Step<double[], double[], PointNavigationEnvironment.State>>, Double>
+        f = o -> o.snapshots()
+        .get(o.snapshots().lastKey())
+        .state()
+        .robotPosition()
+        .distance(o.snapshots().get(o.snapshots().lastKey()).state().targetPosition());
     return FormattedNamedFunction.from(f, format, "final.dist").compose(beforeF);
   }
 
