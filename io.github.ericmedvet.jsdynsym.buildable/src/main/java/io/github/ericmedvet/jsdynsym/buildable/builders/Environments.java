@@ -40,6 +40,7 @@ import io.github.ericmedvet.jnb.core.Param;
 import io.github.ericmedvet.jnb.datastructure.DoubleRange;
 import io.github.ericmedvet.jsdynsym.control.navigation.Arena;
 import io.github.ericmedvet.jsdynsym.control.navigation.NavigationEnvironment;
+import io.github.ericmedvet.jsdynsym.control.navigation.PointNavigationEnvironment;
 import java.util.random.RandomGenerator;
 
 @Discoverable(prefixTemplate = "dynamicalSystem|dynSys|ds.environment|env|e")
@@ -75,6 +76,28 @@ public class Environments {
         nOfSensors,
         sensorRange,
         senseTarget,
+        arena.arena(),
+        randomGenerator));
+  }
+
+  @SuppressWarnings("unused")
+  public static PointNavigationEnvironment pointNavigation(
+      @Param(value = "name", iS = "nav-{arena}") String name,
+      @Param(value = "initialRobotXRange", dNPM = "m.range(min=0.45;max=0.55)") DoubleRange initialRobotXRange,
+      @Param(value = "initialRobotYRange", dNPM = "m.range(min=0.8;max=0.85)") DoubleRange initialRobotYRange,
+      @Param(value = "targetXRange", dNPM = "m.range(min=0.5;max=0.5)") DoubleRange targetXRange,
+      @Param(value = "targetYRange", dNPM = "m.range(min=0.15;max=0.15)") DoubleRange targetYRange,
+      @Param(value = "robotMaxV", dD = 0.01) double robotMaxV,
+      @Param(value = "collisionBounce", dD = 0.01) double collisionBounce,
+      @Param(value = "arena", dS = "empty") Arena.Prepared arena,
+      @Param(value = "randomGenerator", dNPM = "m.defaultRG()") RandomGenerator randomGenerator) {
+    return new PointNavigationEnvironment(new PointNavigationEnvironment.Configuration(
+        initialRobotXRange,
+        initialRobotYRange,
+        targetXRange,
+        targetYRange,
+        robotMaxV,
+        collisionBounce,
         arena.arena(),
         randomGenerator));
   }

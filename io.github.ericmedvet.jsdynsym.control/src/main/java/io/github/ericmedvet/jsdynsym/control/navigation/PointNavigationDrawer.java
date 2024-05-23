@@ -23,7 +23,6 @@ import io.github.ericmedvet.jsdynsym.control.SimulationOutcomeDrawer;
 import io.github.ericmedvet.jsdynsym.control.SingleAgentTask;
 import io.github.ericmedvet.jsdynsym.control.geometry.Point;
 import io.github.ericmedvet.jviz.core.util.GraphicsUtils;
-
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
@@ -33,7 +32,7 @@ import java.util.List;
 import java.util.SortedMap;
 
 public class PointNavigationDrawer
-    implements SimulationOutcomeDrawer<SingleAgentTask.Step<double[], double[], NavigationEnvironment.State>> {
+    implements SimulationOutcomeDrawer<SingleAgentTask.Step<double[], double[], PointNavigationEnvironment.State>> {
 
   private final Configuration configuration;
 
@@ -48,10 +47,11 @@ public class PointNavigationDrawer
       double trajectoryThickness,
       double robotFillAlpha,
       double targetSize,
+      double robotDotSize,
       double marginRate) {
 
     public static final Configuration DEFAULT =
-        new Configuration(Color.MAGENTA, Color.RED, Color.DARK_GRAY, Color.BLUE, 2, 2, 3, 1, 0.25, 5, 0.01);
+        new Configuration(Color.BLUE, Color.RED, Color.DARK_GRAY, Color.BLUE, 2, 2, 3, 1, 0.25, 5, .01, 0.01);
   }
 
   public PointNavigationDrawer(Configuration configuration) {
@@ -61,7 +61,7 @@ public class PointNavigationDrawer
   @Override
   public void drawAll(
       Graphics2D g,
-      SortedMap<Double, SingleAgentTask.Step<double[], double[], NavigationEnvironment.State>> map) {
+      SortedMap<Double, SingleAgentTask.Step<double[], double[], PointNavigationEnvironment.State>> map) {
     Arena arena = map.values().iterator().next().state().configuration().arena();
     // set transform
     AffineTransform previousTransform = setTransform(g, arena);
@@ -83,7 +83,7 @@ public class PointNavigationDrawer
 
   @Override
   public void drawSingle(
-      Graphics2D g, double t, SingleAgentTask.Step<double[], double[], NavigationEnvironment.State> step) {
+      Graphics2D g, double t, SingleAgentTask.Step<double[], double[], PointNavigationEnvironment.State> step) {
     // draw info
     Arena arena = step.state().configuration().arena();
     g.setStroke(new BasicStroke(1f));
@@ -102,9 +102,7 @@ public class PointNavigationDrawer
         configuration.robotColor,
         configuration.robotFillAlpha,
         configuration.robotThickness / g.getTransform().getScaleX(),
-        step.state().robotPosition(),
-        step.state().robotDirection(),
-        step.state().configuration().robotRadius());
+        step.state().robotPosition());
     // draw target
     drawTarget(
         g,
@@ -142,15 +140,17 @@ public class PointNavigationDrawer
     g.draw(path);
   }
 
-  private static void drawRobot(Graphics2D g, Color c, double alpha, double th, Point p, double a, double r) {
+  private void drawRobot(Graphics2D g, Color c, double alpha, double th, Point p) {
     g.setStroke(new BasicStroke((float) th));
-    Shape shape = new Ellipse2D.Double(p.x() - r, p.y() - r, 2d * r, 2d * r);
+    Shape shape = new Ellipse2D.Double(
+        p.x() - configuration.robotDotSize,
+        p.y() - configuration.robotDotSize,
+        2d * configuration.robotDotSize,
+        2d * configuration.robotDotSize);
     g.setColor(GraphicsUtils.alphaed(c, alpha));
     g.fill(shape);
     g.setColor(c);
     g.draw(shape);
-    Point hP = p.sum(new Point(a).scale(r));
-    g.draw(new Line2D.Double(p.x(), p.y(), hP.x(), hP.y()));
   }
 
   private static void drawTarget(Graphics2D g, Color c, double th, double l, Point p) {
