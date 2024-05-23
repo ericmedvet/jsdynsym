@@ -98,7 +98,7 @@ public class PointNavigationEnvironment implements NumericalDynamicalSystem<Stat
     double v1 = DoubleRange.SYMMETRIC_UNIT.clip(action[0]) * configuration.robotMaxV;
     double v2 = DoubleRange.SYMMETRIC_UNIT.clip(action[1]) * configuration.robotMaxV;
     // compute new pose
-    Point newRobotP = state.robotPosition.sum(new Point(v1, v2);
+    Point newRobotP = state.robotPosition.sum(new Point(v1, v2));
     // check collision and update pose
 
     //TODO
