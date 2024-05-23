@@ -50,7 +50,7 @@ public class PointNavigationEnvironment implements NumericalDynamicalSystem<Stat
   public record State(
       Configuration configuration,
       Point targetPosition,
-      Point pointPosition,
+      Point robotPosition,
       int nOfCollisions) {}
 
   private final Configuration configuration;
@@ -98,27 +98,22 @@ public class PointNavigationEnvironment implements NumericalDynamicalSystem<Stat
     double v1 = DoubleRange.SYMMETRIC_UNIT.clip(action[0]) * configuration.robotMaxV;
     double v2 = DoubleRange.SYMMETRIC_UNIT.clip(action[1]) * configuration.robotMaxV;
     // compute new pose
-    Point newRobotP = state.pointPosition.sum(new Point(state.robotDirection).scale((v1 + v2) / 2d));
-    double deltaA = Math.asin((v2 - v1) / 2d / configuration.robotRadius);
+    Point newRobotP = state.robotPosition.sum(new Point(v1, v2));
     // check collision and update pose
-    double minD = segments.stream().mapToDouble(newRobotP::distance).min().orElseThrow();
-    state = new State(
-        configuration,
-        state.targetPosition,
-        (minD > configuration.robotRadius) ? newRobotP : state.pointPosition,
-        state.robotDirection + deltaA,
-        state.nOfCollisions + ((minD > configuration.robotRadius) ? 0 : 1));
+
+    //TODO
+
     // compute observation
     double[] sInputs = configuration
         .sensorsAngleRange
         .delta(state.robotDirection)
         .points(configuration.nOfSensors - 1)
         .map(a -> {
-          Semiline sl = new Semiline(state.pointPosition, a);
+          Semiline sl = new Semiline(state.robotPosition, a);
           double d = segments.stream()
               .map(sl::interception)
               .filter(Optional::isPresent)
-              .mapToDouble(op -> op.orElseThrow().distance(state.pointPosition))
+              .mapToDouble(op -> op.orElseThrow().distance(state.robotPosition))
               .min()
               .orElse(Double.POSITIVE_INFINITY);
           return sensorsRange.normalize(d);
@@ -127,8 +122,8 @@ public class PointNavigationEnvironment implements NumericalDynamicalSystem<Stat
     double[] observation = configuration.senseTarget ? new double[configuration.nOfSensors + 2] : sInputs;
     if (configuration.senseTarget) {
       System.arraycopy(sInputs, 0, observation, 2, sInputs.length);
-      observation[0] = sensorsRange.normalize(state.pointPosition.distance(state.targetPosition));
-      observation[1] = state.targetPosition.diff(state.pointPosition).direction() - state.robotDirection;
+      observation[0] = sensorsRange.normalize(state.robotPosition.distance(state.targetPosition));
+      observation[1] = state.targetPosition.diff(state.robotPosition).direction() - state.robotDirection;
       if (observation[1] > Math.PI) {
         observation[1] = observation[1] - Math.PI;
       }
