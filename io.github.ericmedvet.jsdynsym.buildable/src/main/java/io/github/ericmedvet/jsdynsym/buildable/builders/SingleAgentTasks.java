@@ -42,6 +42,8 @@ import io.github.ericmedvet.jsdynsym.control.Environment;
 import io.github.ericmedvet.jsdynsym.control.SingleAgentTask;
 import io.github.ericmedvet.jsdynsym.core.DynamicalSystem;
 
+import java.util.function.Predicate;
+
 @Discoverable(prefixTemplate = "dynamicalSystem|dynSys|ds.singleAgentTask|saTask|sat")
 public class SingleAgentTasks {
 
@@ -51,8 +53,9 @@ public class SingleAgentTasks {
   public static <C extends DynamicalSystem<O, A, ?>, O, A, S> SingleAgentTask<C, O, A, S> fromEnvironment(
       @Param(value = "name", iS = "{environment.name}") String name,
       @Param("environment") Environment<O, A, S> environment,
+      @Param("stopCondition") Predicate<O> stopCondition,
       @Param("tRange") DoubleRange tRange,
       @Param("dT") double dT) {
-    return SingleAgentTask.fromEnvironment(environment, tRange, dT);
+    return SingleAgentTask.fromEnvironment(environment, stopCondition, tRange, dT);
   }
 }

@@ -25,39 +25,24 @@ import io.github.ericmedvet.jsdynsym.core.DynamicalSystem;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public interface SingleAgentTask<C extends DynamicalSystem<O, A, ?>, O, A, S>
     extends Simulation<C, Step<O, A, S>, Simulation.Outcome<Step<O, A, S>>> {
 
-  record Step<O, A, S>(O observation, A action, S state) {}
-
-  static <C extends DynamicalSystem<O, A, ?>, O, A, S> SingleAgentTask<C, O, A, S> fromEnvironment(
-      Environment<O, A, S> environment, DoubleRange tRange, double dT) {
-    return fromEnvironment(environment, environment.defaultAgentAction(), tRange, dT);
+  record Step<O, A, S>(O observation, A action, S state) {
   }
 
   static <C extends DynamicalSystem<O, A, ?>, O, A, S> SingleAgentTask<C, O, A, S> fromEnvironment(
-      Supplier<Environment<O, A, S>> environmentSupplier, DoubleRange tRange, double dT) {
-    return agent -> {
-      Environment<O, A, S> environment = environmentSupplier.get();
-      return fromEnvironment(environment, environment.defaultAgentAction(), tRange, dT)
-          .simulate(agent);
-    };
-  }
-
-  static <C extends DynamicalSystem<O, A, ?>, O, A, S> SingleAgentTask<C, O, A, S> fromEnvironment(
-      DynamicalSystem<A, O, S> environment, A initialAction, DoubleRange tRange, double dT) {
+          DynamicalSystem<A, O, S> environment, A initialAction, Predicate<O> stopCondition, DoubleRange tRange, double dT) {
     return agent -> {
       environment.reset();
       agent.reset();
       double t = tRange.min();
       Map<Double, Step<O, A, S>> steps = new HashMap<>();
-      O observation = null;
-      while (t <= tRange.max()) {
-        if (observation == null) {
-          observation = environment.step(t, initialAction);
-        }
+      O observation = environment.step(t, initialAction);
+      while (t <= tRange.max() && !stopCondition.test(observation)) {
         A action = agent.step(t, observation);
         observation = environment.step(t, action);
         steps.put(t, new Step<>(observation, action, environment.getState()));
@@ -68,8 +53,46 @@ public interface SingleAgentTask<C extends DynamicalSystem<O, A, ?>, O, A, S>
   }
 
   static <C extends DynamicalSystem<O, A, ?>, O, A, S> SingleAgentTask<C, O, A, S> fromEnvironment(
-      Supplier<DynamicalSystem<A, O, S>> environmentSupplier, A initialAction, DoubleRange tRange, double dT) {
+          Environment<O, A, S> environment, Predicate<O> stopCondition, DoubleRange tRange, double dT) {
+    return fromEnvironment(environment, environment.defaultAgentAction(), stopCondition, tRange, dT);
+  }
+
+  static <C extends DynamicalSystem<O, A, ?>, O, A, S> SingleAgentTask<C, O, A, S> fromEnvironment(
+          DynamicalSystem<A, O, S> environment, A initialAction, DoubleRange tRange, double dT) {
+    return fromEnvironment(environment, initialAction, o -> false, tRange, dT);
+  }
+
+  static <C extends DynamicalSystem<O, A, ?>, O, A, S> SingleAgentTask<C, O, A, S> fromEnvironment(
+          Environment<O, A, S> environment, DoubleRange tRange, double dT) {
+    return fromEnvironment(environment, environment.defaultAgentAction(), o -> false, tRange, dT);
+  }
+
+  static <C extends DynamicalSystem<O, A, ?>, O, A, S> SingleAgentTask<C, O, A, S> fromEnvironment(
+          Supplier<Environment<O, A, S>> environmentSupplier, A initialAction, Predicate<O> stopCondition, DoubleRange tRange, double dT) {
+    return agent -> {
+      Environment<O, A, S> environment = environmentSupplier.get();
+      return fromEnvironment(environment, initialAction, stopCondition, tRange, dT)
+              .simulate(agent);
+    };
+  }
+
+  static <C extends DynamicalSystem<O, A, ?>, O, A, S> SingleAgentTask<C, O, A, S> fromEnvironment(
+          Supplier<Environment<O, A, S>> environmentSupplier, Predicate<O> stopCondition, DoubleRange tRange, double dT) {
+    return agent -> {
+      Environment<O, A, S> environment = environmentSupplier.get();
+      return fromEnvironment(environment, environment.defaultAgentAction(), stopCondition, tRange, dT)
+              .simulate(agent);
+    };
+  }
+
+  static <C extends DynamicalSystem<O, A, ?>, O, A, S> SingleAgentTask<C, O, A, S> fromEnvironment(
+          Supplier<DynamicalSystem<A, O, S>> environmentSupplier, A initialAction, DoubleRange tRange, double dT) {
     return agent -> fromEnvironment(environmentSupplier.get(), initialAction, tRange, dT)
-        .simulate(agent);
+            .simulate(agent);
+  }
+
+  static <C extends DynamicalSystem<O, A, ?>, O, A, S> SingleAgentTask<C, O, A, S> fromEnvironment(
+          Supplier<Environment<O, A, S>> environmentSupplier, DoubleRange tRange, double dT) {
+    return fromEnvironment(environmentSupplier, o -> false, tRange, dT);
   }
 }
