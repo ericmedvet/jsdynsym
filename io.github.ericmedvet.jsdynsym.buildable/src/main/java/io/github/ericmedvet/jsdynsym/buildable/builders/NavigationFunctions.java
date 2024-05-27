@@ -47,8 +47,8 @@ import io.github.ericmedvet.jsdynsym.control.navigation.Arena;
 import io.github.ericmedvet.jsdynsym.control.navigation.State;
 
 import java.util.Comparator;
+import java.util.SortedMap;
 import java.util.function.Function;
-import java.util.function.Predicate;
 
 @Discoverable(prefixTemplate = "dynamicalSystem|dynSys|ds.environment|env|e.navigation|nav|n")
 public class NavigationFunctions {
@@ -72,15 +72,6 @@ public class NavigationFunctions {
                         .average()
                         .orElseThrow();
         return FormattedNamedFunction.from(f, format, "avg.dist").compose(beforeF);
-    }
-
-    @SuppressWarnings("unused")
-    public static <X> NamedFunction<X, Double> conditionalSum(
-            @Param("condition") Predicate<X> condition,
-            @Param("baseFunction") Function<X, Double> baseFunction,
-            @Param("otherFunction") Function<X, Double> otherFunction
-            ) {
-        return NamedFunction.from(o -> baseFunction.apply(o) + (condition.test(o) ? otherFunction.apply(o) : 0d), "condSum");
     }
 
     @SuppressWarnings("unused")
@@ -165,6 +156,7 @@ public class NavigationFunctions {
                 };
         return NamedFunction.from(f, "final.pos").compose(beforeF);
     }
+
     @SuppressWarnings("unused")
     public static <X> FormattedNamedFunction<X, Double> finalTime(
             @Param(value = "of", dNPM = "f.identity()")
@@ -173,10 +165,32 @@ public class NavigationFunctions {
                     Simulation.Outcome<
                             SingleAgentTask.Step<double[], double[], State>>>
                     beforeF,
+            @Param(value = "epsilon", dD = .01) double epsilon,
             @Param(value = "format", dS = "%5.3f") String format) {
         Function<Simulation.Outcome<SingleAgentTask.Step<double[], double[], State>>, Double>
                 f = o -> o.snapshots().lastKey();
         return FormattedNamedFunction.from(f, format, "final.time").compose(beforeF);
+    }
+
+    @SuppressWarnings("unused")
+    public static <X> FormattedNamedFunction<X, Double> finalTimePlusD(
+            @Param(value = "of", dNPM = "f.identity()")
+            Function<
+                    X,
+                    Simulation.Outcome<
+                            SingleAgentTask.Step<double[], double[], State>>>
+                    beforeF,
+            @Param(value = "epsilon", dD = .01) double epsilon,
+            @Param(value = "format", dS = "%5.3f") String format) {
+        Function<Simulation.Outcome<SingleAgentTask.Step<double[], double[], State>>, Double>
+                f = o -> {
+            SortedMap<Double, SingleAgentTask.Step<double[], double[], State>> snapshots = o.snapshots();
+            double stopTime = snapshots.lastKey();
+            double lastDistance = snapshots.get(stopTime).state().robotPosition()
+                    .distance(snapshots.get(stopTime).state().targetPosition());
+            return stopTime + (lastDistance < epsilon ? 0d : lastDistance);
+        };
+        return FormattedNamedFunction.from(f, format, "final.td").compose(beforeF);
     }
 
     @SuppressWarnings("unused")
