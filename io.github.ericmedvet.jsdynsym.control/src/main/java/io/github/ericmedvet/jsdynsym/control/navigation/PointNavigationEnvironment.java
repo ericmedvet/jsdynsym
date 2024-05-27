@@ -20,12 +20,17 @@
 package io.github.ericmedvet.jsdynsym.control.navigation;
 
 import io.github.ericmedvet.jnb.datastructure.DoubleRange;
+import io.github.ericmedvet.jnb.datastructure.Pair;
 import io.github.ericmedvet.jsdynsym.control.Environment;
+import io.github.ericmedvet.jsdynsym.control.geometry.Line;
 import io.github.ericmedvet.jsdynsym.control.geometry.Point;
 import io.github.ericmedvet.jsdynsym.control.geometry.Segment;
 import io.github.ericmedvet.jsdynsym.control.navigation.PointNavigationEnvironment.State;
 import io.github.ericmedvet.jsdynsym.core.numerical.NumericalDynamicalSystem;
+
+import java.util.Comparator;
 import java.util.List;
+import java.util.TreeMap;
 import java.util.random.RandomGenerator;
 
 public class PointNavigationEnvironment
@@ -37,7 +42,7 @@ public class PointNavigationEnvironment
       DoubleRange targetXRange,
       DoubleRange targetYRange,
       double robotMaxV,
-      double collisionBounce,
+      double collisionBlock,
       Arena arena,
       RandomGenerator randomGenerator)
       implements io.github.ericmedvet.jsdynsym.control.navigation.Configuration {}
@@ -81,36 +86,49 @@ public class PointNavigationEnvironment
     // check consistency
     if (action.length != nOfInputs()) {
       throw new IllegalArgumentException("Agent action has wrong number of elements: %d found, %d expected"
-          .formatted(action.length, nOfInputs()));
+              .formatted(action.length, nOfInputs()));
     }
     // prepare
     List<Segment> segments = configuration.arena.segments();
     // apply action
-    double v1 = DoubleRange.SYMMETRIC_UNIT.clip(action[0]) * configuration.robotMaxV;
-    double v2 = DoubleRange.SYMMETRIC_UNIT.clip(action[1]) * configuration.robotMaxV;
-    // compute new pose
-    Point newRobotP = state.robotPosition.sum(new Point(v1, v2));
+    Point robotShift = new Point(
+            DoubleRange.SYMMETRIC_UNIT.clip(action[0]) * configuration.robotMaxV,
+            DoubleRange.SYMMETRIC_UNIT.clip(action[1]) * configuration.robotMaxV
+    );
+    // compute new position
+    Point newRobotP = state.robotPosition.sum(new Point(
+            DoubleRange.SYMMETRIC_UNIT.clip(action[0]) * configuration.robotMaxV,
+            DoubleRange.SYMMETRIC_UNIT.clip(action[1]) * configuration.robotMaxV
+    ));
     Segment robotPath = new Segment(state.robotPosition, newRobotP);
-    // check collision and update pose
-    double endPositionT = segments.stream()
-        .map(s -> collide(s, robotPath))
-        .filter(p -> DoubleRange.UNIT.contains(p.x()) && DoubleRange.UNIT.contains(p.y()))
-        .mapToDouble(Point::y)
-        .min()
-        .orElse(1d);
-    if (endPositionT < 1) {
-      double normalizedT = endPositionT - configuration.collisionBounce / robotPath.length();
-      newRobotP = state.robotPosition.scale(1 - normalizedT).sum(newRobotP.scale(normalizedT));
+    // check collision and update posision
+    double collisionT = segments.stream()
+            .map(s -> collide(s, robotPath))
+            .filter(p -> DoubleRange.UNIT.contains(p.x()) && DoubleRange.UNIT.contains(p.y()))
+            .mapToDouble(Point::y)
+            .min()
+            .orElse(1d);
+    if (collisionT < 1d) {
+      Point collisionPoint = state.robotPosition.sum(robotShift.scale(collisionT));
+      double collisionShiftT = collisionT - configuration.collisionBlock / collisionPoint.distance(state.robotPosition);
+      if (collisionShiftT < 0) {
+        newRobotP = state.robotPosition;
+      } else {
+        newRobotP = state.robotPosition.sum(robotShift.scale(collisionShiftT));
+      }
     }
     state = new State(
-        configuration, state.targetPosition, newRobotP, state.nOfCollisions + (endPositionT < 1 ? 1 : 0));
+            configuration, state.targetPosition, newRobotP, state.nOfCollisions + (collisionT < 1d ? 1 : 0));
     // compute observation
-    return new double[] {newRobotP.x(), newRobotP.y()};
+    return new double[]{newRobotP.x(), newRobotP.y()};
   }
 
   private static Point collide(Segment s1, Segment s2) {
     Point v1 = s1.p2().diff(s1.p1());
     Point v2 = s2.p2().diff(s2.p1());
+    if (v1.magnitude() == 0 || v2.magnitude() == 0) {
+      return new Point(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
+    }
     double cramerDet = v1.y() * v2.x() - v1.x() * v2.y();
     if (cramerDet == 0) {
       if (Math.abs(s2.p2().diff(s1.p1()).direction())
@@ -122,9 +140,10 @@ public class PointNavigationEnvironment
       }
       return new Point(1d, (s1.p2().x() - s2.p1().x()) / v2.x());
     }
+    Point pointDiff = s2.p1().diff(s1.p1());
     return new Point(
-        ((s2.p1().y() - s1.p1().y()) * v2.x() - (s2.p1().x() - s1.p1().x()) * v2.y()) / cramerDet,
-        ((s2.p1().y() - s1.p1().y()) * v1.x() - (s2.p1().x() - s1.p1().x()) * v1.y()) / cramerDet);
+        (pointDiff.y() * v2.x() - pointDiff.x() * v2.y()) / cramerDet,
+        (pointDiff.y() * v1.x() - pointDiff.x() * v1.y()) / cramerDet);
   }
 
   @Override

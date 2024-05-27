@@ -66,7 +66,7 @@ public class Main {
     mlp.randomize(new Random(), DoubleRange.SYMMETRIC_UNIT);*/
     Random random = new Random();
     NumericalStatelessSystem controller = NumericalStatelessSystem.from(2, 2, (t, a) ->
-        new double[] {Math.cos(t) + random.nextGaussian(0d, .1), Math.sin(t) - random.nextGaussian(0, .1)});
+        new double[] {Math.cos(t) + random.nextGaussian(0d, .5), Math.sin(t) - random.nextGaussian(.1, .5)});
     SingleAgentTask<DynamicalSystem<double[], double[], ?>, double[], double[], PointNavigationEnvironment.State>
         task = SingleAgentTask.fromEnvironment(environment, new double[2], new DoubleRange(0, 60), 0.1);
     Simulation.Outcome<SingleAgentTask.Step<double[], double[], PointNavigationEnvironment.State>> outcome =

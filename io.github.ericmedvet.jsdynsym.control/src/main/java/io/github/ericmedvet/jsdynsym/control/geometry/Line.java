@@ -23,7 +23,7 @@ import java.util.Optional;
 
 public record Line(double a, double b, double c) {
 
-  private static Line from(Point p1, Point p2) {
+  public static Line from(Point p1, Point p2) {
     if (p1.x() == p2.x()) {
       return new Line(1d, 0d, -p1.x());
     }

@@ -88,7 +88,7 @@ public class Environments {
       @Param(value = "targetXRange", dNPM = "m.range(min=0.5;max=0.5)") DoubleRange targetXRange,
       @Param(value = "targetYRange", dNPM = "m.range(min=0.15;max=0.15)") DoubleRange targetYRange,
       @Param(value = "robotMaxV", dD = 0.01) double robotMaxV,
-      @Param(value = "collisionBounce", dD = 0.01) double collisionBounce,
+      @Param(value = "collisionBlock", dD = 0.005) double collisionBlock,
       @Param(value = "arena", dS = "empty") Arena.Prepared arena,
       @Param(value = "randomGenerator", dNPM = "m.defaultRG()") RandomGenerator randomGenerator) {
     return new PointNavigationEnvironment(new PointNavigationEnvironment.Configuration(
@@ -97,7 +97,7 @@ public class Environments {
         targetXRange,
         targetYRange,
         robotMaxV,
-        collisionBounce,
+        collisionBlock,
         arena.arena(),
         randomGenerator));
   }
