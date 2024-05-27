@@ -33,28 +33,28 @@ import java.util.random.RandomGenerator;
 public class NavigationEnvironment implements NumericalDynamicalSystem<State>, Environment<double[], double[], State> {
 
   public record Configuration(
-          DoubleRange initialRobotXRange,
-          DoubleRange initialRobotYRange,
-          DoubleRange initialRobotDirectionRange,
-          DoubleRange targetXRange,
-          DoubleRange targetYRange,
-          double robotRadius,
-          double robotMaxV,
-          DoubleRange sensorsAngleRange,
-          int nOfSensors,
-          double sensorRange,
-          boolean senseTarget,
-          Arena arena,
-          RandomGenerator randomGenerator) implements io.github.ericmedvet.jsdynsym.control.navigation.Configuration {
-  }
+      DoubleRange initialRobotXRange,
+      DoubleRange initialRobotYRange,
+      DoubleRange initialRobotDirectionRange,
+      DoubleRange targetXRange,
+      DoubleRange targetYRange,
+      double robotRadius,
+      double robotMaxV,
+      DoubleRange sensorsAngleRange,
+      int nOfSensors,
+      double sensorRange,
+      boolean senseTarget,
+      Arena arena,
+      RandomGenerator randomGenerator)
+      implements io.github.ericmedvet.jsdynsym.control.navigation.Configuration {}
 
   public record State(
-          Configuration configuration,
-          Point targetPosition,
-          Point robotPosition,
-          double robotDirection,
-          int nOfCollisions) implements io.github.ericmedvet.jsdynsym.control.navigation.State {
-  }
+      Configuration configuration,
+      Point targetPosition,
+      Point robotPosition,
+      double robotDirection,
+      int nOfCollisions)
+      implements io.github.ericmedvet.jsdynsym.control.navigation.State {}
 
   private final Configuration configuration;
   private State state;
@@ -77,15 +77,15 @@ public class NavigationEnvironment implements NumericalDynamicalSystem<State>, E
   @Override
   public void reset() {
     state = new State(
-            configuration,
-            new Point(
-                    configuration.targetXRange.denormalize(configuration.randomGenerator.nextDouble()),
-                    configuration.targetYRange.denormalize(configuration.randomGenerator.nextDouble())),
-            new Point(
-                    configuration.initialRobotXRange.denormalize(configuration.randomGenerator.nextDouble()),
-                    configuration.initialRobotYRange.denormalize(configuration.randomGenerator.nextDouble())),
-            configuration.initialRobotDirectionRange.denormalize(configuration.randomGenerator.nextDouble()),
-            0);
+        configuration,
+        new Point(
+            configuration.targetXRange.denormalize(configuration.randomGenerator.nextDouble()),
+            configuration.targetYRange.denormalize(configuration.randomGenerator.nextDouble())),
+        new Point(
+            configuration.initialRobotXRange.denormalize(configuration.randomGenerator.nextDouble()),
+            configuration.initialRobotYRange.denormalize(configuration.randomGenerator.nextDouble())),
+        configuration.initialRobotDirectionRange.denormalize(configuration.randomGenerator.nextDouble()),
+        0);
   }
 
   @Override
@@ -93,7 +93,7 @@ public class NavigationEnvironment implements NumericalDynamicalSystem<State>, E
     // check consistency
     if (action.length != nOfInputs()) {
       throw new IllegalArgumentException("Agent action has wrong number of elements: %d found, %d expected"
-              .formatted(action.length, nOfInputs()));
+          .formatted(action.length, nOfInputs()));
     }
     // prepare
     List<Segment> segments = configuration.arena.segments();
@@ -107,27 +107,27 @@ public class NavigationEnvironment implements NumericalDynamicalSystem<State>, E
     // check collision and update pose
     double minD = segments.stream().mapToDouble(newRobotP::distance).min().orElseThrow();
     state = new State(
-            configuration,
-            state.targetPosition,
-            (minD > configuration.robotRadius) ? newRobotP : state.robotPosition,
-            state.robotDirection + deltaA,
-            state.nOfCollisions + ((minD > configuration.robotRadius) ? 0 : 1));
+        configuration,
+        state.targetPosition,
+        (minD > configuration.robotRadius) ? newRobotP : state.robotPosition,
+        state.robotDirection + deltaA,
+        state.nOfCollisions + ((minD > configuration.robotRadius) ? 0 : 1));
     // compute observation
     double[] sInputs = configuration
-            .sensorsAngleRange
-            .delta(state.robotDirection)
-            .points(configuration.nOfSensors - 1)
-            .map(a -> {
-              Semiline sl = new Semiline(state.robotPosition, a);
-              double d = segments.stream()
-                      .map(sl::interception)
-                      .filter(Optional::isPresent)
-                      .mapToDouble(op -> op.orElseThrow().distance(state.robotPosition))
-                      .min()
-                      .orElse(Double.POSITIVE_INFINITY);
-              return sensorsRange.normalize(d);
-            })
-            .toArray();
+        .sensorsAngleRange
+        .delta(state.robotDirection)
+        .points(configuration.nOfSensors - 1)
+        .map(a -> {
+          Semiline sl = new Semiline(state.robotPosition, a);
+          double d = segments.stream()
+              .map(sl::interception)
+              .filter(Optional::isPresent)
+              .mapToDouble(op -> op.orElseThrow().distance(state.robotPosition))
+              .min()
+              .orElse(Double.POSITIVE_INFINITY);
+          return sensorsRange.normalize(d);
+        })
+        .toArray();
     double[] observation = configuration.senseTarget ? new double[configuration.nOfSensors + 2] : sInputs;
     if (configuration.senseTarget) {
       System.arraycopy(sInputs, 0, observation, 2, sInputs.length);
