@@ -52,7 +52,7 @@ public class SingleAgentTasks {
   public static <C extends DynamicalSystem<O, A, ?>, O, A, S> SingleAgentTask<C, O, A, S> fromEnvironment(
       @Param(value = "name", iS = "{environment.name}") String name,
       @Param("environment") Environment<O, A, S> environment,
-      @Param("stopCondition") Predicate<O> stopCondition,
+      @Param("stopCondition") Predicate<S> stopCondition,
       @Param("tRange") DoubleRange tRange,
       @Param("dT") double dT) {
     return SingleAgentTask.fromEnvironment(environment, stopCondition, tRange, dT);

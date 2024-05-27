@@ -36,7 +36,7 @@ public interface SingleAgentTask<C extends DynamicalSystem<O, A, ?>, O, A, S>
   static <C extends DynamicalSystem<O, A, ?>, O, A, S> SingleAgentTask<C, O, A, S> fromEnvironment(
       DynamicalSystem<A, O, S> environment,
       A initialAction,
-      Predicate<O> stopCondition,
+      Predicate<S> stopCondition,
       DoubleRange tRange,
       double dT) {
     return agent -> {
@@ -45,7 +45,7 @@ public interface SingleAgentTask<C extends DynamicalSystem<O, A, ?>, O, A, S>
       double t = tRange.min();
       Map<Double, Step<O, A, S>> steps = new HashMap<>();
       O observation = environment.step(t, initialAction);
-      while (t <= tRange.max() && !stopCondition.test(observation)) {
+      while (t <= tRange.max() && !stopCondition.test(environment.getState())) {
         A action = agent.step(t, observation);
         observation = environment.step(t, action);
         steps.put(t, new Step<>(observation, action, environment.getState()));
@@ -56,7 +56,7 @@ public interface SingleAgentTask<C extends DynamicalSystem<O, A, ?>, O, A, S>
   }
 
   static <C extends DynamicalSystem<O, A, ?>, O, A, S> SingleAgentTask<C, O, A, S> fromEnvironment(
-      Environment<O, A, S> environment, Predicate<O> stopCondition, DoubleRange tRange, double dT) {
+      Environment<O, A, S> environment, Predicate<S> stopCondition, DoubleRange tRange, double dT) {
     return fromEnvironment(environment, environment.defaultAgentAction(), stopCondition, tRange, dT);
   }
 
@@ -73,7 +73,7 @@ public interface SingleAgentTask<C extends DynamicalSystem<O, A, ?>, O, A, S>
   static <C extends DynamicalSystem<O, A, ?>, O, A, S> SingleAgentTask<C, O, A, S> fromEnvironment(
       Supplier<Environment<O, A, S>> environmentSupplier,
       A initialAction,
-      Predicate<O> stopCondition,
+      Predicate<S> stopCondition,
       DoubleRange tRange,
       double dT) {
     return agent -> {
@@ -85,7 +85,7 @@ public interface SingleAgentTask<C extends DynamicalSystem<O, A, ?>, O, A, S>
 
   static <C extends DynamicalSystem<O, A, ?>, O, A, S> SingleAgentTask<C, O, A, S> fromEnvironment(
       Supplier<Environment<O, A, S>> environmentSupplier,
-      Predicate<O> stopCondition,
+      Predicate<S> stopCondition,
       DoubleRange tRange,
       double dT) {
     return agent -> {
