@@ -23,17 +23,19 @@ import io.github.ericmedvet.jnb.datastructure.DoubleRange;
 import java.util.random.RandomGenerator;
 
 public interface Configuration {
+  Arena arena();
+
   DoubleRange initialRobotXRange();
 
   DoubleRange initialRobotYRange();
 
-  DoubleRange targetXRange();
+  RandomGenerator randomGenerator();
 
-  DoubleRange targetYRange();
+  boolean rescaleInput();
 
   double robotMaxV();
 
-  Arena arena();
+  DoubleRange targetXRange();
 
-  RandomGenerator randomGenerator();
+  DoubleRange targetYRange();
 }
