@@ -60,10 +60,10 @@ public class Main {
     NamedBuilder<?> nb = NamedBuilder.fromDiscovery();
     PointNavigationEnvironment environment =
         (PointNavigationEnvironment) nb.build("ds.e.pointNavigation(arena = E_MAZE)");
-    /*MultiLayerPerceptron mlp = ((NumericalDynamicalSystems.Builder<MultiLayerPerceptron, ?>)
+    /*MultiLayerPerceptron controller = ((NumericalDynamicalSystems.Builder<MultiLayerPerceptron, ?>)
     nb.build("ds.num.mlp()"))
     .apply(environment.nOfOutputs(), environment.nOfInputs());
-    mlp.randomize(new Random(), DoubleRange.SYMMETRIC_UNIT);*/
+    controller.randomize(new Random(), DoubleRange.SYMMETRIC_UNIT);*/
     Random random = new Random();
     NumericalStatelessSystem controller = NumericalStatelessSystem.from(2, 2, (t, a) ->
         new double[] {Math.cos(t) + random.nextGaussian(0d, .5), Math.sin(t) - random.nextGaussian(.1, .5)});
