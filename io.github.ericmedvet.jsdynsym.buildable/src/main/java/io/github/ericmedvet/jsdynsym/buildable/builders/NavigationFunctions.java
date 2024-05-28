@@ -44,8 +44,9 @@ import io.github.ericmedvet.jsdynsym.control.Simulation;
 import io.github.ericmedvet.jsdynsym.control.SingleAgentTask;
 import io.github.ericmedvet.jsdynsym.control.geometry.Point;
 import io.github.ericmedvet.jsdynsym.control.navigation.Arena;
-import io.github.ericmedvet.jsdynsym.control.navigation.NavigationEnvironment;
+import io.github.ericmedvet.jsdynsym.control.navigation.State;
 import java.util.Comparator;
+import java.util.SortedMap;
 import java.util.function.Function;
 
 @Discoverable(prefixTemplate = "dynamicalSystem|dynSys|ds.environment|env|e.navigation|nav|n")
@@ -56,13 +57,9 @@ public class NavigationFunctions {
   @SuppressWarnings("unused")
   public static <X> FormattedNamedFunction<X, Double> avgD(
       @Param(value = "of", dNPM = "f.identity()")
-          Function<
-                  X,
-                  Simulation.Outcome<
-                      SingleAgentTask.Step<double[], double[], NavigationEnvironment.State>>>
-              beforeF,
+          Function<X, Simulation.Outcome<SingleAgentTask.Step<double[], double[], State>>> beforeF,
       @Param(value = "format", dS = "%5.3f") String format) {
-    Function<Simulation.Outcome<SingleAgentTask.Step<double[], double[], NavigationEnvironment.State>>, Double> f =
+    Function<Simulation.Outcome<SingleAgentTask.Step<double[], double[], State>>, Double> f =
         o -> o.snapshots().values().stream()
             .mapToDouble(s ->
                 s.state().robotPosition().distance(s.state().targetPosition()))
@@ -74,96 +71,111 @@ public class NavigationFunctions {
   @SuppressWarnings("unused")
   public static <X> NamedFunction<X, Point> closestRobotP(
       @Param(value = "of", dNPM = "f.identity()")
-          Function<
-                  X,
-                  Simulation.Outcome<
-                      SingleAgentTask.Step<double[], double[], NavigationEnvironment.State>>>
-              beforeF,
+          Function<X, Simulation.Outcome<SingleAgentTask.Step<double[], double[], State>>> beforeF,
       @Param(value = "normalized", dB = true) boolean normalized) {
-    Function<Simulation.Outcome<SingleAgentTask.Step<double[], double[], NavigationEnvironment.State>>, Point> f =
-        o -> {
-          Arena arena = o.snapshots()
-              .values()
-              .iterator()
-              .next()
-              .state()
-              .configuration()
-              .arena();
-          Point p = o.snapshots().values().stream()
-              .min(Comparator.comparingDouble(s ->
-                  s.state().robotPosition().distance(s.state().targetPosition())))
-              .map(s -> s.state().robotPosition())
-              .orElseThrow();
-          if (normalized) {
-            return new Point(
-                new DoubleRange(0, arena.xExtent()).normalize(p.x()),
-                new DoubleRange(0, arena.yExtent()).normalize(p.y()));
-          }
-          return p;
-        };
+    Function<Simulation.Outcome<SingleAgentTask.Step<double[], double[], State>>, Point> f = o -> {
+      Arena arena = o.snapshots()
+          .values()
+          .iterator()
+          .next()
+          .state()
+          .configuration()
+          .arena();
+      Point p = o.snapshots().values().stream()
+          .min(Comparator.comparingDouble(
+              s -> s.state().robotPosition().distance(s.state().targetPosition())))
+          .map(s -> s.state().robotPosition())
+          .orElseThrow();
+      if (normalized) {
+        return new Point(
+            new DoubleRange(0, arena.xExtent()).normalize(p.x()),
+            new DoubleRange(0, arena.yExtent()).normalize(p.y()));
+      }
+      return p;
+    };
     return NamedFunction.from(f, "closest.pos").compose(beforeF);
+  }
+
+  @SuppressWarnings("unused")
+  public static <X> FormattedNamedFunction<X, Double> distanceFromTarget(
+      @Param(value = "of", dNPM = "f.identity()") Function<X, State> beforeF,
+      @Param(value = "format", dS = "%5.3f") String format) {
+    Function<State, Double> f = s -> s.robotPosition().distance(s.targetPosition());
+    return FormattedNamedFunction.from(f, format, "dist").compose(beforeF);
   }
 
   @SuppressWarnings("unused")
   public static <X> FormattedNamedFunction<X, Double> finalD(
       @Param(value = "of", dNPM = "f.identity()")
-          Function<
-                  X,
-                  Simulation.Outcome<
-                      SingleAgentTask.Step<double[], double[], NavigationEnvironment.State>>>
-              beforeF,
+          Function<X, Simulation.Outcome<SingleAgentTask.Step<double[], double[], State>>> beforeF,
       @Param(value = "format", dS = "%5.3f") String format) {
-    Function<Simulation.Outcome<SingleAgentTask.Step<double[], double[], NavigationEnvironment.State>>, Double> f =
-        o -> o.snapshots()
-            .get(o.snapshots().lastKey())
-            .state()
-            .robotPosition()
-            .distance(o.snapshots()
-                .get(o.snapshots().lastKey())
-                .state()
-                .targetPosition());
+    Function<Simulation.Outcome<SingleAgentTask.Step<double[], double[], State>>, Double> f = o -> o.snapshots()
+        .get(o.snapshots().lastKey())
+        .state()
+        .robotPosition()
+        .distance(o.snapshots().get(o.snapshots().lastKey()).state().targetPosition());
     return FormattedNamedFunction.from(f, format, "final.dist").compose(beforeF);
   }
 
   @SuppressWarnings("unused")
   public static <X> NamedFunction<X, Point> finalRobotP(
       @Param(value = "of", dNPM = "f.identity()")
-          Function<
-                  X,
-                  Simulation.Outcome<
-                      SingleAgentTask.Step<double[], double[], NavigationEnvironment.State>>>
-              beforeF,
+          Function<X, Simulation.Outcome<SingleAgentTask.Step<double[], double[], State>>> beforeF,
       @Param(value = "normalized", dB = true) boolean normalized) {
-    Function<Simulation.Outcome<SingleAgentTask.Step<double[], double[], NavigationEnvironment.State>>, Point> f =
-        o -> {
-          Arena arena = o.snapshots()
-              .values()
-              .iterator()
-              .next()
-              .state()
-              .configuration()
-              .arena();
-          Point p = o.snapshots().get(o.snapshots().lastKey()).state().robotPosition();
-          if (normalized) {
-            return new Point(
-                new DoubleRange(0, arena.xExtent()).normalize(p.x()),
-                new DoubleRange(0, arena.yExtent()).normalize(p.y()));
-          }
-          return p;
-        };
+    Function<Simulation.Outcome<SingleAgentTask.Step<double[], double[], State>>, Point> f = o -> {
+      Arena arena = o.snapshots()
+          .values()
+          .iterator()
+          .next()
+          .state()
+          .configuration()
+          .arena();
+      Point p = o.snapshots().get(o.snapshots().lastKey()).state().robotPosition();
+      if (normalized) {
+        return new Point(
+            new DoubleRange(0, arena.xExtent()).normalize(p.x()),
+            new DoubleRange(0, arena.yExtent()).normalize(p.y()));
+      }
+      return p;
+    };
     return NamedFunction.from(f, "final.pos").compose(beforeF);
+  }
+
+  @SuppressWarnings("unused")
+  public static <X> FormattedNamedFunction<X, Double> finalTime(
+      @Param(value = "of", dNPM = "f.identity()")
+          Function<X, Simulation.Outcome<SingleAgentTask.Step<double[], double[], State>>> beforeF,
+      @Param(value = "format", dS = "%5.3f") String format) {
+    Function<Simulation.Outcome<SingleAgentTask.Step<double[], double[], State>>, Double> f =
+        o -> o.snapshots().lastKey();
+    return FormattedNamedFunction.from(f, format, "final.time").compose(beforeF);
+  }
+
+  @SuppressWarnings("unused")
+  public static <X> FormattedNamedFunction<X, Double> finalTimePlusD(
+      @Param(value = "of", dNPM = "f.identity()")
+          Function<X, Simulation.Outcome<SingleAgentTask.Step<double[], double[], State>>> beforeF,
+      @Param(value = "epsilon", dD = .01) double epsilon,
+      @Param(value = "format", dS = "%5.3f") String format) {
+    Function<Simulation.Outcome<SingleAgentTask.Step<double[], double[], State>>, Double> f = o -> {
+      SortedMap<Double, SingleAgentTask.Step<double[], double[], State>> snapshots = o.snapshots();
+      double stopTime = snapshots.lastKey();
+      double lastDistance = snapshots
+          .get(stopTime)
+          .state()
+          .robotPosition()
+          .distance(snapshots.get(stopTime).state().targetPosition());
+      return stopTime + (lastDistance < epsilon ? 0d : lastDistance);
+    };
+    return FormattedNamedFunction.from(f, format, "final.td").compose(beforeF);
   }
 
   @SuppressWarnings("unused")
   public static <X> FormattedNamedFunction<X, Double> minD(
       @Param(value = "of", dNPM = "f.identity()")
-          Function<
-                  X,
-                  Simulation.Outcome<
-                      SingleAgentTask.Step<double[], double[], NavigationEnvironment.State>>>
-              beforeF,
+          Function<X, Simulation.Outcome<SingleAgentTask.Step<double[], double[], State>>> beforeF,
       @Param(value = "format", dS = "%5.3f") String format) {
-    Function<Simulation.Outcome<SingleAgentTask.Step<double[], double[], NavigationEnvironment.State>>, Double> f =
+    Function<Simulation.Outcome<SingleAgentTask.Step<double[], double[], State>>, Double> f =
         o -> o.snapshots().values().stream()
             .mapToDouble(s ->
                 s.state().robotPosition().distance(s.state().targetPosition()))

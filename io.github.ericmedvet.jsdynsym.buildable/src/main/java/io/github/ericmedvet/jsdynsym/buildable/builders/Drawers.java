@@ -37,6 +37,7 @@ package io.github.ericmedvet.jsdynsym.buildable.builders;
 
 import io.github.ericmedvet.jnb.core.Discoverable;
 import io.github.ericmedvet.jsdynsym.control.navigation.NavigationDrawer;
+import io.github.ericmedvet.jsdynsym.control.navigation.PointNavigationDrawer;
 
 @Discoverable(prefixTemplate = "dynamicalSystem|dynSys|ds.drawer|d")
 public class Drawers {
@@ -45,5 +46,10 @@ public class Drawers {
   @SuppressWarnings("unused")
   public static NavigationDrawer navigation() {
     return new NavigationDrawer(NavigationDrawer.Configuration.DEFAULT);
+  }
+
+  @SuppressWarnings("unused")
+  public static PointNavigationDrawer pointNavigation() {
+    return new PointNavigationDrawer(PointNavigationDrawer.Configuration.DEFAULT);
   }
 }

@@ -23,43 +23,32 @@ import io.github.ericmedvet.jnb.datastructure.DoubleRange;
 import io.github.ericmedvet.jsdynsym.control.Environment;
 import io.github.ericmedvet.jsdynsym.control.geometry.Point;
 import io.github.ericmedvet.jsdynsym.control.geometry.Segment;
-import io.github.ericmedvet.jsdynsym.control.geometry.Semiline;
-import io.github.ericmedvet.jsdynsym.control.navigation.NavigationEnvironment.State;
+import io.github.ericmedvet.jsdynsym.control.navigation.PointNavigationEnvironment.State;
 import io.github.ericmedvet.jsdynsym.core.numerical.NumericalDynamicalSystem;
 import java.util.List;
-import java.util.Optional;
 import java.util.random.RandomGenerator;
 
-public class NavigationEnvironment implements NumericalDynamicalSystem<State>, Environment<double[], double[], State> {
+public class PointNavigationEnvironment
+    implements NumericalDynamicalSystem<State>, Environment<double[], double[], State> {
 
   public record Configuration(
       DoubleRange initialRobotXRange,
       DoubleRange initialRobotYRange,
-      DoubleRange initialRobotDirectionRange,
       DoubleRange targetXRange,
       DoubleRange targetYRange,
-      double robotRadius,
       double robotMaxV,
-      DoubleRange sensorsAngleRange,
-      int nOfSensors,
-      double sensorRange,
-      boolean senseTarget,
+      double collisionBlock,
       Arena arena,
       RandomGenerator randomGenerator)
       implements io.github.ericmedvet.jsdynsym.control.navigation.Configuration {}
 
-  public record State(
-      Configuration configuration,
-      Point targetPosition,
-      Point robotPosition,
-      double robotDirection,
-      int nOfCollisions)
+  public record State(Configuration configuration, Point targetPosition, Point robotPosition, int nOfCollisions)
       implements io.github.ericmedvet.jsdynsym.control.navigation.State {}
 
   private final Configuration configuration;
   private State state;
 
-  public NavigationEnvironment(Configuration configuration) {
+  public PointNavigationEnvironment(Configuration configuration) {
     this.configuration = configuration;
     reset();
   }
@@ -84,7 +73,6 @@ public class NavigationEnvironment implements NumericalDynamicalSystem<State>, E
         new Point(
             configuration.initialRobotXRange.denormalize(configuration.randomGenerator.nextDouble()),
             configuration.initialRobotYRange.denormalize(configuration.randomGenerator.nextDouble())),
-        configuration.initialRobotDirectionRange.denormalize(configuration.randomGenerator.nextDouble()),
         0);
   }
 
@@ -97,51 +85,59 @@ public class NavigationEnvironment implements NumericalDynamicalSystem<State>, E
     }
     // prepare
     List<Segment> segments = configuration.arena.segments();
-    DoubleRange sensorsRange = new DoubleRange(configuration.robotRadius, configuration.sensorRange);
     // apply action
-    double v1 = DoubleRange.SYMMETRIC_UNIT.clip(action[0]) * configuration.robotMaxV;
-    double v2 = DoubleRange.SYMMETRIC_UNIT.clip(action[1]) * configuration.robotMaxV;
-    // compute new pose
-    Point newRobotP = state.robotPosition.sum(new Point(state.robotDirection).scale((v1 + v2) / 2d));
-    double deltaA = Math.asin((v2 - v1) / 2d / configuration.robotRadius);
-    // check collision and update pose
-    double minD = segments.stream().mapToDouble(newRobotP::distance).min().orElseThrow();
-    state = new State(
-        configuration,
-        state.targetPosition,
-        (minD > configuration.robotRadius) ? newRobotP : state.robotPosition,
-        state.robotDirection + deltaA,
-        state.nOfCollisions + ((minD > configuration.robotRadius) ? 0 : 1));
-    // compute observation
-    double[] sInputs = configuration
-        .sensorsAngleRange
-        .delta(state.robotDirection)
-        .points(configuration.nOfSensors - 1)
-        .map(a -> {
-          Semiline sl = new Semiline(state.robotPosition, a);
-          double d = segments.stream()
-              .map(sl::interception)
-              .filter(Optional::isPresent)
-              .mapToDouble(op -> op.orElseThrow().distance(state.robotPosition))
-              .min()
-              .orElse(Double.POSITIVE_INFINITY);
-          return sensorsRange.normalize(d);
-        })
-        .toArray();
-    double[] observation = configuration.senseTarget ? new double[configuration.nOfSensors + 2] : sInputs;
-    if (configuration.senseTarget) {
-      System.arraycopy(sInputs, 0, observation, 2, sInputs.length);
-      observation[0] = sensorsRange.normalize(state.robotPosition.distance(state.targetPosition));
-      observation[1] = state.targetPosition.diff(state.robotPosition).direction() - state.robotDirection;
-      if (observation[1] > Math.PI) {
-        observation[1] = observation[1] - Math.PI;
+    Point robotShift = new Point(
+        DoubleRange.SYMMETRIC_UNIT.clip(action[0]) * configuration.robotMaxV,
+        DoubleRange.SYMMETRIC_UNIT.clip(action[1]) * configuration.robotMaxV);
+    // compute new position
+    Point newRobotP = state.robotPosition.sum(new Point(
+        DoubleRange.SYMMETRIC_UNIT.clip(action[0]) * configuration.robotMaxV,
+        DoubleRange.SYMMETRIC_UNIT.clip(action[1]) * configuration.robotMaxV));
+    Segment robotPath = new Segment(state.robotPosition, newRobotP);
+    // check collision and update posision
+    double collisionT = segments.stream()
+        .map(s -> collide(s, robotPath))
+        .filter(p -> DoubleRange.UNIT.contains(p.x()) && DoubleRange.UNIT.contains(p.y()))
+        .mapToDouble(Point::y)
+        .min()
+        .orElse(1d);
+    if (collisionT < 1d) {
+      Point collisionPoint = state.robotPosition.sum(robotShift.scale(collisionT));
+      double collisionShiftT =
+          collisionT - configuration.collisionBlock / collisionPoint.distance(state.robotPosition);
+      if (collisionShiftT < 0) {
+        newRobotP = state.robotPosition;
+      } else {
+        newRobotP = state.robotPosition.sum(robotShift.scale(collisionShiftT));
       }
-      if (observation[1] < -Math.PI) {
-        observation[1] = observation[1] + Math.PI;
-      }
-      observation[1] = observation[1] / Math.PI;
     }
-    return observation;
+    state = new State(
+        configuration, state.targetPosition, newRobotP, state.nOfCollisions + (collisionT < 1d ? 1 : 0));
+    // compute observation
+    return new double[] {newRobotP.x(), newRobotP.y()};
+  }
+
+  private static Point collide(Segment s1, Segment s2) {
+    Point v1 = s1.p2().diff(s1.p1());
+    Point v2 = s2.p2().diff(s2.p1());
+    if (v1.magnitude() == 0 || v2.magnitude() == 0) {
+      return new Point(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
+    }
+    double cramerDet = v1.y() * v2.x() - v1.x() * v2.y();
+    if (cramerDet == 0) {
+      if (Math.abs(s2.p2().diff(s1.p1()).direction())
+          != Math.abs(s1.p2().diff(s1.p1()).direction())) {
+        return new Point(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
+      }
+      if (v1.x() > 0 == s2.p2().x() > s1.p2().x()) {
+        return new Point((s2.p2().x() - s1.p1().x()) / v1.x(), 1d);
+      }
+      return new Point(1d, (s1.p2().x() - s2.p1().x()) / v2.x());
+    }
+    Point pointDiff = s2.p1().diff(s1.p1());
+    return new Point(
+        (pointDiff.y() * v2.x() - pointDiff.x() * v2.y()) / cramerDet,
+        (pointDiff.y() * v1.x() - pointDiff.x() * v1.y()) / cramerDet);
   }
 
   @Override
@@ -151,6 +147,6 @@ public class NavigationEnvironment implements NumericalDynamicalSystem<State>, E
 
   @Override
   public int nOfOutputs() {
-    return configuration.nOfSensors + (configuration.senseTarget ? 2 : 0);
+    return 2;
   }
 }
