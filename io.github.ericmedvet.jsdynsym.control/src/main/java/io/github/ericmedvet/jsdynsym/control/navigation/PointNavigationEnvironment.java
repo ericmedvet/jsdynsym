@@ -20,17 +20,12 @@
 package io.github.ericmedvet.jsdynsym.control.navigation;
 
 import io.github.ericmedvet.jnb.datastructure.DoubleRange;
-import io.github.ericmedvet.jnb.datastructure.Pair;
 import io.github.ericmedvet.jsdynsym.control.Environment;
-import io.github.ericmedvet.jsdynsym.control.geometry.Line;
 import io.github.ericmedvet.jsdynsym.control.geometry.Point;
 import io.github.ericmedvet.jsdynsym.control.geometry.Segment;
 import io.github.ericmedvet.jsdynsym.control.navigation.PointNavigationEnvironment.State;
 import io.github.ericmedvet.jsdynsym.core.numerical.NumericalDynamicalSystem;
-
-import java.util.Comparator;
 import java.util.List;
-import java.util.TreeMap;
 import java.util.random.RandomGenerator;
 
 public class PointNavigationEnvironment
@@ -86,31 +81,30 @@ public class PointNavigationEnvironment
     // check consistency
     if (action.length != nOfInputs()) {
       throw new IllegalArgumentException("Agent action has wrong number of elements: %d found, %d expected"
-              .formatted(action.length, nOfInputs()));
+          .formatted(action.length, nOfInputs()));
     }
     // prepare
     List<Segment> segments = configuration.arena.segments();
     // apply action
     Point robotShift = new Point(
-            DoubleRange.SYMMETRIC_UNIT.clip(action[0]) * configuration.robotMaxV,
-            DoubleRange.SYMMETRIC_UNIT.clip(action[1]) * configuration.robotMaxV
-    );
+        DoubleRange.SYMMETRIC_UNIT.clip(action[0]) * configuration.robotMaxV,
+        DoubleRange.SYMMETRIC_UNIT.clip(action[1]) * configuration.robotMaxV);
     // compute new position
     Point newRobotP = state.robotPosition.sum(new Point(
-            DoubleRange.SYMMETRIC_UNIT.clip(action[0]) * configuration.robotMaxV,
-            DoubleRange.SYMMETRIC_UNIT.clip(action[1]) * configuration.robotMaxV
-    ));
+        DoubleRange.SYMMETRIC_UNIT.clip(action[0]) * configuration.robotMaxV,
+        DoubleRange.SYMMETRIC_UNIT.clip(action[1]) * configuration.robotMaxV));
     Segment robotPath = new Segment(state.robotPosition, newRobotP);
     // check collision and update posision
     double collisionT = segments.stream()
-            .map(s -> collide(s, robotPath))
-            .filter(p -> DoubleRange.UNIT.contains(p.x()) && DoubleRange.UNIT.contains(p.y()))
-            .mapToDouble(Point::y)
-            .min()
-            .orElse(1d);
+        .map(s -> collide(s, robotPath))
+        .filter(p -> DoubleRange.UNIT.contains(p.x()) && DoubleRange.UNIT.contains(p.y()))
+        .mapToDouble(Point::y)
+        .min()
+        .orElse(1d);
     if (collisionT < 1d) {
       Point collisionPoint = state.robotPosition.sum(robotShift.scale(collisionT));
-      double collisionShiftT = collisionT - configuration.collisionBlock / collisionPoint.distance(state.robotPosition);
+      double collisionShiftT =
+          collisionT - configuration.collisionBlock / collisionPoint.distance(state.robotPosition);
       if (collisionShiftT < 0) {
         newRobotP = state.robotPosition;
       } else {
@@ -118,9 +112,9 @@ public class PointNavigationEnvironment
       }
     }
     state = new State(
-            configuration, state.targetPosition, newRobotP, state.nOfCollisions + (collisionT < 1d ? 1 : 0));
+        configuration, state.targetPosition, newRobotP, state.nOfCollisions + (collisionT < 1d ? 1 : 0));
     // compute observation
-    return new double[]{newRobotP.x(), newRobotP.y()};
+    return new double[] {newRobotP.x(), newRobotP.y()};
   }
 
   private static Point collide(Segment s1, Segment s2) {
