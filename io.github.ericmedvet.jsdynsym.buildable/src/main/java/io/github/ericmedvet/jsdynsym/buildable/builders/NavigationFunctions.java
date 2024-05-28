@@ -48,7 +48,6 @@ import io.github.ericmedvet.jsdynsym.control.navigation.State;
 import java.util.Comparator;
 import java.util.SortedMap;
 import java.util.function.Function;
-import java.util.function.Predicate;
 
 @Discoverable(prefixTemplate = "dynamicalSystem|dynSys|ds.environment|env|e.navigation|nav|n")
 public class NavigationFunctions {
@@ -98,8 +97,11 @@ public class NavigationFunctions {
   }
 
   @SuppressWarnings("unused")
-  public static Predicate<State> distanceFromTarget(@Param(value = "epsilon", dD = .01) double epsilon) {
-    return s -> s.robotPosition().distance(s.targetPosition()) < epsilon;
+  public static <X> FormattedNamedFunction<X, Double> distanceFromTarget(
+      @Param(value = "of", dNPM = "f.identity()") Function<X, State> beforeF,
+      @Param(value = "format", dS = "%5.3f") String format) {
+    Function<State, Double> f = s -> s.robotPosition().distance(s.targetPosition());
+    return FormattedNamedFunction.from(f, format, "dist").compose(beforeF);
   }
 
   @SuppressWarnings("unused")
