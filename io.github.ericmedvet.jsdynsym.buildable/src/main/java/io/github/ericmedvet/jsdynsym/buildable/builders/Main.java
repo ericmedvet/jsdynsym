@@ -39,10 +39,7 @@ import io.github.ericmedvet.jnb.core.NamedBuilder;
 import io.github.ericmedvet.jnb.datastructure.DoubleRange;
 import io.github.ericmedvet.jsdynsym.control.Simulation;
 import io.github.ericmedvet.jsdynsym.control.SingleAgentTask;
-import io.github.ericmedvet.jsdynsym.control.navigation.NavigationDrawer;
-import io.github.ericmedvet.jsdynsym.control.navigation.NavigationEnvironment;
-import io.github.ericmedvet.jsdynsym.control.navigation.PointNavigationDrawer;
-import io.github.ericmedvet.jsdynsym.control.navigation.PointNavigationEnvironment;
+import io.github.ericmedvet.jsdynsym.control.navigation.*;
 import io.github.ericmedvet.jsdynsym.core.DynamicalSystem;
 import io.github.ericmedvet.jsdynsym.core.numerical.NumericalStatelessSystem;
 import io.github.ericmedvet.jsdynsym.core.numerical.ann.MultiLayerPerceptron;
@@ -60,11 +57,13 @@ public class Main {
     NamedBuilder<?> nb = NamedBuilder.fromDiscovery();
     PointNavigationEnvironment environment =
         (PointNavigationEnvironment) nb.build("ds.e.pointNavigation(arena = E_MAZE)");
-    /*MultiLayerPerceptron controller = ((NumericalDynamicalSystems.Builder<MultiLayerPerceptron, ?>)
+    MultiLayerPerceptron mlp = ((NumericalDynamicalSystems.Builder<MultiLayerPerceptron, ?>)
     nb.build("ds.num.mlp()"))
     .apply(environment.nOfOutputs(), environment.nOfInputs());
-    controller.randomize(new Random(), DoubleRange.SYMMETRIC_UNIT);*/
-    Random random = new Random();
+    mlp.randomize(new Random(), DoubleRange.SYMMETRIC_UNIT);
+    VectorFieldDrawer vfd = new VectorFieldDrawer(Arena.Prepared.E_MAZE.arena(), VectorFieldDrawer.Configuration.DEFAULT);
+    vfd.show(new ImageBuilder.ImageInfo(500, 500), mlp);
+    /*Random random = new Random();
     NumericalStatelessSystem controller = NumericalStatelessSystem.from(2, 2, (t, a) ->
         new double[] {Math.cos(t) + random.nextGaussian(0d, .5), Math.sin(t) - random.nextGaussian(.1, .5)});
     SingleAgentTask<DynamicalSystem<double[], double[], ?>, double[], double[], PointNavigationEnvironment.State>
@@ -72,7 +71,7 @@ public class Main {
     Simulation.Outcome<SingleAgentTask.Step<double[], double[], PointNavigationEnvironment.State>> outcome =
         task.simulate(controller);
     PointNavigationDrawer d = new PointNavigationDrawer(PointNavigationDrawer.Configuration.DEFAULT);
-    d.show(new ImageBuilder.ImageInfo(500, 500), outcome);
+    d.show(new ImageBuilder.ImageInfo(500, 500), outcome);*/
     // d.save(new ImageBuilder.ImageInfo(500, 500), new File("/home/francescorusin/Downloads/E_MAZE.png"), outcome);
   }
 
