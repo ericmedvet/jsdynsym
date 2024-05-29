@@ -45,6 +45,7 @@ public class NavigationEnvironment implements NumericalDynamicalSystem<State>, E
       double sensorRange,
       boolean senseTarget,
       Arena arena,
+      boolean rescaleInput,
       RandomGenerator randomGenerator)
       implements io.github.ericmedvet.jsdynsym.control.navigation.Configuration {}
 
@@ -125,7 +126,9 @@ public class NavigationEnvironment implements NumericalDynamicalSystem<State>, E
               .mapToDouble(op -> op.orElseThrow().distance(state.robotPosition))
               .min()
               .orElse(Double.POSITIVE_INFINITY);
-          return sensorsRange.normalize(d);
+          return configuration.rescaleInput
+              ? DoubleRange.SYMMETRIC_UNIT.denormalize(sensorsRange.normalize(d))
+              : sensorsRange.normalize(d);
         })
         .toArray();
     double[] observation = configuration.senseTarget ? new double[configuration.nOfSensors + 2] : sInputs;

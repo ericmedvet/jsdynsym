@@ -39,6 +39,7 @@ public class PointNavigationEnvironment
       double robotMaxV,
       double collisionBlock,
       Arena arena,
+      boolean rescaleInput,
       RandomGenerator randomGenerator)
       implements io.github.ericmedvet.jsdynsym.control.navigation.Configuration {}
 
@@ -94,7 +95,7 @@ public class PointNavigationEnvironment
         DoubleRange.SYMMETRIC_UNIT.clip(action[0]) * configuration.robotMaxV,
         DoubleRange.SYMMETRIC_UNIT.clip(action[1]) * configuration.robotMaxV));
     Segment robotPath = new Segment(state.robotPosition, newRobotP);
-    // check collision and update posision
+    // check collision and update position
     double collisionT = segments.stream()
         .map(s -> collide(s, robotPath))
         .filter(p -> DoubleRange.UNIT.contains(p.x()) && DoubleRange.UNIT.contains(p.y()))
@@ -114,7 +115,12 @@ public class PointNavigationEnvironment
     state = new State(
         configuration, state.targetPosition, newRobotP, state.nOfCollisions + (collisionT < 1d ? 1 : 0));
     // compute observation
-    return new double[] {newRobotP.x(), newRobotP.y()};
+    double iX = new DoubleRange(0, configuration.arena.xExtent()).normalize(newRobotP.x());
+    double iY = new DoubleRange(0, configuration.arena.yExtent()).normalize(newRobotP.y());
+    return new double[] {
+      configuration.rescaleInput ? DoubleRange.SYMMETRIC_UNIT.denormalize(iX) : iX,
+      configuration.rescaleInput ? DoubleRange.SYMMETRIC_UNIT.denormalize(iY) : iY
+    };
   }
 
   private static Point collide(Segment s1, Segment s2) {
