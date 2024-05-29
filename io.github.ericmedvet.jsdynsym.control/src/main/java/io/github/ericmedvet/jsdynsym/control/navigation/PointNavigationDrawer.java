@@ -51,7 +51,7 @@ public class PointNavigationDrawer
       double marginRate) {
 
     public static final Configuration DEFAULT =
-        new Configuration(Color.BLUE, Color.RED, Color.DARK_GRAY, Color.BLUE, 2, 2, 3, 1, 0.25, 5, .01, 0.01);
+        new Configuration(Color.BLUE, Color.CYAN, Color.DARK_GRAY, Color.BLUE, 2, 2, 3, 1, 0.25, 5, .01, 0.01);
   }
 
   public PointNavigationDrawer(Configuration configuration) {
