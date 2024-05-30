@@ -34,7 +34,6 @@ public class VectorFieldDrawer implements Drawer<NumericalTimeInvariantStateless
 
   public record Configuration(
       Color arrowColor,
-      Color targetColor,
       Color segmentColor,
       double arrowHeadSize,
       double arrowHeadWidth,
@@ -45,7 +44,7 @@ public class VectorFieldDrawer implements Drawer<NumericalTimeInvariantStateless
       boolean rescale) {
 
     public static final Configuration DEFAULT =
-        new Configuration(Color.RED, Color.CYAN, Color.BLACK, .02, .01, .002f, 3, .05, .01, true);
+        new Configuration(Color.RED, Color.DARK_GRAY, .02, .01, .002f, 3, .05, .01, true);
   }
 
   public VectorFieldDrawer(Arena arena, Configuration configuration) {

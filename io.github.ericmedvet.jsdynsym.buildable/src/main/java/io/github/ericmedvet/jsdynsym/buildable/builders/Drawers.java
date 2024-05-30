@@ -42,9 +42,7 @@ public class Drawers {
   }
 
   @SuppressWarnings("unused")
-  public static VectorFieldDrawer vectorField(
-          @Param(value = "arena", dNPM = "empty")Arena.Prepared arena
-          ) {
+  public static VectorFieldDrawer vectorField(@Param(value = "arena", dNPM = "empty") Arena.Prepared arena) {
     return new VectorFieldDrawer(arena.arena(), VectorFieldDrawer.Configuration.DEFAULT);
   }
 }

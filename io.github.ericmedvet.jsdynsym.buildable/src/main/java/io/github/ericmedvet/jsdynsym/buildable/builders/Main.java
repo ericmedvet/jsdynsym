@@ -40,10 +40,10 @@ public class Main {
   }
 
   @SuppressWarnings("unchecked")
-  public static void pointNavVisual() throws IOException {
+  public static void pointNavVisual() {
     NamedBuilder<?> nb = NamedBuilder.fromDiscovery();
     String genotype =
-        "rO0ABXNyABFqYXZhLnV0aWwuQ29sbFNlcleOq7Y6G6gRAwABSQADdGFneHAAAAAEdwQAAAAWc3IAEGphdmEubGFuZy5Eb3VibGWAs8JKKWv7BAIAAUQABXZhbHVleHIAEGphdmEubGFuZy5OdW1iZXKGrJUdC5TgiwIAAHhwP+RJJIpyqipzcQB+AAK/9LDBpOwBknNxAH4AAr/0qAiNTaEbc3EAfgACP8C2t/X+nzpzcQB+AAI/8u6V0cpEjnNxAH4AAj/ZhYzLaXMMc3EAfgACv9gc8N0RLFNzcQB+AAI/5RNtc9PO83NxAH4AAj/ubxry0tJVc3EAfgACP/MJRRoF/kpzcQB+AALAB5yGFUlg0nNxAH4AAr/0EYG1vUs3c3EAfgACP718Nm/ZbFZzcQB+AAI/9qDJ1vbtd3NxAH4AAsADkH1ACALnc3EAfgACv+R9F/QjBGVzcQB+AAK/+hM2ft5menNxAH4AAr/vK8mxzFECc3EAfgACv86ro8c2jWZzcQB+AAJABC5GK0T4mHNxAH4AAj/xepUX+kYgc3EAfgACP/pcr8bLjGx4";
+        "rO0ABXNyABNqYXZhLnV0aWwuQXJyYXlMaXN0eIHSHZnHYZ0DAAFJAARzaXpleHAAAAAWdwQAAAAWc3IAEGphdmEubGFuZy5Eb3VibGWAs8JKKWv7BAIAAUQABXZhbHVleHIAEGphdmEubGFuZy5OdW1iZXKGrJUdC5TgiwIAAHhwP+HfAxn4soBzcQB+AAI/5/cWGhuXynNxAH4AAr/VPpwJHdyAc3EAfgACv8jBAcrQY6BzcQB+AAK/5cwX9vm3MnNxAH4AAj/desmMrqzYc3EAfgACv8/9cWhZJnhzcQB+AAK/z1669BZtQHNxAH4AAj+/BbKVlmMwc3EAfgACv+biExNRExBzcQB+AAI/2NINXFEfoHNxAH4AAr/n8MgDN+0Mc3EAfgACP8gJ2fyu00hzcQB+AAK/7FiZq3ZpsHNxAH4AAr/sodjxwbdqc3EAfgACP8oN6i+X/JhzcQB+AAK/zzJxehFIqHNxAH4AAr/mXy4s9PQic3EAfgACP4xC3kyxYYBzcQB+AAI/4yais6r7EHNxAH4AAj/YYcjqIOGgc3EAfgACP+HNfeh3wOZ4";
     Function<String, Object> decoder = (Function<String, Object>) nb.build("f.fromBase64()");
     List<Double> actualGenotype = (List<Double>) decoder.apply(genotype);
     PointNavigationEnvironment environment = (PointNavigationEnvironment)
@@ -54,18 +54,25 @@ public class Main {
         .apply(environment.nOfOutputs(), environment.nOfInputs());
     mlp.setParams(actualGenotype.stream().mapToDouble(d -> d).toArray());
     SingleAgentTask<DynamicalSystem<double[], double[], ?>, double[], double[], PointNavigationEnvironment.State>
-        task = SingleAgentTask.fromEnvironment(environment, new double[2], s -> s.robotPosition().distance(s.targetPosition()) < .01, new DoubleRange(0, 100), 0.1);
+        task = SingleAgentTask.fromEnvironment(
+            environment,
+            new double[2],
+            s -> s.robotPosition().distance(s.targetPosition()) < .01,
+            new DoubleRange(0, 100),
+            0.1);
     Simulation.Outcome<SingleAgentTask.Step<double[], double[], PointNavigationEnvironment.State>> outcome =
         task.simulate(mlp);
-    /*PointNavigationDrawer d = new PointNavigationDrawer(PointNavigationDrawer.Configuration.DEFAULT);
-    d.show(new ImageBuilder.ImageInfo(500, 500), outcome);*/
-    VectorFieldDrawer vfd =
-            new VectorFieldDrawer(Arena.Prepared.E_MAZE.arena(), VectorFieldDrawer.Configuration.DEFAULT);
-    vfd.show(new ImageBuilder.ImageInfo(500, 500), mlp);
+    PointNavigationDrawer d = new PointNavigationDrawer(PointNavigationDrawer.Configuration.DEFAULT);
+    d.show(new ImageBuilder.ImageInfo(500, 500), outcome);
+    Function<Simulation.Outcome<SingleAgentTask.Step<double[], double[], PointNavigationEnvironment.State>>, Double> fitness =
+            (Function<Simulation.Outcome<SingleAgentTask.Step<double[],double[], PointNavigationEnvironment.State>>, Double>) nb.build("ds.e.n.finalTimePlusD()");
+    System.out.println(fitness.apply(outcome));
+    /*VectorFieldDrawer vfd =
+        new VectorFieldDrawer(Arena.Prepared.E_MAZE.arena(), VectorFieldDrawer.Configuration.DEFAULT);
+    vfd.show(new ImageBuilder.ImageInfo(500, 500), mlp);*/
   }
 
-  @SuppressWarnings("unchecked")
-  public static void pointNavigation() throws IOException {
+ public static void pointNavigation() {
     NamedBuilder<?> nb = NamedBuilder.fromDiscovery();
     PointNavigationEnvironment environment =
         (PointNavigationEnvironment) nb.build("ds.e.pointNavigation(arena = E_MAZE)");
@@ -104,7 +111,7 @@ public class Main {
     // d.save(new ImageBuilder.ImageInfo(500, 500), new File("/home/francescorusin/Downloads/E_MAZE.png"), outcome);
   }
 
-  public static void navigation() throws IOException {
+  public static void navigation() {
     NamedBuilder<?> nb = NamedBuilder.fromDiscovery();
     NavigationEnvironment environment = (NavigationEnvironment) nb.build("ds.e.navigation(arena = E_MAZE)");
     @SuppressWarnings("unchecked")
