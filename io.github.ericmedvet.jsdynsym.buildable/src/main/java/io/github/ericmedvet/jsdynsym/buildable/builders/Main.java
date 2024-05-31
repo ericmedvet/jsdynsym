@@ -64,15 +64,19 @@ public class Main {
         task.simulate(mlp);
     PointNavigationDrawer d = new PointNavigationDrawer(PointNavigationDrawer.Configuration.DEFAULT);
     d.show(new ImageBuilder.ImageInfo(500, 500), outcome);
-    Function<Simulation.Outcome<SingleAgentTask.Step<double[], double[], PointNavigationEnvironment.State>>, Double> fitness =
-            (Function<Simulation.Outcome<SingleAgentTask.Step<double[],double[], PointNavigationEnvironment.State>>, Double>) nb.build("ds.e.n.finalTimePlusD()");
+    Function<Simulation.Outcome<SingleAgentTask.Step<double[], double[], PointNavigationEnvironment.State>>, Double>
+        fitness = (Function<
+                Simulation.Outcome<
+                    SingleAgentTask.Step<double[], double[], PointNavigationEnvironment.State>>,
+                Double>)
+            nb.build("ds.e.n.finalTimePlusD()");
     System.out.println(fitness.apply(outcome));
     /*VectorFieldDrawer vfd =
-        new VectorFieldDrawer(Arena.Prepared.E_MAZE.arena(), VectorFieldDrawer.Configuration.DEFAULT);
+    new VectorFieldDrawer(Arena.Prepared.E_MAZE.arena(), VectorFieldDrawer.Configuration.DEFAULT);
     vfd.show(new ImageBuilder.ImageInfo(500, 500), mlp);*/
   }
 
- public static void pointNavigation() {
+  public static void pointNavigation() {
     NamedBuilder<?> nb = NamedBuilder.fromDiscovery();
     PointNavigationEnvironment environment =
         (PointNavigationEnvironment) nb.build("ds.e.pointNavigation(arena = E_MAZE)");
