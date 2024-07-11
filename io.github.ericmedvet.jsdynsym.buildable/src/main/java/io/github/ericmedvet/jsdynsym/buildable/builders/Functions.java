@@ -36,10 +36,10 @@ public class Functions {
   @SuppressWarnings("unused")
   public static <X> FormattedNamedFunction<X, Double> doubleOp(
       @Param(value = "of", dNPM = "f.identity()") Function<X, Double> beforeF,
-      @Param(value = "activationF", dS = "identity") MultiLayerPerceptron.ActivationFunction activationF) {
-
+      @Param(value = "activationF", dS = "identity") MultiLayerPerceptron.ActivationFunction activationF,
+      @Param(value = "format", dS = "%.1f") String format) {
     Function<Double, Double> f = activationF::applyAsDouble;
-    return FormattedNamedFunction.from(f, "%.1f", activationF.name().toLowerCase())
+    return FormattedNamedFunction.from(f, format, activationF.name().toLowerCase())
         .compose(beforeF);
   }
 
