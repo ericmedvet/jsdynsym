@@ -148,7 +148,11 @@ public class NavigationDrawer
   @Override
   public ImageInfo imageInfo(
       Simulation.Outcome<SingleAgentTask.Step<double[], double[], NavigationEnvironment.State>> o) {
-    Arena arena = o.snapshots().get(0).state().configuration().arena();
+    Arena arena = o.snapshots()
+        .get(o.snapshots().firstKey())
+        .state()
+        .configuration()
+        .arena();
     return new ImageInfo(
         (int)
             (arena.xExtent() > arena.yExtent()
