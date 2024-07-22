@@ -29,6 +29,8 @@ import java.awt.geom.Line2D;
 
 public class VectorFieldDrawer implements Drawer<NumericalTimeInvariantStatelessSystem> {
 
+  private static final int DEFAULT_SIDE_LENGTH = 500;
+
   private final Configuration configuration;
   private final Arena arena;
 
@@ -50,6 +52,19 @@ public class VectorFieldDrawer implements Drawer<NumericalTimeInvariantStateless
   public VectorFieldDrawer(Arena arena, Configuration configuration) {
     this.configuration = configuration;
     this.arena = arena;
+  }
+
+  @Override
+  public ImageInfo imageInfo(NumericalTimeInvariantStatelessSystem ntiss) {
+    return new ImageInfo(
+        (int)
+            (arena.xExtent() > arena.yExtent()
+                ? DEFAULT_SIDE_LENGTH * arena.xExtent() / arena.yExtent()
+                : DEFAULT_SIDE_LENGTH),
+        (int)
+            (arena.xExtent() > arena.yExtent()
+                ? DEFAULT_SIDE_LENGTH
+                : DEFAULT_SIDE_LENGTH * arena.yExtent() / arena.xExtent()));
   }
 
   @Override

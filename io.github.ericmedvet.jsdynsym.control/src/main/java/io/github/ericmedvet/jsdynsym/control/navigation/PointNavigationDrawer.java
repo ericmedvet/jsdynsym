@@ -19,6 +19,7 @@
  */
 package io.github.ericmedvet.jsdynsym.control.navigation;
 
+import io.github.ericmedvet.jsdynsym.control.Simulation;
 import io.github.ericmedvet.jsdynsym.control.SimulationOutcomeDrawer;
 import io.github.ericmedvet.jsdynsym.control.SingleAgentTask;
 import io.github.ericmedvet.jsdynsym.control.geometry.Point;
@@ -34,7 +35,13 @@ import java.util.SortedMap;
 public class PointNavigationDrawer
     implements SimulationOutcomeDrawer<SingleAgentTask.Step<double[], double[], PointNavigationEnvironment.State>> {
 
+  private static final int DEFAULT_SIDE_LENGTH = 500;
+
   private final Configuration configuration;
+
+  public PointNavigationDrawer(Configuration configuration) {
+    this.configuration = configuration;
+  }
 
   public record Configuration(
       Color robotColor,
@@ -54,31 +61,33 @@ public class PointNavigationDrawer
         new Configuration(Color.BLUE, Color.CYAN, Color.DARK_GRAY, Color.BLUE, 2, 2, 3, 1, 0.25, 5, .01, 0.01);
   }
 
-  public PointNavigationDrawer(Configuration configuration) {
-    this.configuration = configuration;
+  private static void drawTarget(Graphics2D g, Color c, double th, double l, Point p) {
+    g.setStroke(new BasicStroke((float) th));
+    g.setColor(c);
+    g.draw(new Line2D.Double(p.x() - l / 2d, p.y(), p.x() + l / 2d, p.y()));
+    g.draw(new Line2D.Double(p.x(), p.y() - l / 2d, p.x(), p.y() + l / 2d));
   }
 
-  @Override
-  public void drawAll(
-      Graphics2D g,
-      SortedMap<Double, SingleAgentTask.Step<double[], double[], PointNavigationEnvironment.State>> map) {
-    Arena arena = map.values().iterator().next().state().configuration().arena();
-    // set transform
-    AffineTransform previousTransform = setTransform(g, arena);
-    // draw robot and trajectory
-    drawTrajectory(
-        g,
-        configuration.robotColor,
-        configuration.trajectoryThickness / g.getTransform().getScaleX(),
-        map.values().stream().map(s -> s.state().robotPosition()).toList());
-    // draw target and trajectory
-    drawTrajectory(
-        g,
-        configuration.targetColor,
-        configuration.trajectoryThickness / g.getTransform().getScaleX(),
-        map.values().stream().map(s -> s.state().targetPosition()).toList());
-    // restore transformation
-    g.setTransform(previousTransform);
+  private static void drawTrajectory(Graphics2D g, Color c, double th, List<Point> points) {
+    g.setStroke(new BasicStroke((float) th));
+    g.setColor(c);
+    Path2D path = new Path2D.Double();
+    path.moveTo(points.get(0).x(), points.get(0).y());
+    points.forEach(p -> path.lineTo(p.x(), p.y()));
+    g.draw(path);
+  }
+
+  private void drawRobot(Graphics2D g, Color c, double alpha, double th, Point p) {
+    g.setStroke(new BasicStroke((float) th));
+    Shape shape = new Ellipse2D.Double(
+        p.x() - configuration.robotDotSize,
+        p.y() - configuration.robotDotSize,
+        2d * configuration.robotDotSize,
+        2d * configuration.robotDotSize);
+    g.setColor(GraphicsUtils.alphaed(c, alpha));
+    g.fill(shape);
+    g.setColor(c);
+    g.draw(shape);
   }
 
   @Override
@@ -114,6 +123,44 @@ public class PointNavigationDrawer
     g.setTransform(previousTransform);
   }
 
+  @Override
+  public void drawAll(
+      Graphics2D g,
+      SortedMap<Double, SingleAgentTask.Step<double[], double[], PointNavigationEnvironment.State>> map) {
+    Arena arena = map.values().iterator().next().state().configuration().arena();
+    // set transform
+    AffineTransform previousTransform = setTransform(g, arena);
+    // draw robot and trajectory
+    drawTrajectory(
+        g,
+        configuration.robotColor,
+        configuration.trajectoryThickness / g.getTransform().getScaleX(),
+        map.values().stream().map(s -> s.state().robotPosition()).toList());
+    // draw target and trajectory
+    drawTrajectory(
+        g,
+        configuration.targetColor,
+        configuration.trajectoryThickness / g.getTransform().getScaleX(),
+        map.values().stream().map(s -> s.state().targetPosition()).toList());
+    // restore transformation
+    g.setTransform(previousTransform);
+  }
+
+  @Override
+  public ImageInfo imageInfo(
+      Simulation.Outcome<SingleAgentTask.Step<double[], double[], PointNavigationEnvironment.State>> o) {
+    Arena arena = o.snapshots().get(0).state().configuration().arena();
+    return new ImageInfo(
+        (int)
+            (arena.xExtent() > arena.yExtent()
+                ? DEFAULT_SIDE_LENGTH * arena.xExtent() / arena.yExtent()
+                : DEFAULT_SIDE_LENGTH),
+        (int)
+            (arena.xExtent() > arena.yExtent()
+                ? DEFAULT_SIDE_LENGTH
+                : DEFAULT_SIDE_LENGTH * arena.yExtent() / arena.xExtent()));
+  }
+
   private AffineTransform setTransform(Graphics2D g, Arena arena) {
     double cX = g.getClipBounds().x;
     double cY = g.getClipBounds().y;
@@ -129,34 +176,5 @@ public class PointNavigationDrawer
         (cX / scale + cW / scale - arena.xExtent()) / 2d, (cY / scale + cH / scale - arena.yExtent()) / 2d);
     g.setTransform(transform);
     return previousTransform;
-  }
-
-  private static void drawTrajectory(Graphics2D g, Color c, double th, List<Point> points) {
-    g.setStroke(new BasicStroke((float) th));
-    g.setColor(c);
-    Path2D path = new Path2D.Double();
-    path.moveTo(points.get(0).x(), points.get(0).y());
-    points.forEach(p -> path.lineTo(p.x(), p.y()));
-    g.draw(path);
-  }
-
-  private void drawRobot(Graphics2D g, Color c, double alpha, double th, Point p) {
-    g.setStroke(new BasicStroke((float) th));
-    Shape shape = new Ellipse2D.Double(
-        p.x() - configuration.robotDotSize,
-        p.y() - configuration.robotDotSize,
-        2d * configuration.robotDotSize,
-        2d * configuration.robotDotSize);
-    g.setColor(GraphicsUtils.alphaed(c, alpha));
-    g.fill(shape);
-    g.setColor(c);
-    g.draw(shape);
-  }
-
-  private static void drawTarget(Graphics2D g, Color c, double th, double l, Point p) {
-    g.setStroke(new BasicStroke((float) th));
-    g.setColor(c);
-    g.draw(new Line2D.Double(p.x() - l / 2d, p.y(), p.x() + l / 2d, p.y()));
-    g.draw(new Line2D.Double(p.x(), p.y() - l / 2d, p.x(), p.y() + l / 2d));
   }
 }
