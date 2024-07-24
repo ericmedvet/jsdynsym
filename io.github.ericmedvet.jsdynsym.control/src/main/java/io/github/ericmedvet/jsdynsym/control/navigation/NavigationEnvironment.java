@@ -40,8 +40,7 @@ public class NavigationEnvironment implements NumericalDynamicalSystem<State>, E
       DoubleRange targetYRange,
       double robotRadius,
       double robotMaxV,
-      DoubleRange sensorsAngleRange,
-      int nOfSensors,
+      List<Double> sensorAngles,
       double sensorRange,
       boolean senseTarget,
       Arena arena,
@@ -114,12 +113,9 @@ public class NavigationEnvironment implements NumericalDynamicalSystem<State>, E
         state.robotDirection + deltaA,
         state.nOfCollisions + ((minD > configuration.robotRadius) ? 0 : 1));
     // compute observation
-    double[] sInputs = configuration
-        .sensorsAngleRange
-        .delta(state.robotDirection)
-        .points(configuration.nOfSensors - 1)
-        .map(a -> {
-          Semiline sl = new Semiline(state.robotPosition, a);
+    double[] sInputs = configuration.sensorAngles.stream()
+        .mapToDouble(a -> {
+          Semiline sl = new Semiline(state.robotPosition, a + state.robotDirection);
           double d = segments.stream()
               .map(sl::interception)
               .filter(Optional::isPresent)
@@ -131,7 +127,7 @@ public class NavigationEnvironment implements NumericalDynamicalSystem<State>, E
               : sensorsRange.normalize(d);
         })
         .toArray();
-    double[] observation = configuration.senseTarget ? new double[configuration.nOfSensors + 2] : sInputs;
+    double[] observation = configuration.senseTarget ? new double[configuration.sensorAngles.size() + 2] : sInputs;
     if (configuration.senseTarget) {
       System.arraycopy(sInputs, 0, observation, 2, sInputs.length);
       observation[0] = sensorsRange.normalize(state.robotPosition.distance(state.targetPosition));
@@ -154,6 +150,6 @@ public class NavigationEnvironment implements NumericalDynamicalSystem<State>, E
 
   @Override
   public int nOfOutputs() {
-    return configuration.nOfSensors + (configuration.senseTarget ? 2 : 0);
+    return configuration.sensorAngles.size() + (configuration.senseTarget ? 2 : 0);
   }
 }
