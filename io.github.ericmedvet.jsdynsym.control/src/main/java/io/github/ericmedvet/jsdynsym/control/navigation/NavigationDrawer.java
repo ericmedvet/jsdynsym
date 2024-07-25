@@ -19,23 +19,25 @@
  */
 package io.github.ericmedvet.jsdynsym.control.navigation;
 
+import io.github.ericmedvet.jnb.datastructure.DoubleRange;
 import io.github.ericmedvet.jsdynsym.control.Simulation;
 import io.github.ericmedvet.jsdynsym.control.SimulationOutcomeDrawer;
 import io.github.ericmedvet.jsdynsym.control.SingleAgentTask;
 import io.github.ericmedvet.jsdynsym.control.geometry.Point;
+import io.github.ericmedvet.jsdynsym.control.geometry.Segment;
 import io.github.ericmedvet.jviz.core.util.GraphicsUtils;
 import java.awt.*;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Ellipse2D;
-import java.awt.geom.Line2D;
-import java.awt.geom.Path2D;
+import java.awt.geom.*;
+import java.util.Arrays;
 import java.util.List;
 import java.util.SortedMap;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class NavigationDrawer
     implements SimulationOutcomeDrawer<SingleAgentTask.Step<double[], double[], NavigationEnvironment.State>> {
 
-  private static final int DEFAULT_SIDE_LENGTH = 500;
+  private static final int DEFAULT_SIDE_LENGTH = 400;
 
   private final Configuration configuration;
 
@@ -48,16 +50,40 @@ public class NavigationDrawer
       Color targetColor,
       Color segmentColor,
       Color infoColor,
+      Color sensorsColor,
       double robotThickness,
       double targetThickness,
       double segmentThickness,
       double trajectoryThickness,
+      double sensorsThickness,
+      double sensorsFillAlpha,
       double robotFillAlpha,
       double targetSize,
-      double marginRate) {
+      double marginRate,
+      IOType ioType) {
 
-    public static final Configuration DEFAULT =
-        new Configuration(Color.MAGENTA, Color.RED, Color.DARK_GRAY, Color.BLUE, 2, 2, 3, 1, 0.25, 5, 0.01);
+    public enum IOType {
+      OFF,
+      TEXT,
+      GRAPHIC
+    }
+
+    public static final Configuration DEFAULT = new Configuration(
+        Color.MAGENTA,
+        Color.RED,
+        Color.DARK_GRAY,
+        Color.BLUE,
+        Color.CYAN,
+        2,
+        2,
+        3,
+        1,
+        1,
+        0.25,
+        0.25,
+        5,
+        0.01,
+        IOType.GRAPHIC);
   }
 
   private static void drawRobot(Graphics2D g, Color c, double alpha, double th, Point p, double a, double r) {
@@ -69,6 +95,16 @@ public class NavigationDrawer
     g.draw(shape);
     Point hP = p.sum(new Point(a).scale(r));
     g.draw(new Line2D.Double(p.x(), p.y(), hP.x(), hP.y()));
+  }
+
+  private static void drawSensors(
+      Graphics2D g, Color c, Point robotP, double robotA, List<Double> as, double r, double th) {
+    g.setStroke(new BasicStroke((float) th));
+    g.setColor(c);
+    as.forEach(a -> {
+      Segment s = new Segment(robotP, robotP.sum(new Point(robotA + a).scale(r)));
+      g.draw(new Line2D.Double(s.p1().x(), s.p1().y(), s.p2().x(), s.p2().y()));
+    });
   }
 
   private static void drawTarget(Graphics2D g, Color c, double th, double l, Point p) {
@@ -87,14 +123,66 @@ public class NavigationDrawer
     g.draw(path);
   }
 
+  private static void drawIO(
+      Graphics2D g,
+      Color c,
+      double alpha,
+      Configuration.IOType ioType,
+      double[] in,
+      double[] out,
+      boolean senseTarget,
+      boolean rescaled) {
+    g.setStroke(new BasicStroke(1f));
+    if (ioType.equals(Configuration.IOType.TEXT)) {
+      g.setColor(c);
+      g.drawString(
+          "in:  %s"
+              .formatted(Arrays.stream(in)
+                  .mapToObj("%+4.2f"::formatted)
+                  .collect(Collectors.joining(" "))),
+          5,
+          5 + g.getFontMetrics().getHeight() * 2);
+      g.drawString(
+          "out: %s"
+              .formatted(Arrays.stream(out)
+                  .mapToObj("%+4.2f"::formatted)
+                  .collect(Collectors.joining(" "))),
+          5,
+          5 + g.getFontMetrics().getHeight() * 3);
+    }
+    if (ioType.equals(Configuration.IOType.GRAPHIC)) {
+      Color aC = GraphicsUtils.alphaed(c, alpha);
+      g.drawString("in:", 5, 5 + g.getFontMetrics().getHeight() * 2);
+      double x0 = g.getFontMetrics().stringWidth("out: ") + 5;
+      double y0 = 5 + g.getFontMetrics().getHeight() * 2;
+      double w = g.getFontMetrics().stringWidth("o");
+      double h = g.getFontMetrics().getHeight() * .75;
+      // draw proximity sensors
+      IntStream.range(senseTarget ? 2 : 0, in.length).forEach(i -> {
+        g.setColor(c);
+        g.draw(new Rectangle2D.Double(x0 + w * 1.5 * i, y0 - h, w, h));
+        double nV = DoubleRange.UNIT.clip(rescaled ? DoubleRange.SYMMETRIC_UNIT.normalize(in[i]) : in[i]);
+        g.setColor(aC);
+        g.fill(new Rectangle2D.Double(x0 + w * 1.5 * i, y0 - h * nV, w, h * nV));
+      });
+      if (senseTarget) {
+        g.setColor(c);
+        g.draw(new Rectangle2D.Double(x0 + w * 1.5 * (in.length + 1), y0 - h, w, h));
+        double nV = DoubleRange.UNIT.clip(in[0]);
+        g.fill(new Rectangle2D.Double(x0 + w * 1.5 * (in.length + 1), y0 - h * nV, w, h * nV));
+        double a = in[1] * Math.PI;
+        double cX = x0 + w * 1.5 * (in.length + 2) + w / 2d;
+        double cY = y0 + w / 2d;
+        g.draw(new Line2D.Double(cX, cY, cX + w / 2d * Math.cos(a), cY + w / 2d * Math.sin(a)));
+      }
+      g.drawString("out:", 5, 5 + g.getFontMetrics().getHeight() * 3);
+    }
+  }
+
   @Override
   public void drawSingle(
       Graphics2D g, double t, SingleAgentTask.Step<double[], double[], NavigationEnvironment.State> step) {
-    // draw info
     Arena arena = step.state().configuration().arena();
-    g.setStroke(new BasicStroke(1f));
-    g.setColor(configuration.infoColor);
-    g.drawString("%.2fs".formatted(t), 5, 5 + g.getFontMetrics().getHeight());
     // set transform
     AffineTransform previousTransform = setTransform(g, arena);
     // draw arena
@@ -111,6 +199,14 @@ public class NavigationDrawer
         step.state().robotPosition(),
         step.state().robotDirection(),
         step.state().configuration().robotRadius());
+    drawSensors(
+        g,
+        configuration.sensorsColor,
+        step.state().robotPosition(),
+        step.state().robotDirection(),
+        step.state().configuration().sensorAngles(),
+        step.state().configuration().sensorRange(),
+        configuration.sensorsThickness / g.getTransform().getScaleX());
     // draw target
     drawTarget(
         g,
@@ -120,6 +216,22 @@ public class NavigationDrawer
         step.state().targetPosition());
     // restore transformation
     g.setTransform(previousTransform);
+    // draw info
+    g.setStroke(new BasicStroke(1f));
+    g.setColor(configuration.infoColor);
+    g.drawString("%.2fs".formatted(t), 5, 5 + g.getFontMetrics().getHeight());
+    // draw input and output
+    if (!configuration.ioType.equals(Configuration.IOType.OFF)) {
+      drawIO(
+          g,
+          configuration.infoColor,
+          configuration.sensorsFillAlpha,
+          configuration.ioType,
+          step.observation(),
+          step.action(),
+          step.state().configuration().senseTarget(),
+          step.state().configuration().rescaleInput());
+    }
   }
 
   @Override

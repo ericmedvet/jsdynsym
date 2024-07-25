@@ -29,7 +29,7 @@ public record Semiline(Point p, double a) {
       return oIP;
     }
     Point iP = oIP.orElseThrow();
-    if (Math.abs(iP.diff(p).direction() - a) > Math.PI / 2d) {
+    if (Math.abs((iP.diff(p).direction() - a) % (2 * Math.PI)) > Math.PI / 2d) {
       return Optional.empty();
     }
     return oIP;

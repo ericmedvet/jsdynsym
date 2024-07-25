@@ -131,7 +131,8 @@ public class NavigationEnvironment implements NumericalDynamicalSystem<State>, E
     if (configuration.senseTarget) {
       System.arraycopy(sInputs, 0, observation, 2, sInputs.length);
       observation[0] = sensorsRange.normalize(state.robotPosition.distance(state.targetPosition));
-      observation[1] = state.targetPosition.diff(state.robotPosition).direction() - state.robotDirection;
+      observation[1] = (state.targetPosition.diff(state.robotPosition).direction() - state.robotDirection)
+          % (2d * Math.PI);
       if (observation[1] > Math.PI) {
         observation[1] = observation[1] - Math.PI;
       }

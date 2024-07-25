@@ -29,8 +29,10 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
+import java.util.Arrays;
 import java.util.List;
 import java.util.SortedMap;
+import java.util.stream.Collectors;
 
 public class PointNavigationDrawer
     implements SimulationOutcomeDrawer<SingleAgentTask.Step<double[], double[], PointNavigationEnvironment.State>> {
@@ -90,11 +92,28 @@ public class PointNavigationDrawer
     g.draw(shape);
   }
 
+  private static void drawIO(Graphics2D g, Color c, double[] in, double[] out) {
+    g.setStroke(new BasicStroke(1f));
+    g.setColor(c);
+    g.drawString(
+        "in:  %s"
+            .formatted(
+                Arrays.stream(in).mapToObj("%+4.2f"::formatted).collect(Collectors.joining(" "))),
+        5,
+        5 + g.getFontMetrics().getHeight() * 2);
+    g.drawString(
+        "out: %s"
+            .formatted(
+                Arrays.stream(out).mapToObj("%+4.2f"::formatted).collect(Collectors.joining(" "))),
+        5,
+        5 + g.getFontMetrics().getHeight() * 3);
+  }
+
   @Override
   public void drawSingle(
       Graphics2D g, double t, SingleAgentTask.Step<double[], double[], PointNavigationEnvironment.State> step) {
-    // draw info
     Arena arena = step.state().configuration().arena();
+    // draw info
     g.setStroke(new BasicStroke(1f));
     g.setColor(configuration.infoColor);
     g.drawString("%.2fs".formatted(t), 5, 5 + g.getFontMetrics().getHeight());
@@ -121,6 +140,12 @@ public class PointNavigationDrawer
         step.state().targetPosition());
     // restore transformation
     g.setTransform(previousTransform);
+    // draw info
+    g.setStroke(new BasicStroke(1f));
+    g.setColor(configuration.infoColor);
+    g.drawString("%.2fs".formatted(t), 5, 5 + g.getFontMetrics().getHeight());
+    // draw input and output
+    drawIO(g, configuration.infoColor, step.observation(), step.action());
   }
 
   @Override

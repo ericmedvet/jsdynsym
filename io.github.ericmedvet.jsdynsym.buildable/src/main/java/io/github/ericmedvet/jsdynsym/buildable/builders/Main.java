@@ -26,9 +26,9 @@ import io.github.ericmedvet.jsdynsym.control.Simulation;
 import io.github.ericmedvet.jsdynsym.control.SingleAgentTask;
 import io.github.ericmedvet.jsdynsym.control.navigation.*;
 import io.github.ericmedvet.jsdynsym.core.DynamicalSystem;
-import io.github.ericmedvet.jsdynsym.core.numerical.NumericalTimeInvariantStatelessSystem;
 import io.github.ericmedvet.jsdynsym.core.numerical.ann.MultiLayerPerceptron;
 import io.github.ericmedvet.jviz.core.drawer.ImageBuilder;
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Random;
@@ -36,7 +36,8 @@ import java.util.function.Function;
 
 public class Main {
   public static void main(String[] args) throws IOException {
-    pointNavVisual();
+    navigation();
+    // pointNavigation();
   }
 
   @SuppressWarnings("unchecked")
@@ -47,8 +48,8 @@ public class Main {
     Function<String, Object> decoder = (Function<String, Object>) nb.build("f.fromBase64()");
     List<Double> actualGenotype = (List<Double>) decoder.apply(genotype);
     PointNavigationEnvironment environment = (PointNavigationEnvironment)
-        nb.build(
-            "ds.e.pointNavigation(arena = E_MAZE;initialRobotXRange = m.range(min = 0.5; max = 0.55);initialRobotYRange = m.range(min = 0.75; max = 0.75);robotMaxV = 0.05)");
+        nb.build("ds.e.pointNavigation(arena = E_MAZE;initialRobotXRange = m.range(min = 0.5; max = 0.55);"
+            + "initialRobotYRange = m.range(min = 0.75; max = 0.75);robotMaxV = 0.05)");
     MultiLayerPerceptron mlp = ((NumericalDynamicalSystems.Builder<MultiLayerPerceptron, ?>)
             nb.build("ds.num.mlp(innerLayerRatio = 2.0)"))
         .apply(environment.nOfOutputs(), environment.nOfInputs());
@@ -76,46 +77,28 @@ public class Main {
     vfd.show(new ImageBuilder.ImageInfo(500, 500), mlp);*/
   }
 
-  public static void pointNavigation() {
+  public static void pointNavigation() throws IOException {
     NamedBuilder<?> nb = NamedBuilder.fromDiscovery();
     PointNavigationEnvironment environment =
         (PointNavigationEnvironment) nb.build("ds.e.pointNavigation(arena = E_MAZE)");
-    /*MultiLayerPerceptron mlp = ((NumericalDynamicalSystems.Builder<MultiLayerPerceptron, ?>)
-    nb.build("ds.num.mlp()"))
-    .apply(environment.nOfOutputs(), environment.nOfInputs());
-    mlp.randomize(new Random(), DoubleRange.SYMMETRIC_UNIT);*/
-    NumericalTimeInvariantStatelessSystem dynSys = new NumericalTimeInvariantStatelessSystem() {
-      @Override
-      public double[] step(double[] input) {
-        return new double[] {Math.cos(input[0]) * input[0], Math.sin(input[0]) * input[1]};
-      }
-
-      @Override
-      public int nOfInputs() {
-        return 2;
-      }
-
-      @Override
-      public int nOfOutputs() {
-        return 2;
-      }
-    };
+    @SuppressWarnings("unchecked")
+    MultiLayerPerceptron mlp = ((NumericalDynamicalSystems.Builder<MultiLayerPerceptron, ?>)
+            nb.build("ds.num.mlp()"))
+        .apply(environment.nOfOutputs(), environment.nOfInputs());
+    mlp.randomize(new Random(), DoubleRange.SYMMETRIC_UNIT);
     VectorFieldDrawer vfd =
         new VectorFieldDrawer(Arena.Prepared.E_MAZE.arena(), VectorFieldDrawer.Configuration.DEFAULT);
-    vfd.show(new ImageBuilder.ImageInfo(500, 500), dynSys);
-    /*Random random = new Random();
-    NumericalStatelessSystem controller = NumericalStatelessSystem.from(2, 2, (t, a) ->
-    new double[] {Math.cos(t) + random.nextGaussian(0d, .5), Math.sin(t) - random.nextGaussian(.1, .5)});
+    vfd.show(new ImageBuilder.ImageInfo(500, 500), mlp);
     SingleAgentTask<DynamicalSystem<double[], double[], ?>, double[], double[], PointNavigationEnvironment.State>
-    task = SingleAgentTask.fromEnvironment(environment, new double[2], new DoubleRange(0, 60), 0.1);
+        task = SingleAgentTask.fromEnvironment(environment, new double[2], new DoubleRange(0, 10), 0.1);
     Simulation.Outcome<SingleAgentTask.Step<double[], double[], PointNavigationEnvironment.State>> outcome =
-    task.simulate(controller);
-    PointNavigationDrawer d = new PointNavigationDrawer(PointNavigationDrawer.Configuration.DEFAULT);
-    d.show(new ImageBuilder.ImageInfo(500, 500), outcome);*/
-    // d.save(new ImageBuilder.ImageInfo(500, 500), new File("/home/francescorusin/Downloads/E_MAZE.png"), outcome);
+        task.simulate(mlp);
+    new PointNavigationDrawer(PointNavigationDrawer.Configuration.DEFAULT)
+        .videoBuilder()
+        .save(new File("../point-navigation.mp4"), outcome);
   }
 
-  public static void navigation() {
+  public static void navigation() throws IOException {
     NamedBuilder<?> nb = NamedBuilder.fromDiscovery();
     NavigationEnvironment environment = (NavigationEnvironment) nb.build("ds.e.navigation(arena = E_MAZE)");
     @SuppressWarnings("unchecked")
@@ -124,13 +107,11 @@ public class Main {
         .apply(environment.nOfOutputs(), environment.nOfInputs());
     mlp.randomize(new Random(), DoubleRange.SYMMETRIC_UNIT);
     SingleAgentTask<DynamicalSystem<double[], double[], ?>, double[], double[], NavigationEnvironment.State> task =
-        SingleAgentTask.fromEnvironment(environment, new double[2], new DoubleRange(0, 60), 0.1);
+        SingleAgentTask.fromEnvironment(environment, new double[2], new DoubleRange(0, 30), 0.1);
     Simulation.Outcome<SingleAgentTask.Step<double[], double[], NavigationEnvironment.State>> outcome =
         task.simulate(mlp);
     NavigationDrawer d = new NavigationDrawer(NavigationDrawer.Configuration.DEFAULT);
-    d.show(new ImageBuilder.ImageInfo(500, 500), outcome);
-    System.out.println(
-        outcome.snapshots().get(outcome.snapshots().lastKey()).state().nOfCollisions());
-    // d.save(new ImageBuilder.ImageInfo(500, 500), new File("/home/melsalib/Downloads/E_MAZE.png"), outcome);
+    d.show(outcome);
+    d.videoBuilder().save(new File("../navigation.mp4"), outcome);
   }
 }

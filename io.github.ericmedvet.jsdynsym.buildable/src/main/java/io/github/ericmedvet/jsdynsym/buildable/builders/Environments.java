@@ -45,7 +45,7 @@ public class Environments {
       @Param(value = "robotMaxV", dD = 0.01) double robotMaxV,
       @Param(value = "sensorsAngleRange", dNPM = "m.range(min=-1.57;max=1.57)") DoubleRange sensorsAngleRange,
       @Param(value = "nOfSensors", dI = 5) int nOfSensors,
-      @Param(value = "sensorRange", dD = 1) double sensorRange,
+      @Param(value = "sensorRange", dD = .5) double sensorRange,
       @Param(value = "senseTarget", dB = true) boolean senseTarget,
       @Param(value = "arena", dS = "empty") Arena.Prepared arena,
       @Param(value = "rescaleInput", dB = true) boolean rescaleInput,

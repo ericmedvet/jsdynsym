@@ -46,7 +46,7 @@ public class Simulations {
       @Param(value = "robotRadius", dD = 0.05) double robotRadius,
       @Param(value = "robotMaxV", dD = 0.01) double robotMaxV,
       @Param(value = "nOfSensors", dI = 5) int nOfSensors,
-      @Param(value = "sensorRange", dD = 1) double sensorRange,
+      @Param(value = "sensorRange", dD = .5) double sensorRange,
       @Param(value = "senseTarget", dB = true) boolean senseTarget,
       @Param(value = "arena", dS = "empty") Arena.Prepared arena,
       @Param(value = "rescaleInput", dB = true) boolean rescaleInput,
