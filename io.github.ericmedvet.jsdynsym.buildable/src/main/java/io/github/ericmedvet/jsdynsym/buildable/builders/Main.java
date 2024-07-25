@@ -37,7 +37,7 @@ import java.util.function.Function;
 public class Main {
   public static void main(String[] args) throws IOException {
     navigation();
-    // pointNavigation();
+    pointNavigation();
   }
 
   @SuppressWarnings("unchecked")

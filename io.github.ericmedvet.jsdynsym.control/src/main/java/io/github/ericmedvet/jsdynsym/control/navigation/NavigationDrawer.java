@@ -153,29 +153,31 @@ public class NavigationDrawer
     if (ioType.equals(Configuration.IOType.GRAPHIC)) {
       Color aC = GraphicsUtils.alphaed(c, alpha);
       g.drawString("in:", 5, 5 + g.getFontMetrics().getHeight() * 2);
-      double x0 = g.getFontMetrics().stringWidth("out: ") + 5;
-      double y0 = 5 + g.getFontMetrics().getHeight() * 2;
+      double x0 = 5 + g.getFontMetrics().stringWidth("out: ");
+      double y2 = 5 + g.getFontMetrics().getHeight() * 2;
       double w = g.getFontMetrics().stringWidth("o");
       double h = g.getFontMetrics().getHeight() * .75;
-      // draw proximity sensors
-      IntStream.range(senseTarget ? 2 : 0, in.length).forEach(i -> {
-        g.setColor(c);
-        g.draw(new Rectangle2D.Double(x0 + w * 1.5 * i, y0 - h, w, h));
+      IntStream.range(0, in.length).forEach(i -> {
         double nV = DoubleRange.UNIT.clip(rescaled ? DoubleRange.SYMMETRIC_UNIT.normalize(in[i]) : in[i]);
-        g.setColor(aC);
-        g.fill(new Rectangle2D.Double(x0 + w * 1.5 * i, y0 - h * nV, w, h * nV));
-      });
-      if (senseTarget) {
+        double x = x0 + w * 1.5 * i;
         g.setColor(c);
-        g.draw(new Rectangle2D.Double(x0 + w * 1.5 * (in.length + 1), y0 - h, w, h));
-        double nV = DoubleRange.UNIT.clip(in[0]);
-        g.fill(new Rectangle2D.Double(x0 + w * 1.5 * (in.length + 1), y0 - h * nV, w, h * nV));
-        double a = in[1] * Math.PI;
-        double cX = x0 + w * 1.5 * (in.length + 2) + w / 2d;
-        double cY = y0 + w / 2d;
-        g.draw(new Line2D.Double(cX, cY, cX + w / 2d * Math.cos(a), cY + w / 2d * Math.sin(a)));
-      }
+        g.draw(new Rectangle2D.Double(x, y2 - h, w, h));
+        if (!senseTarget || i >= 2) {
+          g.setColor(aC);
+        }
+        g.fill(new Rectangle2D.Double(x, y2 - h * nV, w, h * nV));
+      });
+      g.setColor(c);
       g.drawString("out:", 5, 5 + g.getFontMetrics().getHeight() * 3);
+      double y3 = 5 + g.getFontMetrics().getHeight() * 3;
+      IntStream.range(0, out.length).forEach(i -> {
+        double nV = DoubleRange.UNIT.clip(rescaled ? DoubleRange.SYMMETRIC_UNIT.normalize(out[i]) : out[i]);
+        double x = x0 + w * 1.5 * i;
+        g.setColor(c);
+        g.draw(new Rectangle2D.Double(x, y3 - h, w, h));
+        g.setColor(aC);
+        g.fill(new Rectangle2D.Double(x, y3 - h * nV, w, h * nV));
+      });
     }
   }
 

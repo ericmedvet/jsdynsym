@@ -29,7 +29,7 @@ import java.awt.geom.Line2D;
 
 public class VectorFieldDrawer implements Drawer<NumericalTimeInvariantStatelessSystem> {
 
-  private static final int DEFAULT_SIDE_LENGTH = 500;
+  private static final int DEFAULT_SIDE_LENGTH = 400;
 
   private final Configuration configuration;
   private final Arena arena;

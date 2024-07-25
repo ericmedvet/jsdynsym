@@ -26,6 +26,7 @@ import io.github.ericmedvet.jsdynsym.control.geometry.Segment;
 import io.github.ericmedvet.jsdynsym.control.geometry.Semiline;
 import io.github.ericmedvet.jsdynsym.control.navigation.NavigationEnvironment.State;
 import io.github.ericmedvet.jsdynsym.core.numerical.NumericalDynamicalSystem;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.random.RandomGenerator;
@@ -116,30 +117,28 @@ public class NavigationEnvironment implements NumericalDynamicalSystem<State>, E
     double[] sInputs = configuration.sensorAngles.stream()
         .mapToDouble(a -> {
           Semiline sl = new Semiline(state.robotPosition, a + state.robotDirection);
-          double d = segments.stream()
+          return segments.stream()
               .map(sl::interception)
               .filter(Optional::isPresent)
-              .mapToDouble(op -> op.orElseThrow().distance(state.robotPosition))
+              .mapToDouble(op ->
+                  sensorsRange.normalize(op.orElseThrow().distance(state.robotPosition)))
               .min()
               .orElse(Double.POSITIVE_INFINITY);
-          return configuration.rescaleInput
-              ? DoubleRange.SYMMETRIC_UNIT.denormalize(sensorsRange.normalize(d))
-              : sensorsRange.normalize(d);
         })
         .toArray();
     double[] observation = configuration.senseTarget ? new double[configuration.sensorAngles.size() + 2] : sInputs;
     if (configuration.senseTarget) {
       System.arraycopy(sInputs, 0, observation, 2, sInputs.length);
-      observation[0] = sensorsRange.normalize(state.robotPosition.distance(state.targetPosition));
-      observation[1] = (state.targetPosition.diff(state.robotPosition).direction() - state.robotDirection)
+      double d = state.robotPosition.distance(state.targetPosition);
+      double a = (state.targetPosition.diff(state.robotPosition).direction() - state.robotDirection)
           % (2d * Math.PI);
-      if (observation[1] > Math.PI) {
-        observation[1] = observation[1] - Math.PI;
-      }
-      if (observation[1] < -Math.PI) {
-        observation[1] = observation[1] + Math.PI;
-      }
-      observation[1] = observation[1] / Math.PI;
+      observation[0] = sensorsRange.normalize(d);
+      observation[1] = new DoubleRange(-2d * Math.PI, 2d * Math.PI).normalize(a);
+    }
+    if (configuration.rescaleInput) {
+      observation = Arrays.stream(observation)
+          .map(v -> DoubleRange.SYMMETRIC_UNIT.denormalize(v))
+          .toArray();
     }
     return observation;
   }

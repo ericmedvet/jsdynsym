@@ -19,20 +19,19 @@
  */
 package io.github.ericmedvet.jsdynsym.control.navigation;
 
+import io.github.ericmedvet.jnb.datastructure.DoubleRange;
 import io.github.ericmedvet.jsdynsym.control.Simulation;
 import io.github.ericmedvet.jsdynsym.control.SimulationOutcomeDrawer;
 import io.github.ericmedvet.jsdynsym.control.SingleAgentTask;
 import io.github.ericmedvet.jsdynsym.control.geometry.Point;
 import io.github.ericmedvet.jviz.core.util.GraphicsUtils;
 import java.awt.*;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Ellipse2D;
-import java.awt.geom.Line2D;
-import java.awt.geom.Path2D;
+import java.awt.geom.*;
 import java.util.Arrays;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class PointNavigationDrawer
     implements SimulationOutcomeDrawer<SingleAgentTask.Step<double[], double[], PointNavigationEnvironment.State>> {
@@ -54,13 +53,83 @@ public class PointNavigationDrawer
       double targetThickness,
       double segmentThickness,
       double trajectoryThickness,
+      double sensorsFillAlpha,
       double robotFillAlpha,
       double targetSize,
       double robotDotSize,
-      double marginRate) {
+      double marginRate,
+      NavigationDrawer.Configuration.IOType ioType) {
 
-    public static final Configuration DEFAULT =
-        new Configuration(Color.BLUE, Color.CYAN, Color.DARK_GRAY, Color.BLUE, 2, 2, 3, 1, 0.25, 5, .01, 0.01);
+    public static final Configuration DEFAULT = new Configuration(
+        Color.BLUE,
+        Color.CYAN,
+        Color.DARK_GRAY,
+        Color.BLUE,
+        2,
+        2,
+        3,
+        1,
+        0.25,
+        0.25,
+        5,
+        .01,
+        0.01,
+        NavigationDrawer.Configuration.IOType.GRAPHIC);
+  }
+
+  private static void drawIO(
+      Graphics2D g,
+      Color c,
+      double alpha,
+      NavigationDrawer.Configuration.IOType ioType,
+      double[] in,
+      double[] out,
+      boolean rescaled) {
+    if (ioType.equals(NavigationDrawer.Configuration.IOType.TEXT)) {
+      g.setStroke(new BasicStroke(1f));
+      g.setColor(c);
+      g.drawString(
+          "in:  %s"
+              .formatted(Arrays.stream(in)
+                  .mapToObj("%+4.2f"::formatted)
+                  .collect(Collectors.joining(" "))),
+          5,
+          5 + g.getFontMetrics().getHeight() * 2);
+      g.drawString(
+          "out: %s"
+              .formatted(Arrays.stream(out)
+                  .mapToObj("%+4.2f"::formatted)
+                  .collect(Collectors.joining(" "))),
+          5,
+          5 + g.getFontMetrics().getHeight() * 3);
+    }
+    if (ioType.equals(NavigationDrawer.Configuration.IOType.GRAPHIC)) {
+      Color aC = GraphicsUtils.alphaed(c, alpha);
+      g.drawString("in:", 5, 5 + g.getFontMetrics().getHeight() * 2);
+      double x0 = 5 + g.getFontMetrics().stringWidth("out: ");
+      double y2 = 5 + g.getFontMetrics().getHeight() * 2;
+      double w = g.getFontMetrics().stringWidth("o");
+      double h = g.getFontMetrics().getHeight() * .75;
+      IntStream.range(0, in.length).forEach(i -> {
+        double nV = DoubleRange.UNIT.clip(rescaled ? DoubleRange.SYMMETRIC_UNIT.normalize(in[i]) : in[i]);
+        double x = x0 + w * 1.5 * i;
+        g.setColor(c);
+        g.draw(new Rectangle2D.Double(x, y2 - h, w, h));
+        g.setColor(aC);
+        g.fill(new Rectangle2D.Double(x, y2 - h * nV, w, h * nV));
+      });
+      g.setColor(c);
+      g.drawString("out:", 5, 5 + g.getFontMetrics().getHeight() * 3);
+      double y3 = 5 + g.getFontMetrics().getHeight() * 3;
+      IntStream.range(0, out.length).forEach(i -> {
+        double nV = DoubleRange.UNIT.clip(rescaled ? DoubleRange.SYMMETRIC_UNIT.normalize(out[i]) : out[i]);
+        double x = x0 + w * 1.5 * i;
+        g.setColor(c);
+        g.draw(new Rectangle2D.Double(x, y3 - h, w, h));
+        g.setColor(aC);
+        g.fill(new Rectangle2D.Double(x, y3 - h * nV, w, h * nV));
+      });
+    }
   }
 
   private static void drawTarget(Graphics2D g, Color c, double th, double l, Point p) {
@@ -90,23 +159,6 @@ public class PointNavigationDrawer
     g.fill(shape);
     g.setColor(c);
     g.draw(shape);
-  }
-
-  private static void drawIO(Graphics2D g, Color c, double[] in, double[] out) {
-    g.setStroke(new BasicStroke(1f));
-    g.setColor(c);
-    g.drawString(
-        "in:  %s"
-            .formatted(
-                Arrays.stream(in).mapToObj("%+4.2f"::formatted).collect(Collectors.joining(" "))),
-        5,
-        5 + g.getFontMetrics().getHeight() * 2);
-    g.drawString(
-        "out: %s"
-            .formatted(
-                Arrays.stream(out).mapToObj("%+4.2f"::formatted).collect(Collectors.joining(" "))),
-        5,
-        5 + g.getFontMetrics().getHeight() * 3);
   }
 
   @Override
@@ -145,7 +197,16 @@ public class PointNavigationDrawer
     g.setColor(configuration.infoColor);
     g.drawString("%.2fs".formatted(t), 5, 5 + g.getFontMetrics().getHeight());
     // draw input and output
-    drawIO(g, configuration.infoColor, step.observation(), step.action());
+    if (!configuration.ioType.equals(NavigationDrawer.Configuration.IOType.OFF)) {
+      drawIO(
+          g,
+          configuration.infoColor,
+          configuration.sensorsFillAlpha,
+          configuration.ioType,
+          step.observation(),
+          step.action(),
+          step.state().configuration().rescaleInput());
+    }
   }
 
   @Override
