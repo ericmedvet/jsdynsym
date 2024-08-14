@@ -20,6 +20,7 @@
 
 package io.github.ericmedvet.jsdynsym.buildable.builders;
 
+import io.github.ericmedvet.jnb.core.Cacheable;
 import io.github.ericmedvet.jnb.core.Discoverable;
 import io.github.ericmedvet.jnb.core.Param;
 import io.github.ericmedvet.jsdynsym.control.navigation.Arena;
@@ -32,16 +33,19 @@ public class Drawers {
   private Drawers() {}
 
   @SuppressWarnings("unused")
+  @Cacheable
   public static NavigationDrawer navigation() {
     return new NavigationDrawer(NavigationDrawer.Configuration.DEFAULT);
   }
 
   @SuppressWarnings("unused")
+  @Cacheable
   public static PointNavigationDrawer pointNavigation() {
     return new PointNavigationDrawer(PointNavigationDrawer.Configuration.DEFAULT);
   }
 
   @SuppressWarnings("unused")
+  @Cacheable
   public static VectorFieldDrawer vectorField(@Param(value = "arena", dNPM = "empty") Arena.Prepared arena) {
     return new VectorFieldDrawer(arena.arena(), VectorFieldDrawer.Configuration.DEFAULT);
   }

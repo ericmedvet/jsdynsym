@@ -20,6 +20,7 @@
 
 package io.github.ericmedvet.jsdynsym.buildable.builders;
 
+import io.github.ericmedvet.jnb.core.Cacheable;
 import io.github.ericmedvet.jnb.core.Discoverable;
 import io.github.ericmedvet.jnb.core.Param;
 import io.github.ericmedvet.jnb.datastructure.DoubleRange;
@@ -40,6 +41,7 @@ public class NavigationFunctions {
   private NavigationFunctions() {}
 
   @SuppressWarnings("unused")
+  @Cacheable
   public static <X> FormattedNamedFunction<X, Double> avgD(
       @Param(value = "of", dNPM = "f.identity()")
           Function<X, Simulation.Outcome<SingleAgentTask.Step<double[], double[], State>>> beforeF,
@@ -54,6 +56,7 @@ public class NavigationFunctions {
   }
 
   @SuppressWarnings("unused")
+  @Cacheable
   public static <X> NamedFunction<X, Point> closestRobotP(
       @Param(value = "of", dNPM = "f.identity()")
           Function<X, Simulation.Outcome<SingleAgentTask.Step<double[], double[], State>>> beforeF,
@@ -82,6 +85,7 @@ public class NavigationFunctions {
   }
 
   @SuppressWarnings("unused")
+  @Cacheable
   public static <X> FormattedNamedFunction<X, Double> distanceFromTarget(
       @Param(value = "of", dNPM = "f.identity()") Function<X, State> beforeF,
       @Param(value = "format", dS = "%5.3f") String format) {
@@ -90,6 +94,7 @@ public class NavigationFunctions {
   }
 
   @SuppressWarnings("unused")
+  @Cacheable
   public static <X> FormattedNamedFunction<X, Double> finalD(
       @Param(value = "of", dNPM = "f.identity()")
           Function<X, Simulation.Outcome<SingleAgentTask.Step<double[], double[], State>>> beforeF,
@@ -103,6 +108,7 @@ public class NavigationFunctions {
   }
 
   @SuppressWarnings("unused")
+  @Cacheable
   public static <X> NamedFunction<X, Point> finalRobotP(
       @Param(value = "of", dNPM = "f.identity()")
           Function<X, Simulation.Outcome<SingleAgentTask.Step<double[], double[], State>>> beforeF,
@@ -127,6 +133,7 @@ public class NavigationFunctions {
   }
 
   @SuppressWarnings("unused")
+  @Cacheable
   public static <X> FormattedNamedFunction<X, Double> finalTime(
       @Param(value = "of", dNPM = "f.identity()")
           Function<X, Simulation.Outcome<SingleAgentTask.Step<double[], double[], State>>> beforeF,
@@ -137,6 +144,7 @@ public class NavigationFunctions {
   }
 
   @SuppressWarnings("unused")
+  @Cacheable
   public static <X> FormattedNamedFunction<X, Double> finalTimePlusD(
       @Param(value = "of", dNPM = "f.identity()")
           Function<X, Simulation.Outcome<SingleAgentTask.Step<double[], double[], State>>> beforeF,
@@ -156,6 +164,7 @@ public class NavigationFunctions {
   }
 
   @SuppressWarnings("unused")
+  @Cacheable
   public static <X> FormattedNamedFunction<X, Double> minD(
       @Param(value = "of", dNPM = "f.identity()")
           Function<X, Simulation.Outcome<SingleAgentTask.Step<double[], double[], State>>> beforeF,
@@ -170,6 +179,7 @@ public class NavigationFunctions {
   }
 
   @SuppressWarnings("unused")
+  @Cacheable
   public static <X> FormattedNamedFunction<X, Double> x(
       @Param(value = "of", dNPM = "f.identity()") Function<X, Point> beforeF,
       @Param(value = "format", dS = "%5.3f") String format) {
@@ -178,6 +188,7 @@ public class NavigationFunctions {
   }
 
   @SuppressWarnings("unused")
+  @Cacheable
   public static <X> FormattedNamedFunction<X, Double> y(
       @Param(value = "of", dNPM = "f.identity()") Function<X, Point> beforeF,
       @Param(value = "format", dS = "%5.3f") String format) {

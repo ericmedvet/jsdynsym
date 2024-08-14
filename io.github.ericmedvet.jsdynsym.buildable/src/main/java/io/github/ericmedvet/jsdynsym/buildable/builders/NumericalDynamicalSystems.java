@@ -20,6 +20,7 @@
 
 package io.github.ericmedvet.jsdynsym.buildable.builders;
 
+import io.github.ericmedvet.jnb.core.Cacheable;
 import io.github.ericmedvet.jnb.core.Discoverable;
 import io.github.ericmedvet.jnb.core.Param;
 import io.github.ericmedvet.jnb.datastructure.DoubleRange;
@@ -55,6 +56,7 @@ public class NumericalDynamicalSystems {
   }
 
   @SuppressWarnings("unused")
+  @Cacheable
   public static Builder<DelayedRecurrentNetwork, DelayedRecurrentNetwork.State> drn(
       @Param(value = "timeRange", dNPM = "m.range(min=0;max=1)") DoubleRange timeRange,
       @Param(value = "innerNeuronsRatio", dD = 1d) double innerNeuronsRatio,
@@ -73,6 +75,7 @@ public class NumericalDynamicalSystems {
   }
 
   @SuppressWarnings("unused")
+  @Cacheable
   public static <S> Builder<EnhancedInput<S>, S> enhanced(
       @Param("windowT") double windowT,
       @Param("inner") Builder<? extends NumericalDynamicalSystem<S>, S> inner,
@@ -94,6 +97,7 @@ public class NumericalDynamicalSystems {
   }
 
   @SuppressWarnings("unused")
+  @Cacheable
   public static <S> Builder<NumericalDynamicalSystem<Stepped.State<S>>, Stepped.State<S>> inStepped(
       @Param(value = "stepT", dD = 1) double interval,
       @Param("inner") Builder<? extends NumericalDynamicalSystem<S>, S> inner) {
@@ -102,6 +106,7 @@ public class NumericalDynamicalSystems {
   }
 
   @SuppressWarnings("unused")
+  @Cacheable
   public static Builder<MultiLayerPerceptron, StatelessSystem.State> mlp(
       @Param(value = "innerLayerRatio", dD = 0.65) double innerLayerRatio,
       @Param(value = "nOfInnerLayers", dI = 1) int nOfInnerLayers,
@@ -127,6 +132,7 @@ public class NumericalDynamicalSystems {
   }
 
   @SuppressWarnings("unused")
+  @Cacheable
   public static <S> Builder<Noised<S>, S> noised(
       @Param(value = "inputSigma", dD = 0.01) double inputSigma,
       @Param(value = "outputSigma", dD = 0.01) double outputSigma,
@@ -137,6 +143,7 @@ public class NumericalDynamicalSystems {
   }
 
   @SuppressWarnings("unused")
+  @Cacheable
   public static <S> Builder<NumericalDynamicalSystem<Stepped.State<S>>, Stepped.State<S>> outStepped(
       @Param(value = "stepT", dD = 1) double interval,
       @Param("inner") Builder<? extends NumericalDynamicalSystem<S>, S> inner) {
@@ -145,6 +152,7 @@ public class NumericalDynamicalSystems {
   }
 
   @SuppressWarnings("unused")
+  @Cacheable
   public static Builder<Sinusoidal, StatelessSystem.State> sin(
       @Param(value = "p", dNPM = "m.range(min=-1.57;max=1.57)") DoubleRange phaseRange,
       @Param(value = "f", dNPM = "m.range(min=0;max=1)") DoubleRange frequencyRange,
@@ -155,6 +163,7 @@ public class NumericalDynamicalSystems {
   }
 
   @SuppressWarnings("unused")
+  @Cacheable
   public static <S> Builder<NumericalDynamicalSystem<Stepped.State<S>>, Stepped.State<S>> stepped(
       @Param(value = "stepT", dD = 0.1) double interval,
       @Param("inner") Builder<? extends NumericalDynamicalSystem<S>, S> inner) {

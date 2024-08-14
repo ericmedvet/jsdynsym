@@ -20,6 +20,7 @@
 
 package io.github.ericmedvet.jsdynsym.buildable.builders;
 
+import io.github.ericmedvet.jnb.core.Cacheable;
 import io.github.ericmedvet.jnb.core.Discoverable;
 import io.github.ericmedvet.jnb.core.Param;
 import io.github.ericmedvet.jnb.datastructure.FormattedNamedFunction;
@@ -34,6 +35,7 @@ public class Functions {
   private Functions() {}
 
   @SuppressWarnings("unused")
+  @Cacheable
   public static <X> FormattedNamedFunction<X, Double> doubleOp(
       @Param(value = "of", dNPM = "f.identity()") Function<X, Double> beforeF,
       @Param(value = "activationF", dS = "identity") MultiLayerPerceptron.ActivationFunction activationF,
@@ -44,6 +46,7 @@ public class Functions {
   }
 
   @SuppressWarnings("unused")
+  @Cacheable
   public static <X, S> NamedFunction<X, SortedMap<Double, S>> simOutcome(
       @Param(value = "of", dNPM = "f.identity()") Function<X, Simulation.Outcome<S>> beforeF,
       @Param(value = "format", dS = "%s") String format) {

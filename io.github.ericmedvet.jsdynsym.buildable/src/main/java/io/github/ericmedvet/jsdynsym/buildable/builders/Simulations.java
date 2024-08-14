@@ -19,6 +19,7 @@
  */
 package io.github.ericmedvet.jsdynsym.buildable.builders;
 
+import io.github.ericmedvet.jnb.core.Cacheable;
 import io.github.ericmedvet.jnb.core.Discoverable;
 import io.github.ericmedvet.jnb.core.Param;
 import io.github.ericmedvet.jnb.datastructure.DoubleRange;
@@ -35,6 +36,8 @@ import java.util.random.RandomGenerator;
 public class Simulations {
   private Simulations() {}
 
+  @SuppressWarnings("unused")
+  @Cacheable
   public static VariableSensorPositionsNavigation variableSensorPositionsNavigation(
       @Param(value = "name", iS = "vs[{nOfSensors}]-nav-{arena}") String name,
       @Param(value = "initialRobotXRange", dNPM = "m.range(min=0.45;max=0.55)") DoubleRange initialRobotXRange,
