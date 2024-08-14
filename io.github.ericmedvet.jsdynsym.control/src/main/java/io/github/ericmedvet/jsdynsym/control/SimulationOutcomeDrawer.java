@@ -22,6 +22,7 @@ package io.github.ericmedvet.jsdynsym.control;
 import io.github.ericmedvet.jsdynsym.control.Simulation.Outcome;
 import io.github.ericmedvet.jviz.core.drawer.Drawer;
 import io.github.ericmedvet.jviz.core.drawer.ImageBuilder;
+import io.github.ericmedvet.jviz.core.drawer.Video;
 import io.github.ericmedvet.jviz.core.drawer.VideoBuilder;
 import java.awt.*;
 import java.awt.image.BufferedImage;
