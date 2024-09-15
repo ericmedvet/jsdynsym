@@ -143,7 +143,7 @@ public class PointNavigationDrawer
     g.setStroke(new BasicStroke((float) th));
     g.setColor(c);
     Path2D path = new Path2D.Double();
-    path.moveTo(points.get(0).x(), points.get(0).y());
+    path.moveTo(points.getFirst().x(), points.getFirst().y());
     points.forEach(p -> path.lineTo(p.x(), p.y()));
     g.draw(path);
   }

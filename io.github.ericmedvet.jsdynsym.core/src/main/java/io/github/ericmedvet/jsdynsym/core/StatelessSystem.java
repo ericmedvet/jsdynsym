@@ -24,7 +24,7 @@ package io.github.ericmedvet.jsdynsym.core;
 public interface StatelessSystem<I, O> extends DynamicalSystem<I, O, StatelessSystem.State> {
 
   record State() {
-    public static State EMPTY = new State();
+    public static final State EMPTY = new State();
   }
 
   @Override

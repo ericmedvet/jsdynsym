@@ -26,7 +26,6 @@ import io.github.ericmedvet.jviz.core.drawer.Video;
 import io.github.ericmedvet.jviz.core.drawer.VideoBuilder;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -48,7 +47,7 @@ public interface SimulationOutcomeDrawer<S> extends ImageBuilder<Simulation.Outc
   default VideoBuilder<Simulation.Outcome<S>> videoBuilder() {
     return new VideoBuilder<>() {
       @Override
-      public Video build(VideoInfo videoInfo, Outcome<S> o) throws IOException {
+      public Video build(VideoInfo videoInfo, Outcome<S> o) {
         Drawer<Map.Entry<Double, S>> drawer =
             (g, e) -> SimulationOutcomeDrawer.this.drawSingle(g, e.getKey(), e.getValue());
         Function<Outcome<S>, SortedMap<Double, Map.Entry<Double, S>>> splitter =

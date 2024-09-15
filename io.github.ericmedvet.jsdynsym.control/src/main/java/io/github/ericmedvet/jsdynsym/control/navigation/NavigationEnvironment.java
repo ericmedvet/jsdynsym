@@ -137,7 +137,7 @@ public class NavigationEnvironment implements NumericalDynamicalSystem<State>, E
     }
     if (configuration.rescaleInput) {
       observation = Arrays.stream(observation)
-          .map(v -> DoubleRange.SYMMETRIC_UNIT.denormalize(v))
+          .map(DoubleRange.SYMMETRIC_UNIT::denormalize)
           .toArray();
     }
     return observation;

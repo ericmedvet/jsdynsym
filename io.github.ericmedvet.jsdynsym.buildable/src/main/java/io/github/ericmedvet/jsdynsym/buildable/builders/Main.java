@@ -77,7 +77,7 @@ public class Main {
     vfd.show(new ImageBuilder.ImageInfo(500, 500), mlp);*/
   }
 
-  public static void pointNavigation() throws IOException {
+  public static void pointNavigation() {
     NamedBuilder<?> nb = NamedBuilder.fromDiscovery();
     PointNavigationEnvironment environment =
         (PointNavigationEnvironment) nb.build("ds.e.pointNavigation(arena = E_MAZE)");
@@ -98,7 +98,7 @@ public class Main {
         .save(new File("../point-navigation.mp4"), outcome);
   }
 
-  public static void navigation() throws IOException {
+  public static void navigation() {
     NamedBuilder<?> nb = NamedBuilder.fromDiscovery();
     NavigationEnvironment environment = (NavigationEnvironment) nb.build("ds.e.navigation(arena = E_MAZE)");
     @SuppressWarnings("unchecked")

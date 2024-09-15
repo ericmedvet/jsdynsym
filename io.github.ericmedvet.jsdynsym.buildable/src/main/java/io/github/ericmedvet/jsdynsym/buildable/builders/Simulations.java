@@ -29,9 +29,7 @@ import io.github.ericmedvet.jsdynsym.control.navigation.VariableSensorPositionsN
 import java.util.List;
 import java.util.random.RandomGenerator;
 
-/**
- * @author "Eric Medvet" on 2024/07/24 for jsdynsym
- */
+/** @author "Eric Medvet" on 2024/07/24 for jsdynsym */
 @Discoverable(prefixTemplate = "dynamicalSystem|dynSys|ds.simulation|sim|s")
 public class Simulations {
   private Simulations() {}
