@@ -29,9 +29,7 @@ import io.github.ericmedvet.jsdynsym.core.numerical.NumericalStatelessSystem;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * @author "Eric Medvet" on 2024/07/24 for jgea
- */
+/** @author "Eric Medvet" on 2024/07/24 for jgea */
 public class VariableSensorPositionsNavigation
     implements SimulationWithExample<
         Pair<List<Double>, NumericalDynamicalSystem<?>>,

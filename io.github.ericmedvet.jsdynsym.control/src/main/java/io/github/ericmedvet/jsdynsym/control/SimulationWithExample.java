@@ -19,9 +19,7 @@
  */
 package io.github.ericmedvet.jsdynsym.control;
 
-/**
- * @author "Eric Medvet" on 2024/07/24 for jsdynsym
- */
+/** @author "Eric Medvet" on 2024/07/24 for jsdynsym */
 public interface SimulationWithExample<T, S, O extends Simulation.Outcome<S>> extends Simulation<T, S, O> {
   T example();
 }
