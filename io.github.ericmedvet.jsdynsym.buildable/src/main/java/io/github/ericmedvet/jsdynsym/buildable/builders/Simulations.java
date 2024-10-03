@@ -51,6 +51,7 @@ public class Simulations {
       @Param(value = "senseTarget", dB = true) boolean senseTarget,
       @Param(value = "arena", dS = "empty") Arena.Prepared arena,
       @Param(value = "rescaleInput", dB = true) boolean rescaleInput,
+      @Param(value = "sortedAngles", dB = true) boolean sortedAngles,
       @Param(value = "randomGenerator", dNPM = "m.defaultRG()") RandomGenerator randomGenerator,
       @Param(value = "dT", dD = 0.1) double dT,
       @Param(value = "initialT", dD = 0) double initialT,
@@ -72,6 +73,7 @@ public class Simulations {
             randomGenerator),
         nOfSensors,
         new DoubleRange(initialT, finalT),
-        dT);
+        dT,
+        sortedAngles);
   }
 }
