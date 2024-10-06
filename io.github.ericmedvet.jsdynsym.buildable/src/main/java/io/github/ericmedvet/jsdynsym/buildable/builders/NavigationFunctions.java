@@ -26,6 +26,7 @@ import io.github.ericmedvet.jnb.core.Param;
 import io.github.ericmedvet.jnb.datastructure.DoubleRange;
 import io.github.ericmedvet.jnb.datastructure.FormattedNamedFunction;
 import io.github.ericmedvet.jnb.datastructure.NamedFunction;
+import io.github.ericmedvet.jnb.datastructure.Pair;
 import io.github.ericmedvet.jsdynsym.control.Simulation;
 import io.github.ericmedvet.jsdynsym.control.SingleAgentTask;
 import io.github.ericmedvet.jsdynsym.control.geometry.Point;
@@ -33,12 +34,40 @@ import io.github.ericmedvet.jsdynsym.control.navigation.Arena;
 import io.github.ericmedvet.jsdynsym.control.navigation.State;
 import java.util.Comparator;
 import java.util.SortedMap;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 @Discoverable(prefixTemplate = "dynamicalSystem|dynSys|ds.environment|env|e.navigation|nav|n")
 public class NavigationFunctions {
 
   private NavigationFunctions() {}
+
+  @SuppressWarnings("unused")
+  @Cacheable
+  public static <X> FormattedNamedFunction<X, Double> arenaCoverage(
+      @Param(value = "of", dNPM = "f.identity()")
+          Function<X, Simulation.Outcome<SingleAgentTask.Step<double[], double[], State>>> beforeF,
+      @Param(value = "xBins", dI = 10) int xBins,
+      @Param(value = "yBins", dI = 10) int yBins,
+      @Param(value = "format", dS = "%5.3f") String format) {
+    BiFunction<Double, Integer, Integer> quantizer = (v, n) -> Math.min((int) Math.round(v * (double) n), n - 1);
+    Function<Simulation.Outcome<SingleAgentTask.Step<double[], double[], State>>, Double> f = o -> {
+      Arena arena = o.snapshots()
+          .get(o.snapshots().firstKey())
+          .state()
+          .configuration()
+          .arena();
+      long nOfVisitedCells = o.snapshots().values().stream()
+          .map(s -> new Pair<>(
+              quantizer.apply(s.state().robotPosition().x() / arena.xExtent(), xBins),
+              quantizer.apply(s.state().robotPosition().y() / arena.yExtent(), yBins)))
+          .distinct()
+          .count();
+      return (double) nOfVisitedCells / (double) (xBins * yBins);
+    };
+    return FormattedNamedFunction.from(f, format, "area.coverage[%dx%d]".formatted(xBins, yBins))
+        .compose(beforeF);
+  }
 
   @SuppressWarnings("unused")
   @Cacheable

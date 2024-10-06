@@ -37,7 +37,7 @@ import java.util.function.Function;
 public class Main {
   public static void main(String[] args) throws IOException {
     navigation();
-    pointNavigation();
+    // pointNavigation();
   }
 
   @SuppressWarnings("unchecked")
@@ -111,7 +111,14 @@ public class Main {
     Simulation.Outcome<SingleAgentTask.Step<double[], double[], NavigationEnvironment.State>> outcome =
         task.simulate(mlp);
     NavigationDrawer d = new NavigationDrawer(NavigationDrawer.Configuration.DEFAULT);
+    @SuppressWarnings("unchecked")
+    Function<Simulation.Outcome<SingleAgentTask.Step<double[], double[], NavigationEnvironment.State>>, Double>
+        fitness = (Function<
+                Simulation.Outcome<
+                    SingleAgentTask.Step<double[], double[], NavigationEnvironment.State>>,
+                Double>)
+            nb.build("ds.e.n.arenaCoverage()");
+    System.out.println(fitness.apply(outcome));
     d.show(outcome);
-    d.videoBuilder().save(new File("../navigation.mp4"), outcome);
   }
 }
