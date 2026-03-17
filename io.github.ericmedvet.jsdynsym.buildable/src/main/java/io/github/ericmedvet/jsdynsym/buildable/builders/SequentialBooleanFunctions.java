@@ -113,7 +113,7 @@ public class SequentialBooleanFunctions {
   }
 
   @Cacheable
-  public static <X> FormattedNamedFunction<X, Double> sdtDevScore(
+  public static <X> FormattedNamedFunction<X, Double> sdScore(
       @Param(value = "name", iS = "avg.delta[{scoreType}]") String name,
       @Param(value = "of", dNPM = "f.identity()") Function<X, Simulation.Outcome<SingleAgentTask.Step<ReinforcementLearningAgent.RewardedInput<double[]>, double[], State>>> beforeF,
       @Param(value = "format", dS = "%+5.3f") String format,
