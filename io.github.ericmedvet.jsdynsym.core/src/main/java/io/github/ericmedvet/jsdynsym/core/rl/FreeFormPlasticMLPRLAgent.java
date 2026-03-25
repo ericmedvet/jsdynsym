@@ -19,12 +19,14 @@
  */
 package io.github.ericmedvet.jsdynsym.core.rl;
 
+import io.github.ericmedvet.jnb.datastructure.Copyable;
 import io.github.ericmedvet.jnb.datastructure.DoubleRange;
 import io.github.ericmedvet.jnb.datastructure.NumericalParametrized;
 import io.github.ericmedvet.jnb.datastructure.Parametrized;
 import io.github.ericmedvet.jsdynsym.core.numerical.FrozenableNumericalDynamicalSystem;
 import io.github.ericmedvet.jsdynsym.core.numerical.NumericalStatelessSystem;
 import io.github.ericmedvet.jsdynsym.core.numerical.ann.HebbianMultiLayerPerceptron;
+import io.github.ericmedvet.jsdynsym.core.numerical.ann.MLPUtils;
 import io.github.ericmedvet.jsdynsym.core.numerical.ann.MultiLayerPerceptron;
 import io.github.ericmedvet.jsdynsym.core.numerical.named.NamedUnivariateRealFunction;
 import java.util.ArrayList;
@@ -35,7 +37,7 @@ import java.util.Map;
 import java.util.random.RandomGenerator;
 import java.util.stream.Collectors;
 
-public class FreeFormPlasticMLPRLAgent implements NumericalTimeInvariantReinforcementLearningAgent<FreeFormPlasticMLPRLAgent.State>, Parametrized<FreeFormPlasticMLPRLAgent, NamedUnivariateRealFunction>, FrozenableNumericalRLAgent<FreeFormPlasticMLPRLAgent.State> {
+public class FreeFormPlasticMLPRLAgent implements NumericalTimeInvariantReinforcementLearningAgent<FreeFormPlasticMLPRLAgent.State>, Parametrized<FreeFormPlasticMLPRLAgent, NamedUnivariateRealFunction>, FrozenableNumericalRLAgent<FreeFormPlasticMLPRLAgent.State>, Copyable<FreeFormPlasticMLPRLAgent> {
   private static final String AVERAGE = "average";
   private static final String STD_DEV = "stdDev";
   private static final String CURRENT = "current";
@@ -102,7 +104,7 @@ public class FreeFormPlasticMLPRLAgent implements NumericalTimeInvariantReinforc
     this(
         activationFunction,
         plasticityFunction,
-        MultiLayerPerceptron.countNeurons(nOfInput, innerNeurons, nOfOutput),
+        MLPUtils.countNeurons(nOfInput, innerNeurons, nOfOutput),
         historyLength,
         weightsUpdateInterval,
         weightInitializationType,
@@ -121,6 +123,25 @@ public class FreeFormPlasticMLPRLAgent implements NumericalTimeInvariantReinforc
       }
     }
     return emptyActivations;
+  }
+
+  public static List<String> getVariableNames() {
+    String[] statisticTypes = {AVERAGE, STD_DEV, CURRENT, TREND};
+    List<String> variableNames = new ArrayList<>();
+    for (Statistics.StatisticsScope ss : Statistics.StatisticsScope.values()) {
+      for (String st : statisticTypes) {
+        if (ss.equals(Statistics.StatisticsScope.REWARD)) {
+          variableNames.add(String.format("%s_%s", st, Statistics.StatisticsScope.REWARD));
+        } else {
+          variableNames.add(String.format("%s_%s_%s", st, ss, ACTIVATION));
+        }
+      }
+    }
+    variableNames.add(LAYER_INDEX);
+    variableNames.add(POST_SYNAPTIC_NEURON_INDEX);
+    variableNames.add(PRE_SYNAPTIC_NEURON_INDEX);
+    variableNames.add(AGE);
+    return variableNames;
   }
 
   private static StateAndOutput step(
@@ -168,7 +189,7 @@ public class FreeFormPlasticMLPRLAgent implements NumericalTimeInvariantReinforc
       }
     }
     // compute output
-    double[][] newActivations = MultiLayerPerceptron.computeActivations(
+    double[][] newActivations = MLPUtils.computeActivations(
         input,
         newWeights,
         activationFunction,
@@ -180,74 +201,38 @@ public class FreeFormPlasticMLPRLAgent implements NumericalTimeInvariantReinforc
     );
   }
 
-  private static double[][][] deepCopy3D(double[][][] src, int historyLength, int[] neurons) {
-    double[][][] copy = emptyActivations(historyLength, neurons);
-    for (int i = 0; i < src.length; i++) {
-      for (int j = 0; j < src[i].length; j++) {
-        copy[i][j] = Arrays.copyOf(src[i][j], src[i][j].length);
-      }
-    }
-    return copy;
-  }
-
-  private static double[][] deepCopy2D(double[][] src) {
-    double[][] copy = new double[src.length][];
-    for (int i = 0; i < src.length; i++) {
-      copy[i] = Arrays.copyOf(src[i], src[i].length);
-    }
-    return copy;
-  }
-
-  public static List<String> getVariableNames() {
-    String[] statisticTypes = {AVERAGE, STD_DEV, CURRENT, TREND};
-    List<String> variableNames = new ArrayList<>();
-    for (Statistics.StatisticsScope ss : Statistics.StatisticsScope.values()) {
-      for (String st : statisticTypes) {
-        if (ss.equals(Statistics.StatisticsScope.REWARD)) {
-          variableNames.add(String.format("%s_%s", st, Statistics.StatisticsScope.REWARD));
-        } else {
-          variableNames.add(String.format("%s_%s_%s", st, ss, ACTIVATION));
-        }
-      }
-    }
-    variableNames.add(LAYER_INDEX);
-    variableNames.add(POST_SYNAPTIC_NEURON_INDEX);
-    variableNames.add(PRE_SYNAPTIC_NEURON_INDEX);
-    variableNames.add(AGE);
-    return variableNames;
-  }
-
   @Override
-  public NamedUnivariateRealFunction getParams() {
-    return plasticityFunction;
-  }
-
-  @Override
-  public void setParams(NamedUnivariateRealFunction namedUnivariateRealFunction) {
-    plasticityFunction = namedUnivariateRealFunction;
+  public FreeFormPlasticMLPRLAgent copyOf() {
+    NamedUnivariateRealFunction copyOfPlasticityFunction = plasticityFunction;
+    if (plasticityFunction instanceof Copyable<?> copyable) {
+      copyOfPlasticityFunction = (NamedUnivariateRealFunction) copyable.copyOf();
+    }
+    FreeFormPlasticMLPRLAgent copy = new FreeFormPlasticMLPRLAgent(
+        activationFunction,
+        copyOfPlasticityFunction,
+        MLPUtils.copy1D(neurons),
+        historyLength,
+        weightsUpdateInterval,
+        weightInitializationType,
+        initialWeightRange,
+        weightRange.max(),
+        randomGenerator
+    );
+    copy.stepCounter = stepCounter;
+    copy.state = state.copyOf();
+    return copy;
   }
 
   @Override
   public FrozenableNumericalDynamicalSystem<?> dynamicalSystem() {
-    final State initialState = new State(
-        state.age,
-        HebbianMultiLayerPerceptron.deepCopy(state.weights, neurons),
-        deepCopy3D(state.activationsHistory, historyLength, neurons),
-        Arrays.copyOf(state.rewardsHistory, historyLength),
-        deepCopy2D(state.layersHistory),
-        Arrays.copyOf(state.networkHistory, historyLength)
-    );
+    final State initialState = state.copyOf();
     return new FrozenableNumericalDynamicalSystem<State>() {
       private State innerState = initialState;
       private int innerStepCounter;
 
       @Override
-      public NumericalStatelessSystem stateless() {
-        return new MultiLayerPerceptron(
-            activationFunction,
-            HebbianMultiLayerPerceptron.deepCopy(innerState.weights, neurons),
-            neurons
-        );
+      public State getState() {
+        return innerState;
       }
 
       @Override
@@ -261,14 +246,18 @@ public class FreeFormPlasticMLPRLAgent implements NumericalTimeInvariantReinforc
       }
 
       @Override
-      public State getState() {
-        return innerState;
-      }
-
-      @Override
       public void reset() {
         innerStepCounter = 0;
         innerState = initialState;
+      }
+
+      @Override
+      public NumericalStatelessSystem stateless() {
+        return new MultiLayerPerceptron(
+            activationFunction,
+            MLPUtils.copy3D(innerState.weights),
+            MLPUtils.copy1D(neurons)
+        );
       }
 
       @Override
@@ -293,6 +282,21 @@ public class FreeFormPlasticMLPRLAgent implements NumericalTimeInvariantReinforc
   }
 
   @Override
+  public NamedUnivariateRealFunction getParams() {
+    return plasticityFunction;
+  }
+
+  @Override
+  public void setParams(NamedUnivariateRealFunction namedUnivariateRealFunction) {
+    plasticityFunction = namedUnivariateRealFunction;
+  }
+
+  @Override
+  public State getState() {
+    return state;
+  }
+
+  @Override
   public int nOfInputs() {
     return neurons[0];
   }
@@ -300,6 +304,28 @@ public class FreeFormPlasticMLPRLAgent implements NumericalTimeInvariantReinforc
   @Override
   public int nOfOutputs() {
     return neurons[neurons.length - 1];
+  }
+
+  @Override
+  public void reset() {
+    stepCounter = 0;
+    state = new State(
+        0,
+        MLPUtils.zeroWeights(neurons),
+        emptyActivations(historyLength, neurons),
+        new double[historyLength],
+        new double[emptyActivations(historyLength, neurons).length][historyLength],
+        new double[historyLength]
+    );
+    if (weightInitializationType.equals(HebbianMultiLayerPerceptron.WeightInitializationType.RANDOM)) {
+      for (int i = 1; i < neurons.length; i++) {
+        for (int j = 0; j < neurons[i]; j++) {
+          for (int k = 0; k < neurons[i - 1] + 1; k++) {
+            state.weights[i - 1][j][k] = initialWeightRange.denormalize(randomGenerator.nextDouble());
+          }
+        }
+      }
+    }
   }
 
   @Override
@@ -322,39 +348,74 @@ public class FreeFormPlasticMLPRLAgent implements NumericalTimeInvariantReinforc
   }
 
   @Override
-  public State getState() {
-    return state;
-  }
-
-  @Override
-  public void reset() {
-    stepCounter = 0;
-    state = new State(
-        0,
-        HebbianMultiLayerPerceptron.emptyArray(neurons),
-        emptyActivations(historyLength, neurons),
-        new double[historyLength],
-        new double[emptyActivations(historyLength, neurons).length][historyLength],
-        new double[historyLength]
-    );
-    if (weightInitializationType.equals(HebbianMultiLayerPerceptron.WeightInitializationType.RANDOM)) {
-      for (int i = 1; i < neurons.length; i++) {
-        for (int j = 0; j < neurons[i]; j++) {
-          for (int k = 0; k < neurons[i - 1] + 1; k++) {
-            state.weights[i - 1][j][k] = initialWeightRange.denormalize(randomGenerator.nextDouble());
-          }
-        }
-      }
-    }
-  }
-
-  @Override
   public String toString() {
     return "Free-Form Plastic MLP RL Agent-%s-%s"
         .formatted(
             activationFunction.toString().toLowerCase(),
             Arrays.stream(neurons).mapToObj(Integer::toString).collect(Collectors.joining(">"))
         );
+  }
+
+  public record State(
+      long age,
+      double[][][] weights,
+      double[][][] activationsHistory,
+      double[] rewardsHistory,
+      double[][] layersHistory,
+      double[] networkHistory
+  ) implements NumericalParametrized<State>, Copyable<State> {
+    @Override
+    public State copyOf() {
+      return new State(
+          age,
+          MLPUtils.copy3D(weights),
+          MLPUtils.copy3D(activationsHistory),
+          MLPUtils.copy1D(rewardsHistory),
+          MLPUtils.copy2D(layersHistory),
+          MLPUtils.copy1D(networkHistory)
+      );
+    }
+
+    public double[][] getCurrentAgeActivations() {
+      int historyIndex = (int) (age % rewardsHistory.length);
+      double[][] activations = new double[activationsHistory.length][];
+      for (int i = 0; i < activations.length; i++) {
+        activations[i] = new double[activationsHistory[i].length];
+        for (int j = 0; j < activationsHistory[i].length; j++) {
+          activations[i][j] = activationsHistory[i][j][historyIndex];
+        }
+      }
+      return activations;
+    }
+
+    @Override
+    public double[] getParams() {
+      return MLPUtils.flat(weights);
+    }
+
+    @Override
+    public void setParams(double[] param) {
+      throw new UnsupportedOperationException("Params cannot be set this way");
+    }
+
+    public State update(double[][] newActivations, double reward) {
+      int nOfNeurons = 0;
+      int historyIndex = (int) (age % rewardsHistory.length);
+      networkHistory[historyIndex] = 0;
+      for (int i = 0; i < newActivations.length; i++) {
+        layersHistory[i][historyIndex] = 0;
+        for (int j = 0; j < newActivations[i].length; j++) {
+          activationsHistory[i][j][historyIndex] = newActivations[i][j];
+          layersHistory[i][historyIndex] += newActivations[i][j];
+          networkHistory[historyIndex] += newActivations[i][j];
+        }
+        layersHistory[i][historyIndex] /= activationsHistory[i].length;
+        nOfNeurons += activationsHistory[i].length;
+      }
+      networkHistory[historyIndex] /= nOfNeurons;
+      rewardsHistory[historyIndex] = reward;
+      return new State(age + 1, weights, activationsHistory, rewardsHistory, layersHistory, networkHistory);
+    }
   }
 
   private record StateAndOutput(State state, double[] output) {
@@ -415,56 +476,6 @@ public class FreeFormPlasticMLPRLAgent implements NumericalTimeInvariantReinforc
       public String toString() {
         return name;
       }
-    }
-  }
-
-  public record State(
-      long age,
-      double[][][] weights,
-      double[][][] activationsHistory,
-      double[] rewardsHistory,
-      double[][] layersHistory,
-      double[] networkHistory
-  ) implements NumericalParametrized<State> {
-    public State update(double[][] newActivations, double reward) {
-      int nOfNeurons = 0;
-      int historyIndex = (int) (age % rewardsHistory.length);
-      networkHistory[historyIndex] = 0;
-      for (int i = 0; i < newActivations.length; i++) {
-        layersHistory[i][historyIndex] = 0;
-        for (int j = 0; j < newActivations[i].length; j++) {
-          activationsHistory[i][j][historyIndex] = newActivations[i][j];
-          layersHistory[i][historyIndex] += newActivations[i][j];
-          networkHistory[historyIndex] += newActivations[i][j];
-        }
-        layersHistory[i][historyIndex] /= activationsHistory[i].length;
-        nOfNeurons += activationsHistory[i].length;
-      }
-      networkHistory[historyIndex] /= nOfNeurons;
-      rewardsHistory[historyIndex] = reward;
-      return new State(age + 1, weights, activationsHistory, rewardsHistory, layersHistory, networkHistory);
-    }
-
-    public double[][] getCurrentAgeActivations() {
-      int historyIndex = (int) (age % rewardsHistory.length);
-      double[][] activations = new double[activationsHistory.length][];
-      for (int i = 0; i < activations.length; i++) {
-        activations[i] = new double[activationsHistory[i].length];
-        for (int j = 0; j < activationsHistory[i].length; j++) {
-          activations[i][j] = activationsHistory[i][j][historyIndex];
-        }
-      }
-      return activations;
-    }
-
-    @Override
-    public double[] getParams() {
-      return MultiLayerPerceptron.flat(weights);
-    }
-
-    @Override
-    public void setParams(double[] param) {
-      throw new UnsupportedOperationException("Params cannot be set this way");
     }
   }
 }

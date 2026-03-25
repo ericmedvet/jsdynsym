@@ -19,6 +19,7 @@
  */
 package io.github.ericmedvet.jsdynsym.core.numerical.ann;
 
+import io.github.ericmedvet.jnb.datastructure.Copyable;
 import io.github.ericmedvet.jnb.datastructure.DoubleRange;
 import io.github.ericmedvet.jnb.datastructure.NumericalParametrized;
 import io.github.ericmedvet.jsdynsym.core.numerical.FrozenableNumericalDynamicalSystem;
@@ -29,7 +30,7 @@ import java.util.random.RandomGenerator;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class HebbianMultiLayerPerceptron implements NumericalTimeInvariantDynamicalSystem<HebbianMultiLayerPerceptron.State>, NumericalParametrized<HebbianMultiLayerPerceptron>, FrozenableNumericalDynamicalSystem<HebbianMultiLayerPerceptron.State> {
+public class HebbianMultiLayerPerceptron implements NumericalTimeInvariantDynamicalSystem<HebbianMultiLayerPerceptron.State>, NumericalParametrized<HebbianMultiLayerPerceptron>, FrozenableNumericalDynamicalSystem<HebbianMultiLayerPerceptron.State>, Copyable<HebbianMultiLayerPerceptron> {
   private final MultiLayerPerceptron.ActivationFunction activationFunction;
   private final double[][][] as;
   private final double[][][] bs;
@@ -125,12 +126,12 @@ public class HebbianMultiLayerPerceptron implements NumericalTimeInvariantDynami
   ) {
     this(
         activationFunction,
-        emptyArray(MultiLayerPerceptron.countNeurons(nOfInput, innerNeurons, nOfOutput)),
-        emptyArray(MultiLayerPerceptron.countNeurons(nOfInput, innerNeurons, nOfOutput)),
-        emptyArray(MultiLayerPerceptron.countNeurons(nOfInput, innerNeurons, nOfOutput)),
-        emptyArray(MultiLayerPerceptron.countNeurons(nOfInput, innerNeurons, nOfOutput)),
-        emptyArray(MultiLayerPerceptron.countNeurons(nOfInput, innerNeurons, nOfOutput)),
-        MultiLayerPerceptron.countNeurons(nOfInput, innerNeurons, nOfOutput),
+        MLPUtils.zeroWeights(MLPUtils.countNeurons(nOfInput, innerNeurons, nOfOutput)),
+        MLPUtils.zeroWeights(MLPUtils.countNeurons(nOfInput, innerNeurons, nOfOutput)),
+        MLPUtils.zeroWeights(MLPUtils.countNeurons(nOfInput, innerNeurons, nOfOutput)),
+        MLPUtils.zeroWeights(MLPUtils.countNeurons(nOfInput, innerNeurons, nOfOutput)),
+        MLPUtils.zeroWeights(MLPUtils.countNeurons(nOfInput, innerNeurons, nOfOutput)),
+        MLPUtils.countNeurons(nOfInput, innerNeurons, nOfOutput),
         learningRate,
         weightsUpdateInterval,
         initialWeightRange,
@@ -146,12 +147,22 @@ public class HebbianMultiLayerPerceptron implements NumericalTimeInvariantDynami
       case NETWORK -> 1;
       case LAYER -> (neurons.length - 1);
       case NEURON -> Arrays.stream(neurons).skip(1).sum();
-      case SYNAPSE -> MultiLayerPerceptron.countWeights(neurons);
+      case SYNAPSE -> MLPUtils.countWeights(neurons);
     };
   }
 
-  public static double[][][] emptyArray(int[] neurons) {
-    return MultiLayerPerceptron.unflat(new double[MultiLayerPerceptron.countWeights(neurons)], neurons);
+  private static double[] flat(ParametrizationType parametrizationType, double[][][] params, int[] neurons) {
+    return switch (parametrizationType) {
+      case NETWORK -> new double[]{params[0][0][0]};
+      case LAYER -> Arrays.stream(params)
+          .mapToDouble(l -> l[0][0])
+          .toArray();
+      case NEURON -> Arrays.stream(params)
+          .flatMap(l -> Arrays.stream(l).mapToDouble(n -> n[0]).boxed())
+          .mapToDouble(v -> v)
+          .toArray();
+      case SYNAPSE -> MLPUtils.flat(params, neurons);
+    };
   }
 
   private static double[][][] unflat(ParametrizationType parametrizationType, double[] params, int[] neurons) {
@@ -166,16 +177,16 @@ public class HebbianMultiLayerPerceptron implements NumericalTimeInvariantDynami
     }
     return switch (parametrizationType) {
       case NETWORK ->
-        MultiLayerPerceptron.unflat(nCopies(MultiLayerPerceptron.countWeights(neurons), params[0]), neurons);
+        MLPUtils.unflat(MLPUtils.nCopies(MLPUtils.countWeights(neurons), params[0]), neurons);
       case LAYER -> IntStream.range(1, neurons.length)
           .mapToObj(
               li -> IntStream.range(0, neurons[li])
-                  .mapToObj(ni -> nCopies(neurons[li - 1] + 1, params[li - 1]))
+                  .mapToObj(ni -> MLPUtils.nCopies(neurons[li - 1] + 1, params[li - 1]))
                   .toArray(double[][]::new)
           )
           .toArray(double[][][]::new);
       case NEURON -> {
-        double[][][] unflat = emptyArray(neurons);
+        double[][][] unflat = MLPUtils.zeroWeights(neurons);
         int c = 0;
         for (double[][] layer : unflat) {
           for (double[] neuron : layer) {
@@ -184,106 +195,30 @@ public class HebbianMultiLayerPerceptron implements NumericalTimeInvariantDynami
         }
         yield unflat;
       }
-      case SYNAPSE -> MultiLayerPerceptron.unflat(params, neurons);
+      case SYNAPSE -> MLPUtils.unflat(params, neurons);
     };
-  }
-
-  private static double[] nCopies(int n, double value) {
-    double[] values = new double[n];
-    Arrays.fill(values, value);
-    return values;
-  }
-
-  private static double[] flat(ParametrizationType parametrizationType, double[][][] params, int[] neurons) {
-    return switch (parametrizationType) {
-      case NETWORK -> new double[]{params[0][0][0]};
-      case LAYER -> Arrays.stream(params)
-          .mapToDouble(l -> l[0][0])
-          .toArray();
-      case NEURON -> Arrays.stream(params)
-          .flatMap(l -> Arrays.stream(l).mapToDouble(n -> n[0]).boxed())
-          .mapToDouble(v -> v)
-          .toArray();
-      case SYNAPSE -> MultiLayerPerceptron.flat(params, neurons);
-    };
-  }
-
-  private static void set(double[][][] src, double[][][] dst) {
-    for (int l = 0; l < src.length; l++) {
-      for (int s = 0; s < src[l].length; s++) {
-        System.arraycopy(src[l][s], 0, dst[l][s], 0, src[l][s].length);
-      }
-    }
-  }
-
-  private static double[] concat(double[]... arrays) {
-    int totalLength = 0;
-    for (double[] array : arrays) {
-      totalLength += array.length;
-    }
-    double[] concatenated = new double[totalLength];
-    int offset = 0;
-    for (double[] array : arrays) {
-      System.arraycopy(array, 0, concatenated, offset, array.length);
-      offset += array.length;
-    }
-    return concatenated;
-  }
-
-  public static double[][][] deepCopy(double[][][] src, int[] neurons) {
-    double[][][] copy = emptyArray(neurons);
-    for (int i = 0; i < src.length; i++) {
-      for (int j = 0; j < src[i].length; j++) {
-        copy[i][j] = Arrays.copyOf(src[i][j], src[i][j].length);
-      }
-    }
-    return copy;
-  }
-
-  private static double[][][] randomWeights(
-      int[] neurons,
-      DoubleRange initialWeightRange,
-      RandomGenerator randomGenerator
-  ) {
-    double[][][] randomWeights = emptyArray(neurons);
-    for (int i = 1; i < neurons.length; i++) {
-      for (int j = 0; j < neurons[i]; j++) {
-        for (int k = 0; k < neurons[i - 1] + 1; k++) {
-          randomWeights[i - 1][j][k] = initialWeightRange.denormalize(randomGenerator.nextDouble());
-        }
-      }
-    }
-    return randomWeights;
   }
 
   @Override
-  public double[] step(double[] input) {
-    // update weights
-    double[][][] newWeights = state.weights;
-    if (stepCounter > 0 && stepCounter % weightsUpdateInterval == 0) {
-      for (int i = 1; i < neurons.length; i++) {
-        for (int j = 0; j < newWeights[i - 1].length; j++) {
-          double postActivation = state.activations[i][j];
-          for (int k = 0; k < newWeights[i - 1][j].length; k++) {
-            double preActivation = (k == 0) ? 1.0 : state.activations[i - 1][k - 1];
-            newWeights[i - 1][j][k] = weightRange.clip(
-                newWeights[i - 1][j][k] + learningRate * (as[i - 1][j][k] * preActivation + bs[i - 1][j][k] * postActivation + cs[i - 1][j][k] * preActivation * postActivation + ds[i - 1][j][k])
-            );
-          }
-        }
-      }
-    }
-    // compute output
-    double[][] newActivations = MultiLayerPerceptron.computeActivations(
-        input,
-        newWeights,
+  public HebbianMultiLayerPerceptron copyOf() {
+    HebbianMultiLayerPerceptron copy = new HebbianMultiLayerPerceptron(
         activationFunction,
-        state.activations
+        MLPUtils.copy3D(as),
+        MLPUtils.copy3D(bs),
+        MLPUtils.copy3D(cs),
+        MLPUtils.copy3D(ds),
+        MLPUtils.copy3D(initialWeights),
+        MLPUtils.copy1D(neurons),
+        learningRate,
+        weightsUpdateInterval,
+        initialWeightRange,
+        weightRange.max(),
+        randomGenerator,
+        parametrizationType,
+        weightInitializationType
     );
-    // update state and counter
-    stepCounter += 1;
-    state = new State(newWeights, newActivations);
-    return Arrays.copyOf(newActivations[neurons.length - 1], newActivations[neurons.length - 1].length);
+    copy.state = state.copyOf();
+    return copy;
   }
 
   @Override
@@ -302,49 +237,49 @@ public class HebbianMultiLayerPerceptron implements NumericalTimeInvariantDynami
   }
 
   @Override
-  public void reset() {
-    stepCounter = 0;
-    state = new State(
-        switch (weightInitializationType) {
-          case PARAMS -> deepCopy(initialWeights, neurons);
-          case RANDOM -> {
-            set(randomWeights(neurons, initialWeightRange, randomGenerator), initialWeights);
-            yield deepCopy(initialWeights, neurons);
-          }
-          case ZEROS -> emptyArray(neurons);
-        },
-        Arrays.stream(neurons).mapToObj(double[]::new).toArray(double[][]::new)
-    );
-  }
-
-  @Override
   public double[] getParams() {
     double[] flatAs = flat(parametrizationType, as, neurons);
     double[] flatBs = flat(parametrizationType, bs, neurons);
     double[] flatCs = flat(parametrizationType, cs, neurons);
     double[] flatDs = flat(parametrizationType, ds, neurons);
     if (weightInitializationType.equals(WeightInitializationType.PARAMS)) {
-      double[] flatWeights = MultiLayerPerceptron.flat(state.weights, neurons);
-      return concat(flatAs, flatBs, flatCs, flatDs, flatWeights);
+      double[] flatWeights = MLPUtils.flat(state.weights, neurons);
+      return MLPUtils.concat1D(flatAs, flatBs, flatCs, flatDs, flatWeights);
     } else {
-      return concat(flatAs, flatBs, flatCs, flatDs);
+      return MLPUtils.concat1D(flatAs, flatBs, flatCs, flatDs);
     }
   }
 
   @Override
   public void setParams(double[] params) {
     int n = countParams(parametrizationType, neurons);
-    set(unflat(parametrizationType, Arrays.copyOfRange(params, 0, n), neurons), as);
-    set(unflat(parametrizationType, Arrays.copyOfRange(params, n, 2 * n), neurons), bs);
-    set(unflat(parametrizationType, Arrays.copyOfRange(params, 2 * n, 3 * n), neurons), cs);
-    set(unflat(parametrizationType, Arrays.copyOfRange(params, 3 * n, 4 * n), neurons), ds);
+    MLPUtils.set3D(unflat(parametrizationType, Arrays.copyOfRange(params, 0, n), neurons), as);
+    MLPUtils.set3D(unflat(parametrizationType, Arrays.copyOfRange(params, n, 2 * n), neurons), bs);
+    MLPUtils.set3D(unflat(parametrizationType, Arrays.copyOfRange(params, 2 * n, 3 * n), neurons), cs);
+    MLPUtils.set3D(unflat(parametrizationType, Arrays.copyOfRange(params, 3 * n, 4 * n), neurons), ds);
     if (weightInitializationType.equals(WeightInitializationType.PARAMS)) {
-      set(
+      MLPUtils.set3D(
           unflat(ParametrizationType.SYNAPSE, Arrays.copyOfRange(params, 4 * n, params.length), neurons),
           initialWeights
       );
     }
     reset();
+  }
+
+  @Override
+  public void reset() {
+    stepCounter = 0;
+    state = new State(
+        switch (weightInitializationType) {
+          case PARAMS -> MLPUtils.copy3D(initialWeights);
+          case RANDOM -> {
+            MLPUtils.set3D(MLPUtils.randomWeights(neurons, initialWeightRange, randomGenerator), initialWeights);
+            yield MLPUtils.copy3D(initialWeights);
+          }
+          case ZEROS -> MLPUtils.zeroWeights(neurons);
+        },
+        Arrays.stream(neurons).mapToObj(double[]::new).toArray(double[][]::new)
+    );
   }
 
   @Override
@@ -378,19 +313,55 @@ public class HebbianMultiLayerPerceptron implements NumericalTimeInvariantDynami
     ZEROS, PARAMS, RANDOM
   }
 
+  @Override
+  public double[] step(double[] input) {
+    // update weights
+    double[][][] newWeights = state.weights;
+    if (stepCounter > 0 && stepCounter % weightsUpdateInterval == 0) {
+      for (int i = 1; i < neurons.length; i++) {
+        for (int j = 0; j < newWeights[i - 1].length; j++) {
+          double postActivation = state.activations[i][j];
+          for (int k = 0; k < newWeights[i - 1][j].length; k++) {
+            double preActivation = (k == 0) ? 1.0 : state.activations[i - 1][k - 1];
+            newWeights[i - 1][j][k] = weightRange.clip(
+                newWeights[i - 1][j][k] + learningRate * (as[i - 1][j][k] * preActivation + bs[i - 1][j][k] * postActivation + cs[i - 1][j][k] * preActivation * postActivation + ds[i - 1][j][k])
+            );
+          }
+        }
+      }
+    }
+    // compute output
+    double[][] newActivations = MLPUtils.computeActivations(
+        input,
+        newWeights,
+        activationFunction,
+        state.activations
+    );
+    // update state and counter
+    stepCounter += 1;
+    state = new State(newWeights, newActivations);
+    return MLPUtils.copy1D(newActivations[neurons.length - 1]);
+  }
+
   public record State(
       double[][][] weights,
       double[][] activations
-  ) implements NumericalParametrized<State> {
+  ) implements NumericalParametrized<State>, Copyable<State> {
 
     @Override
-    public double[] getParams() {
-      return MultiLayerPerceptron.flat(weights);
+    public State copyOf() {
+      return new State(MLPUtils.copy3D(weights), MLPUtils.copy2D(activations));
     }
 
     @Override
     public void setParams(double[] param) {
       throw new UnsupportedOperationException("Params cannot be set this way");
     }
+
+    @Override
+    public double[] getParams() {
+      return MLPUtils.flat(weights);
+    }
+
   }
 }

@@ -46,6 +46,7 @@ import io.github.ericmedvet.jsdynsym.core.numerical.LinearCombination;
 import io.github.ericmedvet.jsdynsym.core.numerical.MultivariateRealFunction;
 import io.github.ericmedvet.jsdynsym.core.numerical.NumericalDynamicalSystem;
 import io.github.ericmedvet.jsdynsym.core.numerical.ann.HebbianMultiLayerPerceptron;
+import io.github.ericmedvet.jsdynsym.core.numerical.ann.MLPUtils;
 import io.github.ericmedvet.jsdynsym.core.numerical.ann.MultiLayerPerceptron;
 import io.github.ericmedvet.jsdynsym.core.rl.FreeFormPlasticMLPRLAgent;
 import io.github.ericmedvet.jsdynsym.core.rl.NumericalReinforcementLearningAgent;
@@ -124,11 +125,11 @@ public class Main {
     int[] innerNeurons = {2};
     double[][][] weights = new double[][][]{{{1, 2, 2}, {1, -1, -1}}, {{-2, 2, 2}}
     };
-    int[] neurons = MultiLayerPerceptron.countNeurons(nOfInputs, innerNeurons, nOfOutputs);
+    int[] neurons = MLPUtils.countNeurons(nOfInputs, innerNeurons, nOfOutputs);
     double[][] inputs = {{-1, -1}, {-1, 1}, {1, -1}, {1, 1}};
     MultiLayerPerceptron mlp = new MultiLayerPerceptron(MultiLayerPerceptron.ActivationFunction.TANH, weights, neurons);
-    double[][][] zeros = HebbianMultiLayerPerceptron.emptyArray(
-        MultiLayerPerceptron.countNeurons(nOfInputs, innerNeurons, nOfOutputs)
+    double[][][] zeros = MLPUtils.zeroWeights(
+        MLPUtils.countNeurons(nOfInputs, innerNeurons, nOfOutputs)
     );
     HebbianMultiLayerPerceptron hmlp = new HebbianMultiLayerPerceptron(
         MultiLayerPerceptron.ActivationFunction.TANH,

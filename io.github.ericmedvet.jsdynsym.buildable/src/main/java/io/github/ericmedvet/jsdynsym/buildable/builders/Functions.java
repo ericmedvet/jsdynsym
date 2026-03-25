@@ -35,6 +35,7 @@ import io.github.ericmedvet.jsdynsym.core.DynamicalSystem;
 import io.github.ericmedvet.jsdynsym.core.FrozenableDynamicalSystem;
 import io.github.ericmedvet.jsdynsym.core.StatelessSystem;
 import io.github.ericmedvet.jsdynsym.core.numerical.NumericalDynamicalSystem;
+import io.github.ericmedvet.jsdynsym.core.numerical.ann.MLPUtils;
 import io.github.ericmedvet.jsdynsym.core.numerical.ann.MultiLayerPerceptron;
 import io.github.ericmedvet.jsdynsym.core.rl.FrozenableRLAgent;
 import io.github.ericmedvet.jsdynsym.core.rl.NumericalReinforcementLearningAgent;
@@ -243,7 +244,7 @@ public class Functions {
       for (int i = 0; i < neurons.length; i++) {
         neurons[i] = mlp.sizeOfLayer(i);
       }
-      double[][][] unflat = MultiLayerPerceptron.unflat(mlp.getParams(), neurons);
+      double[][][] unflat = MLPUtils.unflat(mlp.getParams(), neurons);
       return Arrays.stream(unflat)
           .map(
               layerWs -> Arrays.stream(layerWs)
