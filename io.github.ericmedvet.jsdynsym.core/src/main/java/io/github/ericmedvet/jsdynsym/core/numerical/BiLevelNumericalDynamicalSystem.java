@@ -43,12 +43,19 @@ public class BiLevelNumericalDynamicalSystem<SH, SL> implements NumericalDynamic
   }
 
   public record State<SH, SL>(SH highState, SL lowState, double[] highOutput) {
-
+    @Override
+    public String toString() {
+      return "{%s;%s;%s}".formatted(
+          highState,
+          lowState,
+          Arrays.toString(highOutput)
+      );
+    }
   }
 
   @Override
   public int nOfInputs() {
-    return highInnerNDS.nOfInputs() + lowInnerNDS.nOfInputs();
+    return highInnerNDS.nOfInputs() + lowInnerNDS.nOfInputs() - highInnerNDS.nOfOutputs();
   }
 
   @Override
