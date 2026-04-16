@@ -20,22 +20,66 @@
 package io.github.ericmedvet.jsdynsym.control;
 
 import io.github.ericmedvet.jnb.datastructure.DoubleRange;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.SortedMap;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 public interface Simulation<T, S, O extends Simulation.Outcome<S>> {
 
-  interface Outcome<S> {
-    SortedMap<Double, S> snapshots();
+  static <T, S, O extends Simulation.Outcome<S>> Simulation<T, S, Simulation.Outcome<S>> sequential(
+      List<? extends Simulation<T, S, O>> simulations
+  ) {
+    return new Simulation<>() {
+      @Override
+      public Optional<T> example() {
+        return simulations.getFirst().example();
+      }
 
-    static <S> Outcome<S> of(SortedMap<Double, S> snapshots) {
-      return () -> snapshots;
-    }
+      @Override
+      public Simulation.Outcome<S> simulate(T t, double dT, DoubleRange tRange) {
+        double singleDuration = tRange.extent() / simulations.size();
+        double currentInitT = tRange.min();
+        List<O> outcomes = new ArrayList<>(simulations.size());
+        for (Simulation<T, S, O> simulation : simulations) {
+          DoubleRange localTRange = new DoubleRange(currentInitT, currentInitT + singleDuration);
+          outcomes.add(simulation.simulate(t, dT, localTRange));
+        }
+        TreeMap<Double, S> snapshots = outcomes.stream()
+            .flatMap(o -> o.snapshots().entrySet().stream())
+            .collect(
+                Collectors.toMap(
+                    Entry::getKey,
+                    Entry::getValue,
+                    (s1, s2) -> s1,
+                    TreeMap::new
+                )
+            );
+        return Outcome.of(snapshots);
+      }
+
+      @Override
+      public String toString() {
+        return simulations.toString();
+      }
+    };
   }
 
   O simulate(T t, double dT, DoubleRange tRange);
 
   default Optional<T> example() {
     return Optional.empty();
+  }
+
+  interface Outcome<S> {
+
+    SortedMap<Double, S> snapshots();
+
+    static <S> Outcome<S> of(SortedMap<Double, S> snapshots) {
+      return () -> snapshots;
+    }
   }
 }
