@@ -23,6 +23,7 @@ import io.github.ericmedvet.jnb.core.Cacheable;
 import io.github.ericmedvet.jnb.core.Discoverable;
 import io.github.ericmedvet.jnb.core.Param;
 import io.github.ericmedvet.jnb.datastructure.DoubleRange;
+import io.github.ericmedvet.jsdynsym.control.Simulation;
 import io.github.ericmedvet.jsdynsym.control.navigation.NavigationArena;
 import io.github.ericmedvet.jsdynsym.control.navigation.NavigationEnvironment;
 import io.github.ericmedvet.jsdynsym.control.navigation.VariableSensorPositionsNavigation;
@@ -39,6 +40,14 @@ import java.util.random.RandomGenerator;
 public class Simulations {
 
   private Simulations() {
+  }
+
+  @Cacheable
+  public static <T, S, O extends Simulation.Outcome<S>> Simulation<T, S, Simulation.Outcome<S>> sequential(
+      @Param(value = "name", iS = "seq.sims") String name,
+      @Param("relativeV") List<? extends Simulation<T, S, O>> simulations
+  ) {
+    return Simulation.sequential(simulations);
   }
 
   @Cacheable

@@ -30,6 +30,7 @@ import io.github.ericmedvet.jsdynsym.buildable.util.Naming;
 import io.github.ericmedvet.jsdynsym.control.Environment;
 import io.github.ericmedvet.jsdynsym.control.SingleAgentTask;
 import io.github.ericmedvet.jsdynsym.core.DynamicalSystem;
+import java.util.List;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -52,5 +53,15 @@ public class SingleAgentTasks {
     @SuppressWarnings("unchecked") Supplier<Environment<O, A, ES, C>> supplier = () -> (Environment<O, A, ES, C>) nb
         .build((NamedParamMap) map.value("environment", ParamMap.Type.NAMED_PARAM_MAP));
     return Naming.named(name, SingleAgentTask.fromEnvironment(supplier, stopCondition, resetAgent));
+  }
+
+  @Cacheable
+  public static <C extends DynamicalSystem<O, A, ? extends CS>, O, A, CS, TS> SingleAgentTask<C, O, A, CS, TS> sequential(
+      @Param(value = "name", iS = "seq.tasks") String name,
+      @Param("tasks") List<? extends SingleAgentTask<C, O, A, CS, TS>> tasks,
+      @Param("resetFirst") boolean resetFirst,
+      @Param("resetAll") boolean resetAll
+  ) {
+    return SingleAgentTask.sequential(tasks, resetFirst, resetAll);
   }
 }

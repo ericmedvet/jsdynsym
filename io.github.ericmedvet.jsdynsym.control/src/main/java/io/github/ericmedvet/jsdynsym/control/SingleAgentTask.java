@@ -23,18 +23,73 @@ import io.github.ericmedvet.jnb.datastructure.DoubleRange;
 import io.github.ericmedvet.jnb.datastructure.Listener;
 import io.github.ericmedvet.jsdynsym.control.SingleAgentTask.Step;
 import io.github.ericmedvet.jsdynsym.core.DynamicalSystem;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.TreeMap;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public interface SingleAgentTask<C extends DynamicalSystem<O, A, ? extends CS>, O, A, CS, TS> extends Simulation<C, Step<O, A, TS>, Simulation.Outcome<Step<O, A, TS>>> {
 
-  record Step<O, A, S>(O observation, A action, S state) {}
+  static <C extends DynamicalSystem<O, A, ? extends CS>, O, A, CS, TS> SingleAgentTask<C, O, A, CS, TS> sequential(
+      List<? extends SingleAgentTask<C, O, A, CS, TS>> tasks,
+      boolean resetFirst,
+      boolean resetAll
+  ) {
+    return new SingleAgentTask<>() {
+      @Override
+      public Optional<C> example() {
+        return tasks.getFirst().example();
+      }
 
-  record Timed<S>(double t, S state) {}
+      @Override
+      public Outcome<Step<O, A, TS>> simulate(
+          C c,
+          double dT,
+          DoubleRange tRange,
+          Listener<Timed<CS>> agentStateListener
+      ) {
+        if (resetFirst) {
+          c.reset();
+        }
+        double singleDuration = tRange.extent() / tasks.size();
+        double currentInitT = tRange.min();
+        List<Outcome<Step<O, A, TS>>> outcomes = new ArrayList<>(tasks.size());
+        for (SingleAgentTask<C, O, A, CS, TS> task : tasks) {
+          if (resetAll) {
+            c.reset();
+          }
+          DoubleRange localTRange = new DoubleRange(currentInitT, currentInitT + singleDuration);
+          outcomes.add(task.simulate(c, dT, localTRange, agentStateListener));
+        }
+        TreeMap<Double, Step<O, A, TS>> snapshots = outcomes.stream()
+            .flatMap(o -> o.snapshots().entrySet().stream())
+            .collect(
+                Collectors.toMap(
+                    Entry::getKey,
+                    Entry::getValue,
+                    (s1, s2) -> s1,
+                    TreeMap::new
+                )
+            );
+        return Outcome.of(snapshots);
+      }
+
+      @Override
+      public String toString() {
+        return tasks.toString();
+      }
+    };
+  }
+
+  record Step<O, A, S>(O observation, A action, S state) {
+
+  }
 
   Outcome<Step<O, A, TS>> simulate(
       C c,
@@ -103,4 +158,7 @@ public interface SingleAgentTask<C extends DynamicalSystem<O, A, ? extends CS>, 
     );
   }
 
+  record Timed<S>(double t, S state) {
+
+  }
 }

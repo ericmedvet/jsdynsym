@@ -113,44 +113,34 @@ public class SequentialBooleanFunctions {
   }
 
   @Cacheable
-  public static <X> FormattedNamedFunction<X, Double> avgScoreVariation(
+  public static <X> FormattedNamedFunction<X, Double> sdScore(
       @Param(value = "name", iS = "avg.delta[{scoreType}]") String name,
       @Param(value = "of", dNPM = "f.identity()") Function<X, Simulation.Outcome<SingleAgentTask.Step<ReinforcementLearningAgent.RewardedInput<double[]>, double[], State>>> beforeF,
       @Param(value = "format", dS = "%+5.3f") String format,
       @Param(value = "scoreType", dS = "unlimited") ScoreType scoreType,
       @Param("indexes") List<Integer> indexes
   ) {
-    Function<Simulation.Outcome<SingleAgentTask.Step<ReinforcementLearningAgent.RewardedInput<double[]>, double[], State>>, Double> f = o -> o
-        .snapshots()
-        .values()
-        .stream()
-        .collect(Collectors.groupingBy(s -> SequentialXor.stringInputs(s.observation().input())))
-        .values()
-        .stream()
-        .mapToDouble(steps -> {
-          double[] scores = indexes.stream()
-              .map(i -> steps.get((i < 0) ? (steps.size() + i) : i))
-              .mapToDouble(
-                  s -> BooleanUtils.computeScore(
-                      s.state().output(),
-                      s.state().groundTruthOutput(),
-                      scoreType
-                  )
-              )
-              .toArray();
-          double avg = 0;
-          for (double v : scores) {
-            avg += v;
-          }
-          avg /= scores.length;
-          double numerator = 0;
-          for (double v : scores) {
-            numerator += (v - avg) * (v - avg);
-          }
-          return Math.sqrt(numerator / scores.length);
-        })
-        .average()
-        .orElse(0);
+    Function<Simulation.Outcome<SingleAgentTask.Step<ReinforcementLearningAgent.RewardedInput<double[]>, double[], State>>, Double> f = o -> {
+      List<State> states = o.snapshots()
+          .values()
+          .stream()
+          .map(Step::state)
+          .toList();
+      double[] scores = indexes.stream()
+          .map(i -> states.get((i < 0) ? (states.size() + i) : i))
+          .mapToDouble(s -> BooleanUtils.computeScore(s.output(), s.groundTruthOutput(), scoreType))
+          .toArray();
+      double avg = 0;
+      for (double v : scores) {
+        avg += v;
+      }
+      avg /= scores.length;
+      double numerator = 0;
+      for (double v : scores) {
+        numerator += (v - avg) * (v - avg);
+      }
+      return Math.sqrt(numerator / scores.length);
+    };
     return FormattedNamedFunction.from(f, format, name)
         .compose(beforeF);
   }

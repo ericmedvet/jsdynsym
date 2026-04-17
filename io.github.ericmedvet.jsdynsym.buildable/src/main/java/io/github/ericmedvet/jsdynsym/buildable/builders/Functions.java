@@ -161,6 +161,20 @@ public class Functions {
   }
 
   @Cacheable
+  public static <X> FormattedNamedFunction<X, List<Double>> rewards(
+      @Param(value = "name", iS = "reward") String name,
+      @Param(value = "of", dNPM = "f.identity()") Function<X, Outcome<SingleAgentTask.Step<RewardedInput<?>, ?, ?>>> beforeF,
+      @Param(value = "format", dS = "s") String format
+  ) {
+    Function<Outcome<Step<RewardedInput<?>, ?, ?>>, List<Double>> f = o -> o.snapshots()
+        .values()
+        .stream()
+        .map(step -> step.observation().reward())
+        .toList();
+    return FormattedNamedFunction.from(f, format, name).compose(beforeF);
+  }
+
+  @Cacheable
   public static <X, S, B extends Simulation.Outcome<SS>, SS> FormattedNamedFunction<X, Simulation.Outcome<SS>> selfBiSimulator(
       @Param(value = "name", iS = "self.sim") String name,
       @Param(value = "of", dNPM = "f.identity()") Function<X, S> beforeF,
