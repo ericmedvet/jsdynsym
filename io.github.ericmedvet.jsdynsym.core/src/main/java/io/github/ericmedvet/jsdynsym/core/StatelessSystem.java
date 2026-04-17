@@ -44,5 +44,10 @@ public interface StatelessSystem<I, O> extends DynamicalSystem<I, O, StatelessSy
 
   record State() {
     public static final State EMPTY = new State();
+
+    @Override
+    public String toString() {
+      return "empty";
+    }
   }
 }
