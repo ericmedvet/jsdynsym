@@ -116,7 +116,7 @@ public class Main {
     // manualNavigation();
     // rlNavigation();
     // sequentialXor();
-    xorTest();
+    // xorTest();
   }
 
   public static void xorTest() {
