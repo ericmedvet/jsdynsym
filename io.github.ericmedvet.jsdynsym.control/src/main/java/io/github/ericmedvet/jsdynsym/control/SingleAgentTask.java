@@ -34,7 +34,8 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-public interface SingleAgentTask<C extends DynamicalSystem<O, A, ? extends CS>, O, A, CS, TS> extends Simulation<C, Step<O, A, TS>, Simulation.Outcome<Step<O, A, TS>>> {
+public interface SingleAgentTask<C extends DynamicalSystem<O, A, ? extends CS>, O, A, CS, TS> extends
+    Simulation<C, Step<O, A, TS>, Simulation.Outcome<Step<O, A, TS>>> {
 
   static <C extends DynamicalSystem<O, A, ? extends CS>, O, A, CS, TS> SingleAgentTask<C, O, A, CS, TS> sequential(
       List<? extends SingleAgentTask<C, O, A, CS, TS>> tasks,
@@ -66,6 +67,7 @@ public interface SingleAgentTask<C extends DynamicalSystem<O, A, ? extends CS>, 
           }
           DoubleRange localTRange = new DoubleRange(currentInitT, currentInitT + singleDuration);
           outcomes.add(task.simulate(c, dT, localTRange, agentStateListener));
+          currentInitT = currentInitT + singleDuration;
         }
         TreeMap<Double, Step<O, A, TS>> snapshots = outcomes.stream()
             .flatMap(o -> o.snapshots().entrySet().stream())

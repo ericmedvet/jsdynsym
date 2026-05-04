@@ -47,6 +47,7 @@ public interface Simulation<T, S, O extends Simulation.Outcome<S>> {
         for (Simulation<T, S, O> simulation : simulations) {
           DoubleRange localTRange = new DoubleRange(currentInitT, currentInitT + singleDuration);
           outcomes.add(simulation.simulate(t, dT, localTRange));
+          currentInitT = currentInitT + singleDuration;
         }
         TreeMap<Double, S> snapshots = outcomes.stream()
             .flatMap(o -> o.snapshots().entrySet().stream())
