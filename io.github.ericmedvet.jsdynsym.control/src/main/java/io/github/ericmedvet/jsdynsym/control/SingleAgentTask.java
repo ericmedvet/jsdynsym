@@ -34,8 +34,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-public interface SingleAgentTask<C extends DynamicalSystem<O, A, ? extends CS>, O, A, CS, TS> extends
-    Simulation<C, Step<O, A, TS>, Simulation.Outcome<Step<O, A, TS>>> {
+public interface SingleAgentTask<C extends DynamicalSystem<O, A, ? extends CS>, O, A, CS, TS> extends Simulation<C, Step<O, A, TS>, Simulation.Outcome<Step<O, A, TS>>> {
 
   static <C extends DynamicalSystem<O, A, ? extends CS>, O, A, CS, TS> SingleAgentTask<C, O, A, CS, TS> sequential(
       List<? extends SingleAgentTask<C, O, A, CS, TS>> tasks,
