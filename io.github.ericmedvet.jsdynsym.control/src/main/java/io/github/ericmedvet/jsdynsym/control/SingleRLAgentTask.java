@@ -42,6 +42,7 @@ public interface SingleRLAgentTask<C extends ReinforcementLearningAgent<O, A, ? 
       C exampleAgent,
       Predicate<TS> stopCondition,
       boolean resetAgent,
+      double initialReward,
       ToDoubleBiFunction<TS, A> rewardFunction
   ) {
     return new SingleRLAgentTask<>() {
@@ -60,7 +61,7 @@ public interface SingleRLAgentTask<C extends ReinforcementLearningAgent<O, A, ? 
         double t = tRange.min();
         Map<Double, Step<RewardedInput<O>, A, TS>> steps = new HashMap<>();
         O observation = initialObservation;
-        double reward = Double.NaN;
+        double reward = initialReward;
         while (t <= tRange.max() && !stopCondition.test(environment.getState())) {
           A action = agent.step(t, observation, reward);
           agentStateListener.listen(new Timed<>(t, agent.getState()));
@@ -87,6 +88,7 @@ public interface SingleRLAgentTask<C extends ReinforcementLearningAgent<O, A, ? 
       Supplier<? extends Environment<double[], double[], TS, NumericalDynamicalSystem<? extends CS>>> environmentSupplier,
       Predicate<TS> stopCondition,
       boolean resetAgent,
+      double initialReward,
       ToDoubleBiFunction<TS, double[]> rewardFunction
   ) {
     return fromEnvironment(
@@ -95,6 +97,7 @@ public interface SingleRLAgentTask<C extends ReinforcementLearningAgent<O, A, ? 
         NumericalReinforcementLearningAgent.from(environmentSupplier.get().exampleAgent()),
         stopCondition,
         resetAgent,
+        initialReward,
         rewardFunction
     );
   }
