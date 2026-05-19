@@ -120,7 +120,7 @@ public class NavigationFunctions {
               .arena()
               .segments()
               .stream()
-              .map(sl::interception)
+              .map(sl::intersection)
               .filter(Optional::isPresent)
               .mapToDouble(op -> op.orElseThrow().distance(robotP))
               .min()

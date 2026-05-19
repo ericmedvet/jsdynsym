@@ -94,7 +94,7 @@ public class NavigationEnvironment<CS> implements NumericalDynamicalSystem<State
         .mapToDouble(a -> {
           Semiline sl = new Semiline(state.robotPosition, a + state.robotDirection);
           return segments.stream()
-              .map(sl::interception)
+              .map(sl::intersection)
               .filter(Optional::isPresent)
               .mapToDouble(
                   op -> sensorsRange.normalize(op.orElseThrow().distance(state.robotPosition))
