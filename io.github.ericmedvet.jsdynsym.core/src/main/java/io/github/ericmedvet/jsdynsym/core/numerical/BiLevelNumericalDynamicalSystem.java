@@ -27,6 +27,8 @@ public class BiLevelNumericalDynamicalSystem<SH, SL> implements NumericalDynamic
   private final NumericalDynamicalSystem<SH> highInnerNDS;
   private final NumericalDynamicalSystem<SL> lowInnerNDS;
   private final int highPeriod;
+  private final int highIndex;
+  private final int lowIndex;
 
   private double[] highOutput;
   private int highStepCount;
@@ -34,11 +36,15 @@ public class BiLevelNumericalDynamicalSystem<SH, SL> implements NumericalDynamic
   public BiLevelNumericalDynamicalSystem(
       NumericalDynamicalSystem<SH> highInnerNDS,
       NumericalDynamicalSystem<SL> lowInnerNDS,
-      int highPeriod
+      int highPeriod,
+      int highIndex,
+      int lowIndex
   ) {
     this.highInnerNDS = highInnerNDS;
     this.lowInnerNDS = lowInnerNDS;
     this.highPeriod = highPeriod;
+    this.highIndex = highIndex;
+    this.lowIndex = lowIndex;
     innerReset();
   }
 
@@ -55,7 +61,14 @@ public class BiLevelNumericalDynamicalSystem<SH, SL> implements NumericalDynamic
 
   @Override
   public int nOfInputs() {
-    return highInnerNDS.nOfInputs() + lowInnerNDS.nOfInputs() - highInnerNDS.nOfOutputs();
+    return highInnerNDS.nOfInputs() + lowInnerNDS.nOfInputs() - highInnerNDS.nOfOutputs() - (Math.max(
+        this.lowIndex - this.highIndex,
+        0
+    ));
+  }
+
+  public int nOfLowInputs() {
+    return highInnerNDS.nOfInputs();
   }
 
   @Override
@@ -83,14 +96,15 @@ public class BiLevelNumericalDynamicalSystem<SH, SL> implements NumericalDynamic
   @Override
   public double[] step(double t, double[] input) {
     if (highStepCount == 0) {
-      double[] highInput = Arrays.copyOf(input, highInnerNDS.nOfInputs());
+      double[] highInput = Arrays.copyOfRange(input, this.highIndex, this.highIndex + highInnerNDS.nOfInputs());
       highOutput = highInnerNDS.step(t, highInput);
     }
     highStepCount = (highStepCount + 1) % highPeriod;
     double[] lowInput = new double[lowInnerNDS.nOfInputs()];
-    int remainingNOfInputs = nOfInputs() - highInnerNDS.nOfInputs();
-    System.arraycopy(input, highInnerNDS.nOfInputs(), lowInput, 0, remainingNOfInputs);
-    System.arraycopy(highOutput, 0, lowInput, remainingNOfInputs, highOutput.length);
+    // int remainingNOfInputs = nOfInputs() - highInnerNDS.nOfInputs();
+    int directNOfInputs = lowInnerNDS.nOfInputs() - highInnerNDS.nOfOutputs();
+    System.arraycopy(input, this.lowIndex, lowInput, 0, directNOfInputs);
+    System.arraycopy(highOutput, 0, lowInput, directNOfInputs, highOutput.length);
     return lowInnerNDS.step(t, lowInput);
   }
 }

@@ -72,7 +72,8 @@ public class BiLevelMain {
                   );
                   relativeV = true;
                   robotMaxV = 0.1;
-                  robotRadius = 0.01
+                  robotRadius = 0.01;
+                  nOfSensors = 5
                 )
                 """
         );
@@ -80,7 +81,7 @@ public class BiLevelMain {
     // 2) create MLP for policies
     MultiLayerPerceptron highMlp = new MultiLayerPerceptron(
         MultiLayerPerceptron.ActivationFunction.TANH,
-        2,
+        7,
         new int[]{},
         1
     );
@@ -98,7 +99,9 @@ public class BiLevelMain {
     BiLevelNumericalDynamicalSystem<StatelessSystem.State, StatelessSystem.State> agent = new BiLevelNumericalDynamicalSystem<>(
         highMlp,
         lowMlp,
-        5
+        5,
+        0,
+        2
     );
 
     // 4) task and simulation
