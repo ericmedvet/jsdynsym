@@ -66,6 +66,7 @@ public interface SingleAgentTask<C extends DynamicalSystem<O, A, ? extends CS>, 
           }
           DoubleRange localTRange = new DoubleRange(currentInitT, currentInitT + singleDuration);
           outcomes.add(task.simulate(c, dT, localTRange, agentStateListener));
+          currentInitT = currentInitT + singleDuration;
         }
         TreeMap<Double, Step<O, A, TS>> snapshots = outcomes.stream()
             .flatMap(o -> o.snapshots().entrySet().stream())

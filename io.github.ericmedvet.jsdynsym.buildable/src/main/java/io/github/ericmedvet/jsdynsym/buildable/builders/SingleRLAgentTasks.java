@@ -44,10 +44,11 @@ public class SingleRLAgentTasks {
   @SuppressWarnings("unused")
   @Cacheable
   public static <CS, ES> SingleRLAgentTask<NumericalReinforcementLearningAgent<? extends CS>, double[], double[], CS, ES> fromNumericalEnvironment(
-      @Param(value = "name", iS = "{environment.name}") String name,
+      @Param(value = "name", iS = "{environment.name}[{reward.name}]") String name,
       @Param("environment") Environment<double[], double[], ES, NumericalDynamicalSystem<? extends CS>> environment,
       @Param(value = "stopCondition", dNPM = "predicate.not(condition = predicate.always())") Predicate<ES> stopCondition,
-      @Param(value = "resetAgent") boolean resetAgent,
+      @Param("resetAgent") boolean resetAgent,
+      @Param(value = "initialReward", dD = 0) double initialReward,
       @Param("reward") Function<ES, Double> rewardFunction,
       @Param(value = "", injection = Param.Injection.BUILDER) NamedBuilder<?> nb,
       @Param(value = "", injection = Param.Injection.MAP) ParamMap map
@@ -57,7 +58,13 @@ public class SingleRLAgentTasks {
     ToDoubleBiFunction<ES, double[]> actualRewardFunction = (s, action) -> rewardFunction.apply(s);
     return Naming.named(
         name,
-        SingleRLAgentTask.fromNumericalEnvironment(supplier, stopCondition, resetAgent, actualRewardFunction)
+        SingleRLAgentTask.fromNumericalEnvironment(
+            supplier,
+            stopCondition,
+            resetAgent,
+            initialReward,
+            actualRewardFunction
+        )
     );
   }
 }

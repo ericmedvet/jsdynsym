@@ -51,7 +51,7 @@ public record Line(double a, double b, double c) {
     return contains(s.p1()) && contains(s.p2());
   }
 
-  public Optional<Point> interception(Line l) {
+  public Optional<Point> intersection(Line l) {
     if (l.equals(this)) {
       return Optional.empty();
     }
@@ -64,8 +64,8 @@ public record Line(double a, double b, double c) {
     return Optional.of(new Point(x, y));
   }
 
-  public Optional<Point> interception(Segment s) {
-    Optional<Point> oP = interception(from(s));
+  public Optional<Point> intersection(Segment s) {
+    Optional<Point> oP = intersection(from(s));
     if (oP.isEmpty()) {
       return oP;
     }

@@ -29,6 +29,7 @@ import io.github.ericmedvet.jsdynsym.control.pong.PongEnvironment.State;
 import io.github.ericmedvet.jsdynsym.core.numerical.MultivariateRealFunction;
 import io.github.ericmedvet.jsdynsym.core.numerical.NumericalDynamicalSystem;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.random.RandomGenerator;
 
@@ -217,8 +218,14 @@ public class PongEnvironment implements HomogeneousBiEnvironment<double[], doubl
     while (collisionIsPossible) {
       // are considered in the next step
       ballTrajectory = getAsSegment(previousBallState, updatedBallState);
-      Point lRacketCollision = ballTrajectory.intersection(getAsSegment(updatedLRacketState), configuration.precision);
-      Point rRacketCollision = ballTrajectory.intersection(getAsSegment(updatedRRacketState), configuration.precision);
+      Optional<Point> lRacketCollision = ballTrajectory.intersection(
+          getAsSegment(updatedLRacketState),
+          configuration.precision
+      );
+      Optional<Point> rRacketCollision = ballTrajectory.intersection(
+          getAsSegment(updatedRRacketState),
+          configuration.precision
+      );
       List<Point> arenaHorizontalEdgesCollisions = arena.horizontalEdgesIntersections(
           ballTrajectory,
           configuration.precision
@@ -245,30 +252,32 @@ public class PongEnvironment implements HomogeneousBiEnvironment<double[], doubl
           collisionIsPossible = false;
           break;
         case L_RACKET:
-          assert lRacketCollision != null;
-          updatedLRacketState = updatedLRacketState.incrementNofBallCollisions();
-          Pair<BallState, BallState> lBallStates = racketsCollision(
-              lRacketCollision,
-              updatedBallState,
-              updatedLRacketState,
-              lAction
-          );
-          updatedBallState = lBallStates.first();
-          previousBallState = lBallStates.second();
-          lastCollidingObject = ArenaObject.L_RACKET;
+          if (lRacketCollision.isPresent()) {
+            updatedLRacketState = updatedLRacketState.incrementNofBallCollisions();
+            Pair<BallState, BallState> lBallStates = racketsCollision(
+                lRacketCollision.get(),
+                updatedBallState,
+                updatedLRacketState,
+                lAction
+            );
+            updatedBallState = lBallStates.first();
+            previousBallState = lBallStates.second();
+            lastCollidingObject = ArenaObject.L_RACKET;
+          }
           break;
         case R_RACKET:
-          assert rRacketCollision != null;
-          updatedRRacketState = updatedRRacketState.incrementNofBallCollisions();
-          Pair<BallState, BallState> rBallStates = racketsCollision(
-              rRacketCollision,
-              updatedBallState,
-              updatedRRacketState,
-              rAction
-          );
-          updatedBallState = rBallStates.first();
-          previousBallState = rBallStates.second();
-          lastCollidingObject = ArenaObject.R_RACKET;
+          if (rRacketCollision.isPresent()) {
+            updatedRRacketState = updatedRRacketState.incrementNofBallCollisions();
+            Pair<BallState, BallState> rBallStates = racketsCollision(
+                rRacketCollision.get(),
+                updatedBallState,
+                updatedRRacketState,
+                rAction
+            );
+            updatedBallState = rBallStates.first();
+            previousBallState = rBallStates.second();
+            lastCollidingObject = ArenaObject.R_RACKET;
+          }
           break;
         case ARENA_UPPER_EDGE:
           assert arenaHorizontalEdgesCollision != null;
@@ -328,8 +337,8 @@ public class PongEnvironment implements HomogeneousBiEnvironment<double[], doubl
   }
 
   private ArenaObject getClosestCollidingArenaObject(
-      Point lRacketCollision,
-      Point rRacketCollision,
+      Optional<Point> lRacketCollision,
+      Optional<Point> rRacketCollision,
       Point arenaHorizontalEdgesCollision,
       BallState previousBallState,
       BallState updatedBallState,
@@ -338,15 +347,15 @@ public class PongEnvironment implements HomogeneousBiEnvironment<double[], doubl
     Point previousBallPosition = previousBallState.position;
     ArenaObject closestCollidingArenaObject = ArenaObject.NONE;
     double closestDistance = Double.MAX_VALUE;
-    if (lRacketCollision != null && lastCollidingObject != ArenaObject.L_RACKET) {
-      double distance = previousBallPosition.distance(lRacketCollision);
+    if (lRacketCollision.isPresent() && lastCollidingObject != ArenaObject.L_RACKET) {
+      double distance = previousBallPosition.distance(lRacketCollision.get());
       if (distance < closestDistance) {
         closestDistance = distance;
         closestCollidingArenaObject = ArenaObject.L_RACKET;
       }
     }
-    if (rRacketCollision != null && lastCollidingObject != ArenaObject.R_RACKET) {
-      double distance = previousBallPosition.distance(rRacketCollision);
+    if (rRacketCollision.isPresent() && lastCollidingObject != ArenaObject.R_RACKET) {
+      double distance = previousBallPosition.distance(rRacketCollision.get());
       if (distance < closestDistance) {
         closestDistance = distance;
         closestCollidingArenaObject = ArenaObject.R_RACKET;

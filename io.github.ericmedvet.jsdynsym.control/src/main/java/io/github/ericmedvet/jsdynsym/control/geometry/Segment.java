@@ -21,6 +21,7 @@
 package io.github.ericmedvet.jsdynsym.control.geometry;
 
 import io.github.ericmedvet.jnb.datastructure.DoubleRange;
+import java.util.Optional;
 
 public record Segment(Point p1, Point p2) {
 
@@ -32,7 +33,7 @@ public record Segment(Point p1, Point p2) {
     return p2.diff(p1).direction();
   }
 
-  public boolean inPointInBoundingBox(Point point, double precision) {
+  public boolean isPointInBoundingBox(Point point, double precision) {
     return point.x() >= Math.min(this.p1.x(), this.p2.x()) - precision / 2 && point.x() <= Math.max(
         this.p1.x(),
         this.p2.x()
@@ -66,7 +67,7 @@ public record Segment(Point p1, Point p2) {
         );
   }
 
-  public Point intersection(Segment other, double precision) {
+  public Optional<Point> intersection(Segment other, double precision) {
     final double thisDeltaX = this.p1.x() - this.p2.x();
     final double otherDeltaX = other.p1.x() - other.p2.x();
     final double thisDeltaY = this.p1.y() - this.p2.y();
@@ -74,7 +75,7 @@ public record Segment(Point p1, Point p2) {
     double denominator = thisDeltaX * otherDeltaY - thisDeltaY * otherDeltaX;
     // if denominator is 0, the lines are parallel or coincident
     if (denominator == 0) {
-      return null;
+      return Optional.empty();
     }
     double px = ((this.p1.x() * this.p2.y() - this.p1.y() * this.p2.x()) * otherDeltaX - thisDeltaX * (other.p1
         .x() * other.p2.y() - other.p1.y() * other.p2.x())) / denominator;
@@ -82,14 +83,13 @@ public record Segment(Point p1, Point p2) {
         .x() * other.p2.y() - other.p1.y() * other.p2.x())) / denominator;
     Point intersection = new Point(px, py);
     // check if the intersection point lies on both segments
-    if (inPointInBoundingBox(intersection, precision) && other.inPointInBoundingBox(
+    if (isPointInBoundingBox(intersection, precision) && other.isPointInBoundingBox(
         intersection,
         precision
     )) {
-      return intersection;
-    } else {
-      return null;
+      return Optional.of(intersection);
     }
+    return Optional.empty();
   }
 
   public double length() {

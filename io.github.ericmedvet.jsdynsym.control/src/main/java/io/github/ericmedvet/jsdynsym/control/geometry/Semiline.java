@@ -22,9 +22,9 @@ package io.github.ericmedvet.jsdynsym.control.geometry;
 import java.util.Optional;
 
 public record Semiline(Point p, double a) {
-  public Optional<Point> interception(Segment s) {
+  public Optional<Point> intersection(Segment s) {
     Line l = Line.from(p, a);
-    Optional<Point> oIP = l.interception(s);
+    Optional<Point> oIP = l.intersection(s);
     if (oIP.isEmpty()) {
       return oIP;
     }
