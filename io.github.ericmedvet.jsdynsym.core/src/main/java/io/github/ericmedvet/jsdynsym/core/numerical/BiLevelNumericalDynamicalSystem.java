@@ -29,6 +29,7 @@ public class BiLevelNumericalDynamicalSystem<SH, SL> implements NumericalDynamic
   private final int highPeriod;
   private final int highIndex;
   private final int lowIndex;
+  private final boolean enableAverage;
 
   private double[] highOutput;
   private int highStepCount;
@@ -38,13 +39,15 @@ public class BiLevelNumericalDynamicalSystem<SH, SL> implements NumericalDynamic
       NumericalDynamicalSystem<SL> lowInnerNDS,
       int highPeriod,
       int highIndex,
-      int lowIndex
+      int lowIndex,
+      boolean enableAverage
   ) {
     this.highInnerNDS = highInnerNDS;
     this.lowInnerNDS = lowInnerNDS;
     this.highPeriod = highPeriod;
     this.highIndex = highIndex;
     this.lowIndex = lowIndex;
+    this.enableAverage = enableAverage;
     innerReset();
   }
 
@@ -95,9 +98,24 @@ public class BiLevelNumericalDynamicalSystem<SH, SL> implements NumericalDynamic
 
   @Override
   public double[] step(double t, double[] input) {
-    if (highStepCount == 0) {
+    if (enableAverage) {
+      // reset highOutput
+      if (highStepCount == 0) {
+        for (int i = 0; i < highInnerNDS.nOfOutputs(); i++) {
+          highOutput[i] = 0.0;
+        }
+      }
       double[] highInput = Arrays.copyOfRange(input, this.highIndex, this.highIndex + highInnerNDS.nOfInputs());
-      highOutput = highInnerNDS.step(t, highInput);
+      double[] newHighOutput = highInnerNDS.step(t, highInput);
+      for (int i = 0; i < highInnerNDS.nOfOutputs(); i++) {
+        highOutput[i] = highOutput[i] + newHighOutput[i] / highPeriod;
+      }
+
+    } else {
+      if (highStepCount == 0) {
+        double[] highInput = Arrays.copyOfRange(input, this.highIndex, this.highIndex + highInnerNDS.nOfInputs());
+        highOutput = highInnerNDS.step(t, highInput);
+      }
     }
     highStepCount = (highStepCount + 1) % highPeriod;
     double[] lowInput = new double[lowInnerNDS.nOfInputs()];

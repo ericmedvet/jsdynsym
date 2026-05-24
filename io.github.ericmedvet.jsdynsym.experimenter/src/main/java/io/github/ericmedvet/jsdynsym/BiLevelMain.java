@@ -101,7 +101,8 @@ public class BiLevelMain {
         lowMlp,
         5,
         0,
-        2
+        2,
+        false
     );
 
     // 4) task and simulation
