@@ -81,15 +81,15 @@ public class BiLevelMain {
     // 2) create MLP for policies
     MultiLayerPerceptron highMlp = new MultiLayerPerceptron(
         MultiLayerPerceptron.ActivationFunction.TANH,
-        7,
+        2,
         new int[]{},
-        1
+        2
     );
     highMlp.randomize(new Random(), DoubleRange.SYMMETRIC_UNIT);
 
     MultiLayerPerceptron lowMlp = new MultiLayerPerceptron(
         MultiLayerPerceptron.ActivationFunction.TANH,
-        6,
+        7,
         new int[]{},
         2
     );
@@ -100,8 +100,8 @@ public class BiLevelMain {
         highMlp,
         lowMlp,
         5,
-        0,
-        2,
+        new int[]{0, 1},
+        new int[]{2, 3, 4, 5, 6},
         false
     );
 

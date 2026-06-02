@@ -21,34 +21,36 @@ package io.github.ericmedvet.jsdynsym.core.numerical;
 
 import io.github.ericmedvet.jsdynsym.core.numerical.BiLevelNumericalDynamicalSystem.State;
 import java.util.Arrays;
+import java.util.stream.IntStream;
 
 public class BiLevelNumericalDynamicalSystem<SH, SL> implements NumericalDynamicalSystem<State<SH, SL>> {
 
   private final NumericalDynamicalSystem<SH> highInnerNDS;
   private final NumericalDynamicalSystem<SL> lowInnerNDS;
   private final int highPeriod;
-  private final int highIndex;
-  private final int lowIndex;
-  private final boolean enableAverage;
+  private final int[] highIndexesList;
+  private final int[] lowIndexesList;
+  private final boolean averageEnabled;
 
-  private double[] highOutput;
   private int highStepCount;
+  private double[] inputsAverage;
+  private double[] highOutput;
 
   public BiLevelNumericalDynamicalSystem(
       NumericalDynamicalSystem<SH> highInnerNDS,
       NumericalDynamicalSystem<SL> lowInnerNDS,
       int highPeriod,
-      int highIndex,
-      int lowIndex,
-      boolean enableAverage
+      int[] highIndexesList,
+      int[] lowIndexesList,
+      boolean averageEnabled
   ) {
     this.highInnerNDS = highInnerNDS;
     this.lowInnerNDS = lowInnerNDS;
     this.highPeriod = highPeriod;
-    this.highIndex = highIndex;
-    this.lowIndex = lowIndex;
-    this.enableAverage = enableAverage;
-    innerReset();
+    this.highIndexesList = highIndexesList;
+    this.lowIndexesList = lowIndexesList;
+    this.averageEnabled = averageEnabled;
+    innerReset(); // or reset?
   }
 
   public record State<SH, SL>(SH highState, SL lowState, double[] highOutput) {
@@ -63,15 +65,9 @@ public class BiLevelNumericalDynamicalSystem<SH, SL> implements NumericalDynamic
   }
 
   @Override
+  // should be min length given max index or sum of unique indexes?
   public int nOfInputs() {
-    return highInnerNDS.nOfInputs() + lowInnerNDS.nOfInputs() - highInnerNDS.nOfOutputs() - (Math.max(
-        this.lowIndex - this.highIndex,
-        0
-    ));
-  }
-
-  public int nOfLowInputs() {
-    return highInnerNDS.nOfInputs();
+    return highInnerNDS.nOfInputs() + lowInnerNDS.nOfInputs() - highInnerNDS.nOfOutputs();
   }
 
   @Override
@@ -94,35 +90,50 @@ public class BiLevelNumericalDynamicalSystem<SH, SL> implements NumericalDynamic
   private void innerReset() {
     highOutput = new double[highInnerNDS.nOfOutputs()];
     highStepCount = 0;
+    inputsAverage = null; //new double[highInnerNDS.nOfOutputs()];
   }
 
   @Override
   public double[] step(double t, double[] input) {
-    if (enableAverage) {
-      // reset highOutput
+    // idea: weighted average or discount factor, also an rnn or recurrent model would be good
+    //   .stream(i -> ).toList()
+    if (averageEnabled) {
+      //double[] highInput = Arrays.copyOfRange(input, this.highIndex, this.highIndex + highInnerNDS.nOfInputs());
+      double[] highInput;
       if (highStepCount == 0) {
-        for (int i = 0; i < highInnerNDS.nOfOutputs(); i++) {
-          highOutput[i] = 0.0;
+        if (inputsAverage == null) {
+          // use first input as input
+          highInput = Arrays.stream(highIndexesList).mapToDouble(i -> input[i]).toArray();
+        } else {
+          // get high input from average
+          highInput = Arrays.stream(highIndexesList).mapToDouble(i -> inputsAverage[i]).toArray();
         }
+        // update highOutput
+        highOutput = highInnerNDS.step(t, highInput);
+        // restart average
+        inputsAverage = Arrays.stream(input).map(x -> x / highPeriod).toArray();
+      } else {
+        inputsAverage = IntStream.range(0, inputsAverage.length)
+            .mapToDouble(i -> inputsAverage[i] + input[i] / highPeriod)
+            .toArray();
       }
-      double[] highInput = Arrays.copyOfRange(input, this.highIndex, this.highIndex + highInnerNDS.nOfInputs());
-      double[] newHighOutput = highInnerNDS.step(t, highInput);
-      for (int i = 0; i < highInnerNDS.nOfOutputs(); i++) {
-        highOutput[i] = highOutput[i] + newHighOutput[i] / highPeriod;
-      }
-
     } else {
       if (highStepCount == 0) {
-        double[] highInput = Arrays.copyOfRange(input, this.highIndex, this.highIndex + highInnerNDS.nOfInputs());
+        double[] highInput = Arrays.stream(highIndexesList).mapToDouble(i -> input[i]).toArray();
         highOutput = highInnerNDS.step(t, highInput);
       }
     }
     highStepCount = (highStepCount + 1) % highPeriod;
     double[] lowInput = new double[lowInnerNDS.nOfInputs()];
     // int remainingNOfInputs = nOfInputs() - highInnerNDS.nOfInputs();
-    int directNOfInputs = lowInnerNDS.nOfInputs() - highInnerNDS.nOfOutputs();
-    System.arraycopy(input, this.lowIndex, lowInput, 0, directNOfInputs);
-    System.arraycopy(highOutput, 0, lowInput, directNOfInputs, highOutput.length);
+    System.arraycopy(
+        Arrays.stream(lowIndexesList).mapToDouble(i -> input[i]).toArray(),
+        0,
+        lowInput,
+        0,
+        lowIndexesList.length
+    );
+    System.arraycopy(highOutput, 0, lowInput, lowIndexesList.length, highOutput.length);
     return lowInnerNDS.step(t, lowInput);
   }
 }
