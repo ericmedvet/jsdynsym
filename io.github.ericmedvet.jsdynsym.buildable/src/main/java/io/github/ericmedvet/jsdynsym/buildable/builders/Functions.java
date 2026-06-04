@@ -25,6 +25,7 @@ import io.github.ericmedvet.jnb.core.Discoverable;
 import io.github.ericmedvet.jnb.core.Param;
 import io.github.ericmedvet.jnb.datastructure.DoubleRange;
 import io.github.ericmedvet.jnb.datastructure.FormattedNamedFunction;
+import io.github.ericmedvet.jnb.datastructure.NamedFunction;
 import io.github.ericmedvet.jnb.datastructure.Parametrized;
 import io.github.ericmedvet.jsdynsym.control.HomogeneousBiSimulation;
 import io.github.ericmedvet.jsdynsym.control.Simulation;
@@ -34,6 +35,7 @@ import io.github.ericmedvet.jsdynsym.control.SingleAgentTask.Step;
 import io.github.ericmedvet.jsdynsym.core.DynamicalSystem;
 import io.github.ericmedvet.jsdynsym.core.FrozenableDynamicalSystem;
 import io.github.ericmedvet.jsdynsym.core.StatelessSystem;
+import io.github.ericmedvet.jsdynsym.core.numerical.BiLevelNumericalDynamicalSystem;
 import io.github.ericmedvet.jsdynsym.core.numerical.NumericalDynamicalSystem;
 import io.github.ericmedvet.jsdynsym.core.numerical.ann.MLPUtils;
 import io.github.ericmedvet.jsdynsym.core.numerical.ann.MultiLayerPerceptron;
@@ -53,6 +55,24 @@ import java.util.stream.Collectors;
 public class Functions {
 
   private Functions() {
+  }
+
+  @Cacheable
+  public static <X, SH> NamedFunction<X, NumericalDynamicalSystem<SH>> biLevelHighInnerNds(
+      @Param(value = "name", iS = "high") String name,
+      @Param(value = "of", dNPM = "f.identity()") Function<X, BiLevelNumericalDynamicalSystem<SH, ?>> beforeF
+  ) {
+    Function<BiLevelNumericalDynamicalSystem<SH, ?>, NumericalDynamicalSystem<SH>> f = BiLevelNumericalDynamicalSystem::getHighInnerNDS;
+    return NamedFunction.from(f, name).compose(beforeF);
+  }
+
+  @Cacheable
+  public static <X, SL> NamedFunction<X, NumericalDynamicalSystem<SL>> biLevelLowInnerNds(
+      @Param(value = "name", iS = "low") String name,
+      @Param(value = "of", dNPM = "f.identity()") Function<X, BiLevelNumericalDynamicalSystem<?, SL>> beforeF
+  ) {
+    Function<BiLevelNumericalDynamicalSystem<?, SL>, NumericalDynamicalSystem<SL>> f = BiLevelNumericalDynamicalSystem::getLowInnerNDS;
+    return NamedFunction.from(f, name).compose(beforeF);
   }
 
   @Cacheable
