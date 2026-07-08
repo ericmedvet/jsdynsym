@@ -20,7 +20,6 @@
 module io.github.ericmedvet.jsdynsym.control {
   exports io.github.ericmedvet.jsdynsym.control;
   exports io.github.ericmedvet.jsdynsym.control.navigation;
-  exports io.github.ericmedvet.jsdynsym.control.geometry;
   exports io.github.ericmedvet.jsdynsym.control.pong;
   exports io.github.ericmedvet.jsdynsym.control.synthetic;
   exports io.github.ericmedvet.jsdynsym.control.drawer;

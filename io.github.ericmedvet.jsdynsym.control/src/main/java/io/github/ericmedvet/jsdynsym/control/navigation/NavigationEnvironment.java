@@ -21,12 +21,12 @@ package io.github.ericmedvet.jsdynsym.control.navigation;
 
 import io.github.ericmedvet.jnb.datastructure.DoubleRange;
 import io.github.ericmedvet.jsdynsym.control.Environment;
-import io.github.ericmedvet.jsdynsym.control.geometry.Point;
-import io.github.ericmedvet.jsdynsym.control.geometry.Segment;
-import io.github.ericmedvet.jsdynsym.control.geometry.Semiline;
 import io.github.ericmedvet.jsdynsym.control.navigation.NavigationEnvironment.Configuration.TargetSensing;
 import io.github.ericmedvet.jsdynsym.control.navigation.NavigationEnvironment.State;
 import io.github.ericmedvet.jsdynsym.core.numerical.NumericalDynamicalSystem;
+import io.github.ericmedvet.jviz.core.geometry.Point;
+import io.github.ericmedvet.jviz.core.geometry.Segment;
+import io.github.ericmedvet.jviz.core.geometry.Semiline;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;

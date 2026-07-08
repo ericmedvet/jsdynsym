@@ -34,10 +34,10 @@
  */
 package io.github.ericmedvet.jsdynsym.control.drawer;
 
-import io.github.ericmedvet.jsdynsym.control.geometry.Point;
 import io.github.ericmedvet.jsdynsym.control.navigation.Arena;
 import io.github.ericmedvet.jsdynsym.core.numerical.NumericalTimeInvariantStatelessSystem;
 import io.github.ericmedvet.jviz.core.drawer.Drawer;
+import io.github.ericmedvet.jviz.core.geometry.Point;
 import io.github.ericmedvet.jviz.core.util.GraphicsUtils;
 import java.awt.BasicStroke;
 import java.awt.Color;

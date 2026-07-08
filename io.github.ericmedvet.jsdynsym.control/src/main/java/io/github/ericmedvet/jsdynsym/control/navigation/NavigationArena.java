@@ -23,7 +23,7 @@ import io.github.ericmedvet.jnb.datastructure.DoubleRange;
 import io.github.ericmedvet.jnb.datastructure.Grid;
 import io.github.ericmedvet.jnb.datastructure.Grid.Entry;
 import io.github.ericmedvet.jnb.datastructure.Grid.Key;
-import io.github.ericmedvet.jsdynsym.control.geometry.Segment;
+import io.github.ericmedvet.jviz.core.geometry.Segment;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;

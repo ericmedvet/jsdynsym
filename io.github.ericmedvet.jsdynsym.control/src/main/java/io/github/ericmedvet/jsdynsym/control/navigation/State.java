@@ -19,7 +19,8 @@
  */
 package io.github.ericmedvet.jsdynsym.control.navigation;
 
-import io.github.ericmedvet.jsdynsym.control.geometry.Point;
+
+import io.github.ericmedvet.jviz.core.geometry.Point;
 
 public interface State {
   Configuration configuration();
