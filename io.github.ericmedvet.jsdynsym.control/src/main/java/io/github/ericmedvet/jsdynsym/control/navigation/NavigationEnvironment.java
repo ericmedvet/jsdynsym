@@ -70,13 +70,13 @@ public class NavigationEnvironment<CS> implements NumericalDynamicalSystem<State
     );
     // check collision and update pose
     double minD = segments.stream()
-        .mapToDouble(newRobotP::distance)
+        .mapToDouble(newRobotP::distanceTo)
         .min()
         .orElseThrow();
     boolean collision = minD <= configuration.robotRadius;
     if (!collision && minD < 5d * maxV) { // the comparison with minD is an optimization
       Segment robotPath = new Segment(state.robotPosition, newRobotP);
-      collision = segments.stream().anyMatch(os -> os.intersect(robotPath));
+      collision = segments.stream().anyMatch(os -> os.intersectionWith(robotPath).isPresent());
     }
     state = new State(
         t,
@@ -94,10 +94,10 @@ public class NavigationEnvironment<CS> implements NumericalDynamicalSystem<State
         .mapToDouble(a -> {
           Semiline sl = new Semiline(state.robotPosition, a + state.robotDirection);
           return segments.stream()
-              .map(sl::intersection)
+              .map(sl::intersectionWith)
               .filter(Optional::isPresent)
               .mapToDouble(
-                  op -> sensorsRange.normalize(op.orElseThrow().distance(state.robotPosition))
+                  op -> sensorsRange.normalize(op.orElseThrow().distanceTo(state.robotPosition))
               )
               .min()
               .orElse(Double.POSITIVE_INFINITY);
@@ -108,7 +108,7 @@ public class NavigationEnvironment<CS> implements NumericalDynamicalSystem<State
     ) ? new double[configuration.sensorAngles.size() + 2] : sInputs;
     if (!configuration.targetSensing.equals(TargetSensing.NONE)) {
       System.arraycopy(sInputs, 0, observation, 2, sInputs.length);
-      double d = state.robotPosition.distance(state.targetPosition);
+      double d = state.robotPosition.distanceTo(state.targetPosition);
       double a = (state.targetPosition.diff(state.robotPosition).direction() - state.robotDirection) % (2d * Math.PI);
       observation[0] = switch (configuration.targetSensing) {
         case LIMITED -> sensorsRange.normalize(d);

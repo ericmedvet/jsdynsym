@@ -94,7 +94,7 @@ public class NavigationFunctions {
     Function<Simulation.Outcome<SingleAgentTask.Step<double[], double[], State>>, Double> f = o -> o.snapshots()
         .values()
         .stream()
-        .mapToDouble(s -> s.state().robotPosition().distance(s.state().targetPosition()))
+        .mapToDouble(s -> s.state().robotPosition().distanceTo(s.state().targetPosition()))
         .average()
         .orElseThrow();
     return FormattedNamedFunction.from(f, format, name).compose(beforeF);
@@ -120,9 +120,9 @@ public class NavigationFunctions {
               .arena()
               .segments()
               .stream()
-              .map(sl::intersection)
+              .map(sl::intersectionWith)
               .filter(Optional::isPresent)
-              .mapToDouble(op -> op.orElseThrow().distance(robotP))
+              .mapToDouble(op -> op.orElseThrow().distanceTo(robotP))
               .min()
               .orElse(Double.POSITIVE_INFINITY);
         })
@@ -150,7 +150,7 @@ public class NavigationFunctions {
           .stream()
           .min(
               Comparator.comparingDouble(
-                  s -> s.state().robotPosition().distance(s.state().targetPosition())
+                  s -> s.state().robotPosition().distanceTo(s.state().targetPosition())
               )
           )
           .map(s -> s.state().robotPosition())
@@ -172,7 +172,7 @@ public class NavigationFunctions {
       @Param(value = "of", dNPM = "f.identity()") Function<X, State> beforeF,
       @Param(value = "format", dS = "%5.3f") String format
   ) {
-    Function<State, Double> f = s -> s.robotPosition().distance(s.targetPosition());
+    Function<State, Double> f = s -> s.robotPosition().distanceTo(s.targetPosition());
     return FormattedNamedFunction.from(f, format, name).compose(beforeF);
   }
 
@@ -186,7 +186,7 @@ public class NavigationFunctions {
         .get(o.snapshots().lastKey())
         .state()
         .robotPosition()
-        .distance(o.snapshots().get(o.snapshots().lastKey()).state().targetPosition());
+        .distanceTo(o.snapshots().get(o.snapshots().lastKey()).state().targetPosition());
     return FormattedNamedFunction.from(f, format, name).compose(beforeF);
   }
 
@@ -268,7 +268,7 @@ public class NavigationFunctions {
           .get(stopTime)
           .state()
           .robotPosition()
-          .distance(snapshots.get(stopTime).state().targetPosition());
+          .distanceTo(snapshots.get(stopTime).state().targetPosition());
       return stopTime + (lastDistance < epsilon ? 0d : lastDistance);
     };
     return FormattedNamedFunction.from(f, format, name).compose(beforeF);
@@ -283,7 +283,7 @@ public class NavigationFunctions {
     Function<Simulation.Outcome<SingleAgentTask.Step<double[], double[], State>>, Double> f = o -> o.snapshots()
         .values()
         .stream()
-        .mapToDouble(s -> s.state().robotPosition().distance(s.state().targetPosition()))
+        .mapToDouble(s -> s.state().robotPosition().distanceTo(s.state().targetPosition()))
         .min()
         .orElseThrow();
     return FormattedNamedFunction.from(f, format, name).compose(beforeF);

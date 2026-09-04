@@ -355,7 +355,7 @@ public class Main {
     SingleAgentTask<NumericalDynamicalSystem<?>, double[], double[], ?, PointNavigationEnvironment.State> task = SingleAgentTask
         .fromEnvironment(
             () -> environment,
-            s -> s.robotPosition().distance(s.targetPosition()) < .01,
+            s -> s.robotPosition().distanceTo(s.targetPosition()) < .01,
             true
         );
     Simulation.Outcome<SingleAgentTask.Step<double[], double[], PointNavigationEnvironment.State>> outcome = task

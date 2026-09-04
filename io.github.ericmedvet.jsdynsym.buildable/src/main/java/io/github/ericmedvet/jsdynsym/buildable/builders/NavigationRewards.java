@@ -44,8 +44,8 @@ public class NavigationRewards {
       @Param(value = "format", dS = "%5.3f") String format
   ) {
     Function<State, Double> f = s -> {
-      double currentDistance = s.robotPosition().distance(s.targetPosition());
-      double previousDistance = s.robotPreviousPosition().distance(s.targetPosition());
+      double currentDistance = s.robotPosition().distanceTo(s.targetPosition());
+      double previousDistance = s.robotPreviousPosition().distanceTo(s.targetPosition());
       double reward = distanceDecreaseWeight * (previousDistance - currentDistance);
       reward = reward + distanceWeight * currentDistance;
       reward = reward + (currentDistance < targetProximityRadius ? targetProximityReward : 0d);

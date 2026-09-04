@@ -126,7 +126,9 @@ public class PointNavigationEnvironment<CS> implements NumericalDynamicalSystem<
         .orElse(1d);
     if (collisionT < 1d) {
       Point collisionPoint = state.robotPosition.sum(robotShift.scale(collisionT));
-      double collisionShiftT = collisionT - configuration.collisionBlock / collisionPoint.distance(state.robotPosition);
+      double collisionShiftT = collisionT - configuration.collisionBlock / collisionPoint.distanceTo(
+          state.robotPosition
+      );
       if (collisionShiftT < 0) {
         newRobotP = state.robotPosition;
       } else {
